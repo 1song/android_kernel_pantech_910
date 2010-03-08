@@ -24,6 +24,12 @@ static const struct proc_ns_operations *ns_entries[] = {
 #ifdef CONFIG_IPC_NS
 	&ipcns_operations,
 #endif
+<<<<<<< HEAD
+=======
+#ifdef CONFIG_PID_NS
+	&pidns_operations,
+#endif
+>>>>>>> 52dba7a... vfs: Add setns support for the mount namespace
 	&mntns_operations,
 };
 

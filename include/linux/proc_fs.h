@@ -241,6 +241,7 @@ static inline bool proc_ns_inode(struct inode *inode)
 	return false;
 }
 
+<<<<<<< HEAD
 static inline int proc_alloc_inum(unsigned int *inum)
 {
 	*inum = 1;
@@ -249,6 +250,8 @@ static inline int proc_alloc_inum(unsigned int *inum)
 static inline void proc_free_inum(unsigned int inum)
 {
 }
+=======
+>>>>>>> 52dba7a... vfs: Add setns support for the mount namespace
 #endif /* CONFIG_PROC_FS */
 
 #if !defined(CONFIG_PROC_KCORE)
@@ -272,6 +275,10 @@ struct proc_ns_operations {
 extern const struct proc_ns_operations netns_operations;
 extern const struct proc_ns_operations utsns_operations;
 extern const struct proc_ns_operations ipcns_operations;
+<<<<<<< HEAD
+=======
+extern const struct proc_ns_operations pidns_operations;
+>>>>>>> 52dba7a... vfs: Add setns support for the mount namespace
 extern const struct proc_ns_operations mntns_operations;
 
 union proc_op {
