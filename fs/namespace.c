@@ -2302,7 +2302,11 @@ static void free_mnt_ns(struct mnt_namespace *ns)
 =======
 static void free_mnt_ns(struct mnt_namespace *ns)
 {
+<<<<<<< HEAD
 >>>>>>> b204aab... vfs: Add a user namespace reference from struct mnt_namespace
+=======
+	proc_free_inum(ns->proc_inum);
+>>>>>>> a2b5a5f... proc: Usable inode numbers for the namespace file descriptors.
 	put_user_ns(ns->user_ns);
 	kfree(ns);
 }
@@ -2338,13 +2342,19 @@ static struct mnt_namespace *alloc_mnt_ns(struct user_namespace *user_ns)
 	if (!new_ns)
 		return ERR_PTR(-ENOMEM);
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> a2b5a5f... proc: Usable inode numbers for the namespace file descriptors.
 	ret = proc_alloc_inum(&new_ns->proc_inum);
 	if (ret) {
 		kfree(new_ns);
 		return ERR_PTR(ret);
 	}
+<<<<<<< HEAD
 =======
 >>>>>>> 52dba7a... vfs: Add setns support for the mount namespace
+=======
+>>>>>>> a2b5a5f... proc: Usable inode numbers for the namespace file descriptors.
 	new_ns->seq = atomic64_add_return(1, &mnt_ns_seq);
 	atomic_set(&new_ns->count, 1);
 	new_ns->root = NULL;
@@ -2853,14 +2863,20 @@ static int mntns_install(struct nsproxy *nsproxy, void *ns)
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> a2b5a5f... proc: Usable inode numbers for the namespace file descriptors.
 static unsigned int mntns_inum(void *ns)
 {
 	struct mnt_namespace *mnt_ns = ns;
 	return mnt_ns->proc_inum;
 }
 
+<<<<<<< HEAD
 =======
 >>>>>>> 52dba7a... vfs: Add setns support for the mount namespace
+=======
+>>>>>>> a2b5a5f... proc: Usable inode numbers for the namespace file descriptors.
 const struct proc_ns_operations mntns_operations = {
 	.name		= "mnt",
 	.type		= CLONE_NEWNS,
@@ -2868,7 +2884,11 @@ const struct proc_ns_operations mntns_operations = {
 	.put		= mntns_put,
 	.install	= mntns_install,
 <<<<<<< HEAD
+<<<<<<< HEAD
 	.inum		= mntns_inum,
 =======
 >>>>>>> 52dba7a... vfs: Add setns support for the mount namespace
+=======
+	.inum		= mntns_inum,
+>>>>>>> a2b5a5f... proc: Usable inode numbers for the namespace file descriptors.
 };
