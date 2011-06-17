@@ -370,7 +370,11 @@ retry:
 	if (i > UINT_MAX - PROC_DYNAMIC_FIRST) {
 		spin_lock_irq(&proc_inum_lock);
 		ida_remove(&proc_inum_ida, i);
+<<<<<<< HEAD
 		spin_unlock_irq(&proc_inum_lock);
+=======
+		spin_unlock(&proc_inum_lock);
+>>>>>>> 69b578e... proc: Generalize proc inode allocation
 		return -ENOSPC;
 	}
 	*inum = PROC_DYNAMIC_FIRST + i;

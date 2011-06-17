@@ -242,6 +242,9 @@ static inline bool proc_ns_inode(struct inode *inode)
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 69b578e... proc: Generalize proc inode allocation
 static inline int proc_alloc_inum(unsigned int *inum)
 {
 	*inum = 1;
@@ -250,8 +253,11 @@ static inline int proc_alloc_inum(unsigned int *inum)
 static inline void proc_free_inum(unsigned int inum)
 {
 }
+<<<<<<< HEAD
 =======
 >>>>>>> 52dba7a... vfs: Add setns support for the mount namespace
+=======
+>>>>>>> 69b578e... proc: Generalize proc inode allocation
 #endif /* CONFIG_PROC_FS */
 
 #if !defined(CONFIG_PROC_KCORE)
