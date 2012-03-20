@@ -61,18 +61,26 @@ struct class_datum {
 	struct constraint_node *constraints;	/* constraints on class permissions */
 	struct constraint_node *validatetrans;	/* special transition rules */
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* Options how a new object user, role, and type should be decided */
 =======
 	/* Options how a new object user and role should be decided */
 >>>>>>> a77bcaf... SELinux: allow default source/target selectors for user/role/range
+=======
+/* Options how a new object user, role, and type should be decided */
+>>>>>>> 58adb1f... SELinux: add default_type statements
 #define DEFAULT_SOURCE         1
 #define DEFAULT_TARGET         2
 	char default_user;
 	char default_role;
 <<<<<<< HEAD
+<<<<<<< HEAD
 	char default_type;
 =======
 >>>>>>> a77bcaf... SELinux: allow default source/target selectors for user/role/range
+=======
+	char default_type;
+>>>>>>> 58adb1f... SELinux: add default_type statements
 /* Options how a new object range should be decided */
 #define DEFAULT_SOURCE_LOW     1
 #define DEFAULT_SOURCE_HIGH    2

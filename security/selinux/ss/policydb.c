@@ -1416,6 +1416,13 @@ static int class_read(struct policydb *p, struct hashtab *h, void *fp)
 		cladatum->default_range = le32_to_cpu(buf[2]);
 	}
 
+	if (p->policyvers >= POLICYDB_VERSION_DEFAULT_TYPE) {
+		rc = next_entry(buf, fp, sizeof(u32) * 1);
+		if (rc)
+			goto bad;
+		cladatum->default_type = le32_to_cpu(buf[0]);
+	}
+
 	rc = hashtab_insert(h, key, cladatum);
 	if (rc)
 		goto bad;
@@ -2977,6 +2984,9 @@ static int class_write(void *vkey, void *datum, void *ptr)
 	}
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 58adb1f... SELinux: add default_type statements
 	if (p->policyvers >= POLICYDB_VERSION_DEFAULT_TYPE) {
 		buf[0] = cpu_to_le32(cladatum->default_type);
 		rc = put_entry(buf, sizeof(uint32_t), 1, fp);
@@ -2984,8 +2994,11 @@ static int class_write(void *vkey, void *datum, void *ptr)
 			return rc;
 	}
 
+<<<<<<< HEAD
 =======
 >>>>>>> a77bcaf... SELinux: allow default source/target selectors for user/role/range
+=======
+>>>>>>> 58adb1f... SELinux: add default_type statements
 	return 0;
 }
 

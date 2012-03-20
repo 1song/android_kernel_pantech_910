@@ -1852,12 +1852,15 @@ static int security_compute_sid(u32 ssid,
 	}
 
 	/* Set the type to default values. */
-	if ((tclass == policydb.process_class) || (sock == true)) {
-		/* Use the type of process. */
+	if (cladatum && cladatum->default_type == DEFAULT_SOURCE) {
 		newcontext.type = scontext->type;
+<<<<<<< HEAD
 	} else {
 		/* Use the type of the related object. */
 >>>>>>> a77bcaf... SELinux: allow default source/target selectors for user/role/range
+=======
+	} else if (cladatum && cladatum->default_type == DEFAULT_TARGET) {
+>>>>>>> 58adb1f... SELinux: add default_type statements
 		newcontext.type = tcontext->type;
 	} else {
 		if ((tclass == policydb.process_class) || (sock == true)) {
