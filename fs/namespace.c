@@ -2286,15 +2286,23 @@ dput_out:
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 static void free_mnt_ns(struct mnt_namespace *ns)
 {
 	proc_free_inum(ns->proc_inum);
+=======
+static void free_mnt_ns(struct mnt_namespace *ns)
+{
+>>>>>>> b204aab... vfs: Add a user namespace reference from struct mnt_namespace
 	put_user_ns(ns->user_ns);
 	kfree(ns);
 }
 
+<<<<<<< HEAD
 =======
 >>>>>>> 52dba7a... vfs: Add setns support for the mount namespace
+=======
+>>>>>>> b204aab... vfs: Add a user namespace reference from struct mnt_namespace
 /*
  * Assign a sequence number so we can detect when we attempt to bind
  * mount a reference to an older mount namespace into the current
@@ -2305,10 +2313,14 @@ static void free_mnt_ns(struct mnt_namespace *ns)
 static atomic64_t mnt_ns_seq = ATOMIC64_INIT(1);
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 static struct mnt_namespace *alloc_mnt_ns(struct user_namespace *user_ns)
 =======
 static struct mnt_namespace *alloc_mnt_ns(void)
 >>>>>>> 52dba7a... vfs: Add setns support for the mount namespace
+=======
+static struct mnt_namespace *alloc_mnt_ns(struct user_namespace *user_ns)
+>>>>>>> b204aab... vfs: Add a user namespace reference from struct mnt_namespace
 {
 	struct mnt_namespace *new_ns;
 	int ret;
@@ -2366,8 +2378,12 @@ static struct mnt_namespace *dup_mnt_ns(struct mnt_namespace *mnt_ns,
 	new = copy_tree(old, old->mnt.mnt_root, CL_COPY_ALL | CL_EXPIRE);
 	if (IS_ERR(new)) {
 		up_write(&namespace_sem);
+<<<<<<< HEAD
 		kfree(new_ns);
 >>>>>>> 126a884... VFS: Make clone_mnt()/copy_tree()/collect_mounts() return errors
+=======
+		free_mnt_ns(new_ns);
+>>>>>>> b204aab... vfs: Add a user namespace reference from struct mnt_namespace
 		return ERR_CAST(new);
 	}
 	new_ns->root = new;

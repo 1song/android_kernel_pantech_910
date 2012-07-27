@@ -8,9 +8,13 @@ struct mnt_namespace {
 	struct mount *	root;
 	struct list_head	list;
 <<<<<<< HEAD
+<<<<<<< HEAD
 	struct user_namespace	*user_ns;
 =======
 >>>>>>> 52dba7a... vfs: Add setns support for the mount namespace
+=======
+	struct user_namespace	*user_ns;
+>>>>>>> b204aab... vfs: Add a user namespace reference from struct mnt_namespace
 	u64			seq;	/* Sequence number to prevent loops */
 	wait_queue_head_t poll;
 	int event;
