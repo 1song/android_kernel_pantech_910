@@ -1917,10 +1917,14 @@ unlock:
  * namespace's tree
  */
 <<<<<<< HEAD
+<<<<<<< HEAD
 static int do_new_mount(struct path *path, const char *fstype, int flags,
 =======
 static int do_new_mount(struct path *path, const char *type, int flags,
 >>>>>>> 20908f4... consitify do_mount() arguments
+=======
+static int do_new_mount(struct path *path, const char *fstype, int flags,
+>>>>>>> 07dddf3... vfs: Allow unprivileged manipulation of the mount namespace.
 			int mnt_flags, const char *name, void *data)
 {
 	struct file_system_type *type;
@@ -2814,11 +2818,16 @@ static int mntns_install(struct nsproxy *nsproxy, void *ns)
 	struct path root;
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 	if (!ns_capable(mnt_ns->user_ns, CAP_SYS_ADMIN) ||
 	    !nsown_capable(CAP_SYS_CHROOT))
 =======
 	if (!capable(CAP_SYS_ADMIN) || !capable(CAP_SYS_CHROOT))
 >>>>>>> 52dba7a... vfs: Add setns support for the mount namespace
+=======
+	if (!ns_capable(mnt_ns->user_ns, CAP_SYS_ADMIN) ||
+	    !nsown_capable(CAP_SYS_CHROOT))
+>>>>>>> 07dddf3... vfs: Allow unprivileged manipulation of the mount namespace.
 		return -EINVAL;
 
 	if (fs->users != 1)
