@@ -1911,7 +1911,11 @@ unlock:
  * create a new mount for userspace and request it to be added into the
  * namespace's tree
  */
+<<<<<<< HEAD
 static int do_new_mount(struct path *path, const char *fstype, int flags,
+=======
+static int do_new_mount(struct path *path, const char *type, int flags,
+>>>>>>> 20908f4... consitify do_mount() arguments
 			int mnt_flags, const char *name, void *data)
 {
 	struct file_system_type *type;
