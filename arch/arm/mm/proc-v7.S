@@ -83,9 +83,14 @@ ENTRY(cpu_v7_dcache_clean_area)
 1:	mcr	p15, 0, r0, c7, c10, 1		@ clean D entry
 	add	r0, r0, r2
 	subs	r1, r1, r2
+<<<<<<< HEAD
 	bhi	1b
 	dsb
 #endif
+=======
+	bhi	2b
+	dsb	ishst
+>>>>>>> 7d03ae5... ARM: mm: use inner-shareable barriers for TLB and user cache operations
 	mov	pc, lr
 ENDPROC(cpu_v7_dcache_clean_area)
 
