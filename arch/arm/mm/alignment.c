@@ -25,6 +25,7 @@
 #include <asm/cp15.h>
 #include <asm/system_info.h>
 #include <asm/unaligned.h>
+#include <asm/opcodes.h>
 
 #include "fault.h"
 
@@ -764,23 +765,42 @@ do_alignment(unsigned long addr, unsigned int fsr, struct pt_regs *regs)
 	fs = get_fs();
 	set_fs(KERNEL_DS);
 	if (thumb_mode(regs)) {
+<<<<<<< HEAD
 		fault = __get_user(tinstr, (u16 *)(instrptr & ~1));
+=======
+		u16 *ptr = (u16 *)(instrptr & ~1);
+		fault = probe_kernel_address(ptr, tinstr);
+		tinstr = __mem_to_opcode_thumb16(tinstr);
+>>>>>>> bcbc997... ARM: alignment: correctly decode instructions in BE8 mode.
 		if (!fault) {
 			if (cpu_architecture() >= CPU_ARCH_ARMv7 &&
 			    IS_T32(tinstr)) {
 				/* Thumb-2 32-bit */
 				u16 tinst2 = 0;
+<<<<<<< HEAD
 				fault = __get_user(tinst2, (u16 *)(instrptr+2));
 				instr = (tinstr << 16) | tinst2;
+=======
+				fault = probe_kernel_address(ptr + 1, tinst2);
+				tinst2 = __mem_to_opcode_thumb16(tinst2);
+				instr = __opcode_thumb32_compose(tinstr, tinst2);
+>>>>>>> bcbc997... ARM: alignment: correctly decode instructions in BE8 mode.
 				thumb2_32b = 1;
 			} else {
 				isize = 2;
 				instr = thumb2arm(tinstr);
 			}
 		}
+<<<<<<< HEAD
 	} else
 		fault = __get_user(instr, (u32 *)instrptr);
 	set_fs(fs);
+=======
+	} else {
+		fault = probe_kernel_address(instrptr, instr);
+		instr = __mem_to_opcode_arm(instr);
+	}
+>>>>>>> bcbc997... ARM: alignment: correctly decode instructions in BE8 mode.
 
 	if (fault) {
 		type = TYPE_FAULT;
