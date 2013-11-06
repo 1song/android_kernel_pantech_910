@@ -121,7 +121,11 @@ targets       := vmlinux vmlinux.lds \
 		 bswapsdi2.S font.o font.c head.o misc.o $(OBJS)
 
 # Make sure files are removed during clean
+<<<<<<< HEAD
 extra-y       += piggy.gzip piggy.lzo piggy.lzma piggy.xzkern piggy.lz4 \
+=======
+extra-y       += piggy.gzip piggy.lzo piggy.lzma piggy.xzkern \
+>>>>>>> 66dce7d... ARM: 7877/1: use built-in byte swap function
 		 lib1funcs.S ashldi3.S bswapsdi2.S $(libfdt) $(libfdt_hdrs)
 
 ifeq ($(CONFIG_FUNCTION_TRACER),y)
