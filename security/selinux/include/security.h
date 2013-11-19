@@ -34,14 +34,21 @@
 #define POLICYDB_VERSION_NEW_OBJECT_DEFAULTS	27
 #define POLICYDB_VERSION_DEFAULT_TYPE	28
 #define POLICYDB_VERSION_CONSTRAINT_NAMES	29
+<<<<<<< HEAD
 #define POLICYDB_VERSION_XPERMS_IOCTL	30
+=======
+>>>>>>> 86ab756... SELinux: Update policy version to support constraints info
 
 /* Range of policy versions we understand*/
 #define POLICYDB_VERSION_MIN   POLICYDB_VERSION_BASE
 #ifdef CONFIG_SECURITY_SELINUX_POLICYDB_VERSION_MAX
 #define POLICYDB_VERSION_MAX	CONFIG_SECURITY_SELINUX_POLICYDB_VERSION_MAX_VALUE
 #else
+<<<<<<< HEAD
 #define POLICYDB_VERSION_MAX	POLICYDB_VERSION_XPERMS_IOCTL
+=======
+#define POLICYDB_VERSION_MAX	POLICYDB_VERSION_CONSTRAINT_NAMES
+>>>>>>> 86ab756... SELinux: Update policy version to support constraints info
 #endif
 
 /* Mask for just the mount related flags */

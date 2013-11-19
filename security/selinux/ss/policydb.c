@@ -148,11 +148,14 @@ static struct policydb_compat_info policydb_compat[] = {
 		.sym_num	= SYM_NUM,
 		.ocon_num	= OCON_NUM,
 	},
+<<<<<<< HEAD
 	{
 		.version	= POLICYDB_VERSION_XPERMS_IOCTL,
 		.sym_num	= SYM_NUM,
 		.ocon_num	= OCON_NUM,
 	},
+=======
+>>>>>>> 86ab756... SELinux: Update policy version to support constraints info
 };
 
 static struct policydb_compat_info *policydb_lookup_compat(int version)
@@ -1371,6 +1374,7 @@ static int class_read(struct policydb *p, struct hashtab *h, void *fp)
 		ncons = le32_to_cpu(buf[0]);
 		rc = read_cons_helper(p, &cladatum->validatetrans,
 				ncons, 1, fp);
+<<<<<<< HEAD
 		if (rc)
 			goto bad;
 	}
@@ -1387,6 +1391,8 @@ static int class_read(struct policydb *p, struct hashtab *h, void *fp)
 
 	if (p->policyvers >= POLICYDB_VERSION_DEFAULT_TYPE) {
 		rc = next_entry(buf, fp, sizeof(u32) * 1);
+=======
+>>>>>>> 86ab756... SELinux: Update policy version to support constraints info
 		if (rc)
 			goto bad;
 		cladatum->default_type = le32_to_cpu(buf[0]);
