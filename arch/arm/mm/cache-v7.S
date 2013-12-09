@@ -88,20 +88,35 @@ loop1:
 	clz	r5, r4				@ find bit position of way size increment
 	ldr	r7, =0x7fff
 	ands	r7, r7, r1, lsr #13		@ extract max number of the index size
+<<<<<<< HEAD
 loop2:
 	mov	r9, r4				@ create working copy of max way size
 loop3:
  ARM(	orr	r11, r10, r9, lsl r5	)	@ factor way and cache number into r11
  THUMB(	lsl	r6, r9, r5		)
+=======
+loop1:
+	mov	r9, r7				@ create working copy of max index
+loop2:
+ ARM(	orr	r11, r10, r4, lsl r5	)	@ factor way and cache number into r11
+ THUMB(	lsl	r6, r4, r5		)
+>>>>>>> e242200... ARM: 7919/1: mm: refactor v7 cache cleaning ops to use way/index sequence
  THUMB(	orr	r11, r10, r6		)	@ factor way and cache number into r11
- ARM(	orr	r11, r11, r7, lsl r2	)	@ factor index number into r11
- THUMB(	lsl	r6, r7, r2		)
+ ARM(	orr	r11, r11, r9, lsl r2	)	@ factor index number into r11
+ THUMB(	lsl	r6, r9, r2		)
  THUMB(	orr	r11, r11, r6		)	@ factor index number into r11
 	mcr	p15, 0, r11, c7, c14, 2		@ clean & invalidate by set/way
+<<<<<<< HEAD
 	subs	r9, r9, #1			@ decrement the way
 	bge	loop3
 	subs	r7, r7, #1			@ decrement the index
 	bge	loop2
+=======
+	subs	r9, r9, #1			@ decrement the index
+	bge	loop2
+	subs	r4, r4, #1			@ decrement the way
+	bge	loop1
+>>>>>>> e242200... ARM: 7919/1: mm: refactor v7 cache cleaning ops to use way/index sequence
 skip:
 	add	r10, r10, #2			@ increment cache number
 	cmp	r3, r10
