@@ -1311,7 +1311,11 @@ static int inode_doinit_with_dentry(struct inode *inode, struct dentry *opt_dent
 		/* Default to the fs superblock SID. */
 		isec->sid = sbsec->sid;
 
+<<<<<<< HEAD
 		if ((sbsec->flags & SE_SBGENFS) && !S_ISLNK(inode->i_mode)) {
+=======
+		if ((sbsec->flags & SE_SBPROC) && !S_ISLNK(inode->i_mode)) {
+>>>>>>> 6c29da1... selinux: correctly label /proc inodes in use before the policy is loaded
 			/* We must have a dentry to determine the label on
 			 * procfs inodes */
 			if (opt_dentry)
@@ -1334,8 +1338,12 @@ static int inode_doinit_with_dentry(struct inode *inode, struct dentry *opt_dent
 			if (!dentry)
 				goto out_unlock;
 			isec->sclass = inode_mode_to_security_class(inode->i_mode);
+<<<<<<< HEAD
 			rc = selinux_genfs_get_sid(dentry, isec->sclass,
 						   sbsec->flags, &sid);
+=======
+			rc = selinux_proc_get_sid(dentry, isec->sclass, &sid);
+>>>>>>> 6c29da1... selinux: correctly label /proc inodes in use before the policy is loaded
 			dput(dentry);
 			if (rc)
 				goto out_unlock;
