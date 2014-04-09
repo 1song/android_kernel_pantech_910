@@ -93,12 +93,18 @@ static int cpufreq_stats_update(unsigned int cpu)
 	stat = per_cpu(cpufreq_stats_table, cpu);
 	all_stat = per_cpu(all_cpufreq_stats, cpu);
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 2f890c0... cpufreq: prevents NULL pointer reference while all_time_in_state stats is
 	if (!stat) {
 		spin_unlock(&cpufreq_stats_lock);
 		return 0;
 	}
+<<<<<<< HEAD
 =======
 >>>>>>> 49bbfe0... cpufreq: Persist cpufreq time in state data across hotplug
+=======
+>>>>>>> 2f890c0... cpufreq: prevents NULL pointer reference while all_time_in_state stats is
 	if (stat->time_in_state) {
 		stat->time_in_state[stat->last_index] +=
 			cur_time - stat->last_time;
@@ -201,9 +207,13 @@ static ssize_t show_all_time_in_state(struct kobject *kobj,
 	unsigned int i, cpu, freq, index;
 	struct all_cpufreq_stats *all_stat;
 <<<<<<< HEAD
+<<<<<<< HEAD
 	struct cpufreq_policy *policy;
 =======
 >>>>>>> 49bbfe0... cpufreq: Persist cpufreq time in state data across hotplug
+=======
+	struct cpufreq_policy *policy;
+>>>>>>> 2f890c0... cpufreq: prevents NULL pointer reference while all_time_in_state stats is
 
 	len += scnprintf(buf + len, PAGE_SIZE - len, "freq\t\t");
 	for_each_possible_cpu(cpu) {
@@ -219,18 +229,25 @@ static ssize_t show_all_time_in_state(struct kobject *kobj,
 		len += scnprintf(buf + len, PAGE_SIZE - len, "\n%u\t\t", freq);
 		for_each_possible_cpu(cpu) {
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 2f890c0... cpufreq: prevents NULL pointer reference while all_time_in_state stats is
 			policy = cpufreq_cpu_get(cpu);
 			if (policy == NULL)
 				continue;
 			all_stat = per_cpu(all_cpufreq_stats, policy->cpu);
+<<<<<<< HEAD
 =======
 			all_stat = per_cpu(all_cpufreq_stats, cpu);
 >>>>>>> 49bbfe0... cpufreq: Persist cpufreq time in state data across hotplug
+=======
+>>>>>>> 2f890c0... cpufreq: prevents NULL pointer reference while all_time_in_state stats is
 			index = get_index_all_cpufreq_stat(all_stat, freq);
 			if (index != -1) {
 				len += scnprintf(buf + len, PAGE_SIZE - len,
 					"%llu\t\t", (unsigned long long)
 					cputime64_to_clock_t(all_stat->time_in_state[index]));
+<<<<<<< HEAD
 <<<<<<< HEAD
 			} else {
 				len += scnprintf(buf + len, PAGE_SIZE - len,
@@ -242,6 +259,13 @@ static ssize_t show_all_time_in_state(struct kobject *kobj,
 			}
 			len += scnprintf(buf + len, PAGE_SIZE - len, "N/A\t\t");
 >>>>>>> 49bbfe0... cpufreq: Persist cpufreq time in state data across hotplug
+=======
+			} else {
+				len += scnprintf(buf + len, PAGE_SIZE - len,
+						"N/A\t\t");
+			}
+			cpufreq_cpu_put(policy);
+>>>>>>> 2f890c0... cpufreq: prevents NULL pointer reference while all_time_in_state stats is
 		}
 	}
 
@@ -480,6 +504,7 @@ error_get_fail:
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 static void cpufreq_powerstats_create(unsigned int cpu,
 		struct cpufreq_frequency_table *table, int count) {
 	unsigned int alloc_size, i = 0, j = 0, ret = 0;
@@ -528,10 +553,13 @@ static void cpufreq_powerstats_create(unsigned int cpu,
 	spin_unlock(&cpufreq_stats_lock);
 }
 
+=======
+>>>>>>> 2f890c0... cpufreq: prevents NULL pointer reference while all_time_in_state stats is
 static int compare_for_sort(const void *lhs_ptr, const void *rhs_ptr)
 {
 	unsigned int lhs = *(const unsigned int *)(lhs_ptr);
 	unsigned int rhs = *(const unsigned int *)(rhs_ptr);
+<<<<<<< HEAD
 	if (lhs < rhs)
 		return -1;
 	if (lhs > rhs)
@@ -541,6 +569,11 @@ static int compare_for_sort(const void *lhs_ptr, const void *rhs_ptr)
 
 =======
 >>>>>>> 49bbfe0... cpufreq: Persist cpufreq time in state data across hotplug
+=======
+	return (lhs - rhs);
+}
+
+>>>>>>> 2f890c0... cpufreq: prevents NULL pointer reference while all_time_in_state stats is
 static bool check_all_freq_table(unsigned int freq)
 {
 	int i;
@@ -597,6 +630,7 @@ static void cpufreq_allstats_create(unsigned int cpu)
 	unsigned int alloc_size, count = 0;
 	struct cpufreq_frequency_table *table = cpufreq_frequency_get_table(cpu);
 	struct all_cpufreq_stats *all_stat;
+	bool sort_needed = false;
 
 	if (!table)
 		return;
@@ -629,14 +663,19 @@ static void cpufreq_allstats_create(unsigned int cpu)
 		(all_stat->time_in_state + count);
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 	spin_lock(&cpufreq_stats_lock);
 =======
 >>>>>>> 49bbfe0... cpufreq: Persist cpufreq time in state data across hotplug
+=======
+	spin_lock(&cpufreq_stats_lock);
+>>>>>>> 2f890c0... cpufreq: prevents NULL pointer reference while all_time_in_state stats is
 	for (i = 0; table[i].frequency != CPUFREQ_TABLE_END; i++) {
 		unsigned int freq = table[i].frequency;
 		if (freq == CPUFREQ_ENTRY_INVALID)
 			continue;
 		all_stat->freq_table[j++] = freq;
+<<<<<<< HEAD
 <<<<<<< HEAD
 		if (all_freq_table && !check_all_freq_table(freq)) {
 			add_all_freq_table(freq);
@@ -651,11 +690,23 @@ static void cpufreq_allstats_create(unsigned int cpu)
 	spin_unlock(&cpufreq_stats_lock);
 =======
 		if (all_freq_table && !check_all_freq_table(freq))
+=======
+		if (all_freq_table && !check_all_freq_table(freq)) {
+>>>>>>> 2f890c0... cpufreq: prevents NULL pointer reference while all_time_in_state stats is
 			add_all_freq_table(freq);
+			sort_needed = true;
+		}
 	}
+	if (sort_needed)
+		sort(all_freq_table->freq_table, all_freq_table->table_size,
+				sizeof(unsigned int), &compare_for_sort, NULL);
 	all_stat->state_num = j;
 	per_cpu(all_cpufreq_stats, cpu) = all_stat;
+<<<<<<< HEAD
 >>>>>>> 49bbfe0... cpufreq: Persist cpufreq time in state data across hotplug
+=======
+	spin_unlock(&cpufreq_stats_lock);
+>>>>>>> 2f890c0... cpufreq: prevents NULL pointer reference while all_time_in_state stats is
 }
 
 static int cpufreq_stat_notifier_policy(struct notifier_block *nb,
@@ -671,6 +722,7 @@ static int cpufreq_stat_notifier_policy(struct notifier_block *nb,
 	if (!table)
 		return 0;
 
+<<<<<<< HEAD
 	for (i = 0; table[i].frequency != CPUFREQ_TABLE_END; i++) {
 		unsigned int freq = table[i].frequency;
 
@@ -686,6 +738,12 @@ static int cpufreq_stat_notifier_policy(struct notifier_block *nb,
 		cpufreq_powerstats_create(cpu, table, count);
 
 	ret = cpufreq_stats_create_table(policy, table, count);
+=======
+	if (!per_cpu(all_cpufreq_stats, cpu))
+		cpufreq_allstats_create(cpu);
+
+	ret = cpufreq_stats_create_table(policy, table);
+>>>>>>> 2f890c0... cpufreq: prevents NULL pointer reference while all_time_in_state stats is
 	if (ret)
 		return ret;
 	return 0;
@@ -741,6 +799,7 @@ static int cpufreq_stats_create_table_cpu(unsigned int cpu)
 	if (!table)
 		goto out;
 
+<<<<<<< HEAD
 	for (i = 0; table[i].frequency != CPUFREQ_TABLE_END; i++) {
 		unsigned int freq = table[i].frequency;
 
@@ -756,6 +815,12 @@ static int cpufreq_stats_create_table_cpu(unsigned int cpu)
 		cpufreq_powerstats_create(cpu, table, count);
 
 	ret = cpufreq_stats_create_table(policy, table, count);
+=======
+	if (!per_cpu(all_cpufreq_stats, cpu))
+		cpufreq_allstats_create(cpu);
+
+	ret = cpufreq_stats_create_table(policy, table);
+>>>>>>> 2f890c0... cpufreq: prevents NULL pointer reference while all_time_in_state stats is
 
 out:
 	cpufreq_cpu_put(policy);
@@ -803,17 +868,6 @@ static struct notifier_block notifier_trans_block = {
 	.notifier_call = cpufreq_stat_notifier_trans
 };
 
-static int compare_for_sort(const void *lhs_ptr, const void *rhs_ptr)
-{
-	unsigned int lhs = *(const unsigned int *)(lhs_ptr);
-	unsigned int rhs = *(const unsigned int *)(rhs_ptr);
-	if (lhs < rhs)
-		return -1;
-	if (lhs > rhs)
-		return 1;
-	return 0;
-}
-
 static int __init cpufreq_stats_init(void)
 {
 	int ret;
@@ -840,6 +894,7 @@ static int __init cpufreq_stats_init(void)
 
 	create_all_freq_table();
 <<<<<<< HEAD
+<<<<<<< HEAD
 	ret = sysfs_create_file(cpufreq_global_kobject,
 			&_attr_all_time_in_state.attr);
 	if (ret)
@@ -856,6 +911,8 @@ static int __init cpufreq_stats_init(void)
 	if (all_freq_table && all_freq_table->freq_table)
 		sort(all_freq_table->freq_table, all_freq_table->table_size,
 				sizeof(unsigned int), &compare_for_sort, NULL);
+=======
+>>>>>>> 2f890c0... cpufreq: prevents NULL pointer reference while all_time_in_state stats is
 	ret = sysfs_create_file(cpufreq_global_kobject,
 			&_attr_all_time_in_state.attr);
 	if (ret)
