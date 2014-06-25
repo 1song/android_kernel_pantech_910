@@ -566,10 +566,14 @@ static void add_all_freq_table(unsigned int freq)
 	size = sizeof(unsigned int) * (all_freq_table->table_size + 1);
 	all_freq_table->freq_table = krealloc(all_freq_table->freq_table,
 <<<<<<< HEAD
+<<<<<<< HEAD
 			size, GFP_ATOMIC);
 =======
 			size, GFP_KERNEL);
 >>>>>>> 49bbfe0... cpufreq: Persist cpufreq time in state data across hotplug
+=======
+			size, GFP_ATOMIC);
+>>>>>>> b64e13d... cpufreq: fix sleeping in atomic context when realloc freq_table for all_time_in_state
 	if (IS_ERR(all_freq_table->freq_table)) {
 		pr_warn("Could not reallocate memory for freq_table\n");
 		all_freq_table->freq_table = NULL;
