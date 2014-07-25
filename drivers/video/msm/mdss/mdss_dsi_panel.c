@@ -528,6 +528,7 @@ void mdss_dsi_panel_reset(struct mdss_panel_data *pdata, int enable)
 	pinfo = &(ctrl_pdata->panel_data.panel_info);
 
 	if (enable) {
+<<<<<<< HEAD
 		if (gpio_is_valid(ctrl_pdata->disp_en_gpio))
 			gpio_set_value((ctrl_pdata->disp_en_gpio), 1);
 
@@ -536,6 +537,32 @@ void mdss_dsi_panel_reset(struct mdss_panel_data *pdata, int enable)
 				pdata->panel_info.rst_seq[i]);
 			if (pdata->panel_info.rst_seq[++i])
 				usleep(pdata->panel_info.rst_seq[i] * 1000);
+=======
+#ifdef CONFIG_MACH_OPPO
+		if (gpio_is_valid(ctrl_pdata->disp_en_gpio) &&
+				gpio_is_valid(ctrl_pdata->rst_gpio)) {
+#endif
+		rc = mdss_dsi_request_gpios(ctrl_pdata);
+		if (rc) {
+			pr_err("gpio request failed\n");
+			return rc;
+		}
+		if (!pinfo->cont_splash_enabled) {
+			if (gpio_is_valid(ctrl_pdata->disp_en_gpio))
+				gpio_set_value((ctrl_pdata->disp_en_gpio), 1);
+
+			for (i = 0; i < pdata->panel_info.rst_seq_len; ++i) {
+				gpio_set_value((ctrl_pdata->rst_gpio),
+					pdata->panel_info.rst_seq[i]);
+				if (pdata->panel_info.rst_seq[++i])
+					usleep(pinfo->rst_seq[i] * 1000);
+			}
+#ifdef CONFIG_MACH_OPPO
+			if (gpio_is_valid(ctrl_pdata->lcd_5v_en_gpio)) {
+				gpio_direction_output(ctrl_pdata->lcd_5v_en_gpio, 1);
+			}
+#endif
+>>>>>>> 8634ace... msm: mdss: Move LCD 5V EN gpio enable out of loop
 		}
 
 		if (gpio_is_valid(ctrl_pdata->mode_gpio)) {
