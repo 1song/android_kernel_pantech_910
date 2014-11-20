@@ -1357,7 +1357,7 @@ int msm_vidc_close(void *instance)
 	int rc = 0;
 	int i;
 
-	if (!inst)
+	if (!inst || !inst->core)
 		return -EINVAL;
 
 	v4l2_fh_del(&inst->event_handler);
@@ -1375,7 +1375,13 @@ int msm_vidc_close(void *instance)
 	}
 
 	core = inst->core;
+<<<<<<< HEAD
 	mutex_lock(&core->sync_lock);
+=======
+	msm_comm_session_clean(inst);
+
+	mutex_lock(&core->lock);
+>>>>>>> c767797... msm: vidc: Fix SYS_ERROR handling
 	list_for_each_safe(ptr, next, &core->instances) {
 		temp = list_entry(ptr, struct msm_vidc_inst, list);
 		if (temp == inst)
