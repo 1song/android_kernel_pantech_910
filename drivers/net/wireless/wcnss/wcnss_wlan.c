@@ -843,6 +843,7 @@ void wcnss_log_debug_regs_on_bite(void)
 
 		if (clk_rate) {
 			wcnss_pronto_log_debug_regs();
+			wcnss_log_iris_regs();
 		} else {
 			pr_err("clock frequency is zero, cannot access PMU or other registers\n");
 			wcnss_log_iris_regs();
@@ -856,6 +857,7 @@ void wcnss_reset_intr(void)
 {
 	if (wcnss_hardware_type() == WCNSS_PRONTO_HW) {
 		wcnss_pronto_log_debug_regs();
+		wcnss_log_iris_regs();
 		wmb();
 		__raw_writel(1 << 16, penv->fiq_reg);
 	} else {
@@ -910,6 +912,53 @@ static void wcnss_remove_sysfs(struct device *dev)
 		device_remove_file(dev, &dev_attr_wcnss_mac_addr);
 	}
 }
+<<<<<<< HEAD
+=======
+
+static void wcnss_pm_qos_add_request(void)
+{
+	pr_info("%s: add request\n", __func__);
+	pm_qos_add_request(&penv->wcnss_pm_qos_request, PM_QOS_CPU_DMA_LATENCY,
+			PM_QOS_DEFAULT_VALUE);
+}
+
+static void wcnss_pm_qos_remove_request(void)
+{
+	pr_info("%s: remove request\n", __func__);
+	pm_qos_remove_request(&penv->wcnss_pm_qos_request);
+}
+
+void wcnss_pm_qos_update_request(int val)
+{
+	pr_info("%s: update request %d\n", __func__, val);
+	pm_qos_update_request(&penv->wcnss_pm_qos_request, val);
+}
+
+void wcnss_disable_pc_remove_req(void)
+{
+	mutex_lock(&penv->pm_qos_mutex);
+	if (penv->pc_disabled) {
+		penv->pc_disabled = 0;
+		wcnss_pm_qos_update_request(WCNSS_ENABLE_PC_LATENCY);
+		wcnss_pm_qos_remove_request();
+		wcnss_allow_suspend();
+	}
+	mutex_unlock(&penv->pm_qos_mutex);
+}
+
+void wcnss_disable_pc_add_req(void)
+{
+	mutex_lock(&penv->pm_qos_mutex);
+	if (!penv->pc_disabled) {
+		wcnss_pm_qos_add_request();
+		wcnss_prevent_suspend();
+		wcnss_pm_qos_update_request(WCNSS_DISABLE_PC_LATENCY);
+		penv->pc_disabled = 1;
+	}
+	mutex_unlock(&penv->pm_qos_mutex);
+}
+
+>>>>>>> 43781ce... wcnss: logging enhancement with IRIS register dump at Wdog bite
 static void wcnss_smd_notify_event(void *data, unsigned int event)
 {
 	int len = 0;
@@ -1674,8 +1723,10 @@ static void wcnssctrl_rx_handler(struct work_struct *worker)
 		smd_read(penv->smd_ch, NULL, len);
 		return;
 	}
-	if (len < sizeof(struct smd_msg_hdr))
+	if (len < sizeof(struct smd_msg_hdr)) {
+		pr_err("wcnss: incomplete header available len = %d\n", len);
 		return;
+	}
 
 	rc = smd_read(penv->smd_ch, buf, sizeof(struct smd_msg_hdr));
 	if (rc < sizeof(struct smd_msg_hdr)) {
