@@ -421,6 +421,13 @@ obj-$(CONFIG_WALL_CLK_SYSFS) += wallclk_sysfs.o
 obj-$(CONFIG_ARCH_RANDOM) += early_random.o
 obj-$(CONFIG_PERFMAP) += perfmap.o
 
+<<<<<<< HEAD
 obj-$(CONFIG_PANTECH_ERR_CRASH_LOGGING) += pantech_restart.o pantech_sys.o pantech_apanic.o pantech_debug.o
 obj-$(CONFIG_PANTECH_MEM_LEAK_TRACE) += pantech_memlog.o
 obj-$(CONFIG_TURBO_BOOST) += msm_turbo.o
+=======
+CFLAGS_board-8974-console.o += -Idrivers/staging/android
+obj-$(CONFIG_ALUCARD_HOTPLUG) += alucard_hotplug.o
+
+obj-$(CONFIG_BRICKED_HOTPLUG) += bricked_hotplug.o
+>>>>>>> b3ff9ec... msm: Add bricked hotplug
