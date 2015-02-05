@@ -28,6 +28,10 @@ enum wcnss_hw_type {
 
 struct wcnss_wlan_config {
 	int		use_48mhz_xo;
+<<<<<<< HEAD
+=======
+	int	is_pronto_v3;
+>>>>>>> 7525d44... wcnss: add NULL check before accessing pnv pointer
 };
 
 enum {
