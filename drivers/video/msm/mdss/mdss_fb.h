@@ -87,6 +87,11 @@ struct disp_info_notify {
 	struct mutex lock;
 	int value;
 	int is_suspend;
+<<<<<<< HEAD
+=======
+	int ref_count;
+	bool init_done;
+>>>>>>> a4c97ed... msm: mdss: add init and deinit calls to notify update ioctl
 };
 
 struct msm_sync_pt_data {
