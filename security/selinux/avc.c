@@ -1527,10 +1527,14 @@ inline int avc_has_perm_noaudit(u32 ssid, u32 tsid,
 	node = avc_lookup(ssid, tsid, tclass);
 	if (unlikely(!node))
 <<<<<<< HEAD
+<<<<<<< HEAD
 		node = avc_compute_av(ssid, tsid, tclass, avd, &xp_node);
 =======
 		node = avc_compute_av(ssid, tsid, tclass, avd, &ops_node);
 >>>>>>> 57ce68f... SELinux: per-command whitelisting of ioctls
+=======
+		node = avc_compute_av(ssid, tsid, tclass, avd);
+>>>>>>> bdac173... selinux: remove unnecessary pointer reassignment
 	else
 		memcpy(avd, &node->ae.avd, sizeof(*avd));
 
