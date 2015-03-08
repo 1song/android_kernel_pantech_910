@@ -18,6 +18,11 @@ obj-$(CONFIG_CPU_FREQ_GOV_SMARTASSV2)   += cpufreq_smartass2.o
 obj-$(CONFIG_CPU_FREQ_GOV_LIONHEART)    += cpufreq_lionheart.o
 obj-$(CONFIG_CPU_FREQ_GOV_LAGFREE)      += cpufreq_lagfree.o
 obj-$(CONFIG_CPU_FREQ_GOV_INTELLIMM)	+= cpufreq_intellimm.o
+<<<<<<< HEAD
+=======
+obj-$(CONFIG_CPU_FREQ_GOV_ELEMENTALX)	+= cpufreq_elementalx.o
+obj-$(CONFIG_CPU_FREQ_GOV_HYPER)	+= cpufreq_HYPER.o
+>>>>>>> b487f8b... Added HYPER CPU governor
 
 # CPUfreq cross-arch helpers
 obj-$(CONFIG_CPU_FREQ_TABLE)		+= freq_table.o
