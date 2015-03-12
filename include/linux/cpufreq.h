@@ -430,7 +430,13 @@ extern struct cpufreq_governor cpufreq_gov_HYPER;
 #elif defined(CONFIG_CPU_FREQ_DEFAULT_GOV_PEGASUSQ)
 extern struct cpufreq_governor cpufreq_gov_pegasusq;
 #define CPUFREQ_DEFAULT_GOVERNOR	(&cpufreq_gov_pegasusq)
+<<<<<<< HEAD
 >>>>>>> 4b48b35... Add ALL of MY CPU GOVS from My JB Kernel! 8 new govs.
+=======
+#elif defined(CONFIG_CPU_FREQ_DEFAULT_GOV_SMARTMAX)
+extern struct cpufreq_governor cpufreq_gov_smartmax;
+#define CPUFREQ_DEFAULT_GOVERNOR (&cpufreq_gov_smartmax)
+>>>>>>> 224b237... cpufreq: smartmax: added new governor based on ondemand and smartass2
 #endif
 
 

@@ -30,7 +30,11 @@ obj-$(CONFIG_CPU_FREQ_GOV_HYPER)	+= cpufreq_HYPER.o
 >>>>>>> b487f8b... Added HYPER CPU governor
 =======
 obj-$(CONFIG_CPU_FREQ_GOV_PEGASUSQ)	+= cpufreq_pegasusq.o
+<<<<<<< HEAD
 >>>>>>> 4b48b35... Add ALL of MY CPU GOVS from My JB Kernel! 8 new govs.
+=======
+obj-$(CONFIG_CPU_FREQ_GOV_SMARTMAX)     += cpufreq_smartmax.o
+>>>>>>> 224b237... cpufreq: smartmax: added new governor based on ondemand and smartass2
 
 # CPUfreq cross-arch helpers
 obj-$(CONFIG_CPU_FREQ_TABLE)		+= freq_table.o
