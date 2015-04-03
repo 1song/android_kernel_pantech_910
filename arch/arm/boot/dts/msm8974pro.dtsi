@@ -1647,8 +1647,27 @@
                        qcom,io-fraction = <101>;
                };
 
+<<<<<<< HEAD
                qcom,gpu-pwrlevel@5 {
                        reg = <5>;
+=======
+               qcom,gpu-pwrlevel@6 {
+                       reg = <6>;
+                       qcom,gpu-freq = <100000000>;
+                       qcom,bus-freq = <2>;
+                       qcom,io-fraction = <101>;
+               };
+
+               qcom,gpu-pwrlevel@7{
+                       reg = <7>;
+                       qcom,gpu-freq = <27000000>;
+                       qcom,bus-freq = <0>;
+                       qcom,io-fraction = <101>;
+               };
+
+               qcom,gpu-pwrlevel@8 {
+                       reg = <8>;
+>>>>>>> 9945a2b... GPU FREQ: set higher bus level for 100Mhz to reduce tiny lags
                        qcom,gpu-freq = <27000000>;
                        qcom,bus-freq = <0>;
                        qcom,io-fraction = <101>;
