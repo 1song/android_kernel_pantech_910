@@ -210,6 +210,15 @@ static int cpu_hotplug_handler(struct notifier_block *nb,
 static int system_suspend_handler(struct notifier_block *nb,
 				unsigned long val, void *data)
 {
+<<<<<<< HEAD
+=======
+	if (!rq_info.hotplug_enabled)
+		return NOTIFY_OK;
+
+	if (rq_info.bricked_hotplug_enabled)
+		return NOTIFY_OK;
+
+>>>>>>> 19c606f... fix bricked hotplug and cleanup
 	switch (val) {
 	case PM_POST_HIBERNATION:
 	case PM_POST_SUSPEND:
@@ -237,6 +246,61 @@ static ssize_t hotplug_disable_show(struct kobject *kobj,
 
 static struct kobj_attribute hotplug_disabled_attr = __ATTR_RO(hotplug_disable);
 
+<<<<<<< HEAD
+=======
+static struct kobj_attribute hotplug_enabled_attr =
+	__ATTR(hotplug_enable, S_IWUSR | S_IRUSR, show_hotplug_enable,
+	       store_hotplug_enable);
+
+static ssize_t store_bricked_hotplug_enable(struct kobject *kobj,
+				struct kobj_attribute *attr,
+				const char *buf, size_t count)
+{
+	int ret;
+	unsigned int val;
+	unsigned long flags = 0;
+
+	spin_lock_irqsave(&rq_lock, flags);
+	ret = sscanf(buf, "%u", &val);
+	if (ret != 1 || val < 0 || val > 1)
+		return -EINVAL;
+
+	rq_info.bricked_hotplug_enabled = val;
+
+	spin_unlock_irqrestore(&rq_lock, flags);
+
+	return count;
+}
+
+static ssize_t show_bricked_hotplug_enable(struct kobject *kobj,
+				struct kobj_attribute *attr, char *buf)
+{
+	return snprintf(buf, MAX_LONG_SIZE, "%d\n",
+			rq_info.bricked_hotplug_enabled);
+}
+
+static struct kobj_attribute bricked_hotplug_enabled_attr =
+		__ATTR(bricked_hotplug_enable, S_IWUSR | S_IRUSR,
+		show_bricked_hotplug_enable,
+		store_bricked_hotplug_enable);
+
+unsigned int get_rq_info(void)
+{
+unsigned long flags = 0;
+        unsigned int rq = 0;
+
+        spin_lock_irqsave(&rq_lock, flags);
+
+        rq = rq_info.rq_avg;
+        rq_info.rq_avg = 0;
+
+        spin_unlock_irqrestore(&rq_lock, flags);
+
+        return rq;
+}
+EXPORT_SYMBOL(get_rq_info);
+
+>>>>>>> 19c606f... fix bricked hotplug and cleanup
 static void def_work_fn(struct work_struct *work)
 {
 	int64_t diff;
