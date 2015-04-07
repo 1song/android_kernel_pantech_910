@@ -14,10 +14,13 @@
  */
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 #include <asm/thread_notify.h>
 
 >>>>>>> 0559ddd... proc: uid: Adds accounting for the cputimes per uid.
+=======
+>>>>>>> 6388df7... proc: uid: Changes the thread notifier to profile event notifier.
 #include <linux/atomic.h>
 #include <linux/err.h>
 #include <linux/hashtable.h>
@@ -26,9 +29,13 @@
 #include <linux/list.h>
 #include <linux/proc_fs.h>
 <<<<<<< HEAD
+<<<<<<< HEAD
 #include <linux/profile.h>
 =======
 >>>>>>> 0559ddd... proc: uid: Adds accounting for the cputimes per uid.
+=======
+#include <linux/profile.h>
+>>>>>>> 6388df7... proc: uid: Changes the thread notifier to profile event notifier.
 #include <linux/sched.h>
 #include <linux/seq_file.h>
 #include <linux/slab.h>
@@ -38,10 +45,14 @@
 DECLARE_HASHTABLE(hash_table, UID_HASH_BITS);
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 static DEFINE_MUTEX(uid_lock);
 =======
 static DEFINE_SPINLOCK(uid_lock);
 >>>>>>> 0559ddd... proc: uid: Adds accounting for the cputimes per uid.
+=======
+static DEFINE_MUTEX(uid_lock);
+>>>>>>> 6388df7... proc: uid: Changes the thread notifier to profile event notifier.
 static struct proc_dir_entry *parent;
 
 struct uid_entry {
@@ -103,10 +114,14 @@ static int uid_stat_show(struct seq_file *m, void *v)
 	unsigned long bkt;
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 	mutex_lock(&uid_lock);
 =======
 	spin_lock(&uid_lock);
 >>>>>>> 0559ddd... proc: uid: Adds accounting for the cputimes per uid.
+=======
+	mutex_lock(&uid_lock);
+>>>>>>> 6388df7... proc: uid: Changes the thread notifier to profile event notifier.
 
 	hash_for_each(hash_table, bkt, node, uid_entry, hash) {
 		uid_entry->active_stime = 0;
@@ -129,8 +144,12 @@ static int uid_stat_show(struct seq_file *m, void *v)
 		uid_entry = find_or_register_uid(task_uid(task));
 		if (!uid_entry) {
 			read_unlock(&tasklist_lock);
+<<<<<<< HEAD
 			spin_unlock(&uid_lock);
 >>>>>>> 0559ddd... proc: uid: Adds accounting for the cputimes per uid.
+=======
+			mutex_unlock(&uid_lock);
+>>>>>>> 6388df7... proc: uid: Changes the thread notifier to profile event notifier.
 			pr_err("%s: failed to find the uid_entry for uid %d\n",
 						__func__, task_uid(task));
 			return -ENOMEM;
@@ -176,8 +195,12 @@ static int uid_stat_show(struct seq_file *m, void *v)
 						cputime_to_usecs(total_stime));
 	}
 
+<<<<<<< HEAD
 	spin_unlock(&uid_lock);
 >>>>>>> 0559ddd... proc: uid: Adds accounting for the cputimes per uid.
+=======
+	mutex_unlock(&uid_lock);
+>>>>>>> 6388df7... proc: uid: Changes the thread notifier to profile event notifier.
 	return 0;
 }
 
@@ -226,10 +249,14 @@ static ssize_t uid_remove_write(struct file *file,
 	}
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 	mutex_lock(&uid_lock);
 =======
 	spin_lock(&uid_lock);
 >>>>>>> 0559ddd... proc: uid: Adds accounting for the cputimes per uid.
+=======
+	mutex_lock(&uid_lock);
+>>>>>>> 6388df7... proc: uid: Changes the thread notifier to profile event notifier.
 
 	for (; uid_start <= uid_end; uid_start++) {
 		hash_for_each_possible_safe(hash_table, uid_entry, node, tmp,
@@ -240,10 +267,14 @@ static ssize_t uid_remove_write(struct file *file,
 	}
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 	mutex_unlock(&uid_lock);
 =======
 	spin_unlock(&uid_lock);
 >>>>>>> 0559ddd... proc: uid: Adds accounting for the cputimes per uid.
+=======
+	mutex_unlock(&uid_lock);
+>>>>>>> 6388df7... proc: uid: Changes the thread notifier to profile event notifier.
 	return count;
 }
 
@@ -253,6 +284,7 @@ static const struct file_operations uid_remove_fops = {
 	.write		= uid_remove_write,
 };
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 static int process_notifier(struct notifier_block *self,
 			unsigned long cmd, void *v)
@@ -269,14 +301,25 @@ static int process_notifier(struct notifier_block *self,
 	uid = task_uid(task);
 =======
 static void uid_task_exit(struct task_struct *task)
+=======
+static int process_notifier(struct notifier_block *self,
+			unsigned long cmd, void *v)
+>>>>>>> 6388df7... proc: uid: Changes the thread notifier to profile event notifier.
 {
+	struct task_struct *task = v;
 	struct uid_entry *uid_entry;
-	uid_t uid = task_uid(task);
 	cputime_t utime, stime;
+	uid_t uid;
 
-	spin_lock(&uid_lock);
+	if (!task)
+		return NOTIFY_OK;
 
+<<<<<<< HEAD
 >>>>>>> 0559ddd... proc: uid: Adds accounting for the cputimes per uid.
+=======
+	mutex_lock(&uid_lock);
+	uid = task_uid(task);
+>>>>>>> 6388df7... proc: uid: Changes the thread notifier to profile event notifier.
 	uid_entry = find_or_register_uid(uid);
 	if (!uid_entry) {
 		pr_err("%s: failed to find uid %d\n", __func__, uid);
@@ -296,6 +339,7 @@ exit:
 =======
 
 exit:
+<<<<<<< HEAD
 	spin_unlock(&uid_lock);
 }
 
@@ -318,6 +362,10 @@ static int process_notifier(struct notifier_block *self,
 
 	return NOTIFY_DONE;
 >>>>>>> 0559ddd... proc: uid: Adds accounting for the cputimes per uid.
+=======
+	mutex_unlock(&uid_lock);
+	return NOTIFY_OK;
+>>>>>>> 6388df7... proc: uid: Changes the thread notifier to profile event notifier.
 }
 
 static struct notifier_block process_notifier_block = {
@@ -346,8 +394,12 @@ static int __init proc_uid_cputime_init(void)
 	proc_create_data("show_uid_stat", S_IWUGO, parent, &uid_stat_fops,
 					NULL);
 
+<<<<<<< HEAD
 	thread_register_notifier(&process_notifier_block);
 >>>>>>> 0559ddd... proc: uid: Adds accounting for the cputimes per uid.
+=======
+	profile_event_register(PROFILE_TASK_EXIT, &process_notifier_block);
+>>>>>>> 6388df7... proc: uid: Changes the thread notifier to profile event notifier.
 
 	return 0;
 }
