@@ -149,6 +149,7 @@ static struct policydb_compat_info policydb_compat[] = {
 		.ocon_num	= OCON_NUM,
 	},
 <<<<<<< HEAD
+<<<<<<< HEAD
 	{
 		.version	= POLICYDB_VERSION_XPERMS_IOCTL,
 		.sym_num	= SYM_NUM,
@@ -156,6 +157,13 @@ static struct policydb_compat_info policydb_compat[] = {
 	},
 =======
 >>>>>>> 86ab756... SELinux: Update policy version to support constraints info
+=======
+	{
+		.version	= POLICYDB_VERSION_IOCTL_OPERATIONS,
+		.sym_num	= SYM_NUM,
+		.ocon_num	= OCON_NUM,
+	},
+>>>>>>> 57ce68f... SELinux: per-command whitelisting of ioctls
 };
 
 static struct policydb_compat_info *policydb_lookup_compat(int version)

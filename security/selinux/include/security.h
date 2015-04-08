@@ -35,9 +35,13 @@
 #define POLICYDB_VERSION_DEFAULT_TYPE	28
 #define POLICYDB_VERSION_CONSTRAINT_NAMES	29
 <<<<<<< HEAD
+<<<<<<< HEAD
 #define POLICYDB_VERSION_XPERMS_IOCTL	30
 =======
 >>>>>>> 86ab756... SELinux: Update policy version to support constraints info
+=======
+#define POLICYDB_VERSION_IOCTL_OPERATIONS	30
+>>>>>>> 57ce68f... SELinux: per-command whitelisting of ioctls
 
 /* Range of policy versions we understand*/
 #define POLICYDB_VERSION_MIN   POLICYDB_VERSION_BASE
@@ -45,10 +49,14 @@
 #define POLICYDB_VERSION_MAX	CONFIG_SECURITY_SELINUX_POLICYDB_VERSION_MAX_VALUE
 #else
 <<<<<<< HEAD
+<<<<<<< HEAD
 #define POLICYDB_VERSION_MAX	POLICYDB_VERSION_XPERMS_IOCTL
 =======
 #define POLICYDB_VERSION_MAX	POLICYDB_VERSION_CONSTRAINT_NAMES
 >>>>>>> 86ab756... SELinux: Update policy version to support constraints info
+=======
+#define POLICYDB_VERSION_MAX	POLICYDB_VERSION_IOCTL_OPERATIONS
+>>>>>>> 57ce68f... SELinux: per-command whitelisting of ioctls
 #endif
 
 /* Mask for just the mount related flags */
@@ -112,6 +120,7 @@ struct av_decision {
 	u32 flags;
 };
 
+<<<<<<< HEAD
 #define XPERMS_ALLOWED 1
 #define XPERMS_AUDITALLOW 2
 #define XPERMS_DONTAUDIT 4
@@ -133,6 +142,31 @@ struct extended_perms_decision {
 struct extended_perms {
 	u16 len;	/* length associated decision chain */
 	struct extended_perms_data drivers; /* flag drivers that are used */
+=======
+#define security_operation_set(perms, x) (perms[x >> 5] |= 1 << (x & 0x1f))
+#define security_operation_test(perms, x) (1 & (perms[x >> 5] >> (x & 0x1f)))
+
+struct operation_perm {
+	u32 perms[8];
+};
+
+struct operation_decision {
+	u8 type;
+	u8 specified;
+	struct operation_perm *allowed;
+	struct operation_perm *auditallow;
+	struct operation_perm *dontaudit;
+};
+
+#define OPERATION_ALLOWED 1
+#define OPERATION_AUDITALLOW 2
+#define OPERATION_DONTAUDIT 4
+#define OPERATION_ALL (OPERATION_ALLOWED | OPERATION_AUDITALLOW |\
+			OPERATION_DONTAUDIT)
+struct operation {
+	u16 len;	/* length of operation decision chain */
+	u32 type[8];	/* 256 types */
+>>>>>>> 57ce68f... SELinux: per-command whitelisting of ioctls
 };
 
 /* definitions of av_decision.flags */
@@ -140,10 +174,17 @@ struct extended_perms {
 
 void security_compute_av(u32 ssid, u32 tsid,
 			 u16 tclass, struct av_decision *avd,
+<<<<<<< HEAD
 			 struct extended_perms *xperms);
 
 void security_compute_xperms_decision(u32 ssid, u32 tsid, u16 tclass,
 			 u8 driver, struct extended_perms_decision *xpermd);
+=======
+			 struct operation *ops);
+
+void security_compute_operation(u32 ssid, u32 tsid, u16 tclass,
+			 u8 type, struct operation_decision *od);
+>>>>>>> 57ce68f... SELinux: per-command whitelisting of ioctls
 
 void security_compute_av_user(u32 ssid, u32 tsid,
 			     u16 tclass, struct av_decision *avd);
