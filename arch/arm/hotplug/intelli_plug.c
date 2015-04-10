@@ -17,36 +17,16 @@
 #include <linux/module.h>
 #include <linux/slab.h>
 #include <linux/input.h>
-<<<<<<< HEAD
-#include <linux/cpufreq.h>
-
-#ifdef CONFIG_POWERSUSPEND
-=======
 #include <linux/kobject.h>
 #ifdef CONFIG_LCD_NOTIFY
 #include <linux/lcd_notify.h>
 #elif defined(CONFIG_POWERSUSPEND)
->>>>>>> 704efca... update and refactor intelliplug
 #include <linux/powersuspend.h>
 #elif defined(CONFIG_HAS_EARLYSUSPEND)
 #include <linux/earlysuspend.h>
 #endif
 #include <linux/cpufreq.h>
 
-<<<<<<< HEAD
-//#define DEBUG_INTELLI_PLUG
-#undef DEBUG_INTELLI_PLUG
-#define INTELLI_PLUG_MAJOR_VERSION	3
-#define INTELLI_PLUG_MINOR_VERSION	8
-
-#define DEF_SAMPLING_MS			(268)
-
-#define DUAL_PERSISTENCE		(2500 / DEF_SAMPLING_MS)
-#define TRI_PERSISTENCE			(1700 / DEF_SAMPLING_MS)
-#define QUAD_PERSISTENCE		(1000 / DEF_SAMPLING_MS)
-
-#define BUSY_PERSISTENCE		(3500 / DEF_SAMPLING_MS)
-=======
 #define INTELLI_PLUG			"intelli_plug"
 #define INTELLI_PLUG_MAJOR_VERSION	5
 #define INTELLI_PLUG_MINOR_VERSION	0
@@ -81,32 +61,12 @@ defined (CONFIG_ARCH_MSM8610) || defined (CONFIG_ARCH_MSM8228)
 #define CPU_NR_THRESHOLD		((THREAD_CAPACITY << 1) + (THREAD_CAPACITY / 2))
 #define MULT_FACTOR			4
 #define DIV_FACTOR			100000
->>>>>>> 704efca... update and refactor intelliplug
 
 static u64 last_boost_time, last_input;
 
 static struct delayed_work intelli_plug_work;
 static struct work_struct up_down_work;
 static struct workqueue_struct *intelliplug_wq;
-<<<<<<< HEAD
-static struct workqueue_struct *intelliplug_boost_wq;
-
-static unsigned int intelli_plug_active = 1;
-module_param(intelli_plug_active, uint, 0644);
-
-static unsigned int touch_boost_active = 0;
-module_param(touch_boost_active, uint, 0644);
-
-unsigned int intelli_plug_nr_run_profile_sel = 0;
-module_param(intelli_plug_nr_run_profile_sel, uint, 0644);
-
-//default to something sane rather than zero
-static unsigned int sampling_time = DEF_SAMPLING_MS;
-
-static int persist_count = 0;
-
-static bool suspended = false;
-=======
 #if defined(CONFIG_LCD_NOTIFY) || \
 	defined(CONFIG_POWERSUSPEND) || \
 	defined(CONFIG_HAS_EARLYSUSPEND)
@@ -117,7 +77,6 @@ static struct mutex intelli_plug_mutex;
 static struct notifier_block notif;
 #endif
 #endif
->>>>>>> 704efca... update and refactor intelliplug
 
 struct ip_cpu_info {
 	unsigned int curr_max;
@@ -248,28 +207,9 @@ static unsigned int calculate_thread_stats(void)
 	unsigned int threshold_size;
 	unsigned int *current_profile;
 
-<<<<<<< HEAD
-	current_profile = nr_run_profiles[intelli_plug_nr_run_profile_sel];
-	if (num_possible_cpus() > 2) {
-		if (intelli_plug_nr_run_profile_sel >= NR_RUN_ECO_MODE_PROFILE)
-			threshold_size =
-				ARRAY_SIZE(nr_run_thresholds_eco);
-		else
-			threshold_size =
-				ARRAY_SIZE(nr_run_thresholds_balance);
-	} else
-		threshold_size =
-			ARRAY_SIZE(nr_run_thresholds_eco);
-
-	if (intelli_plug_nr_run_profile_sel >= NR_RUN_ECO_MODE_PROFILE)
-		nr_fshift = 1;
-	else
-		nr_fshift = num_possible_cpus() - 1;
-=======
 	threshold_size = max_cpus_online;
 	nr_run_hysteresis = max_cpus_online * 2;
 	nr_fshift = max_cpus_online - 1;
->>>>>>> 704efca... update and refactor intelliplug
 
 	for (nr_run = 1; nr_run < threshold_size; nr_run++) {
 		unsigned int nr_threshold;
@@ -358,80 +298,7 @@ static void intelli_plug_work_fn(struct work_struct *work)
 		dprintk("intelli_plug is suspended!\n");
 		return;
 	}
-<<<<<<< HEAD
-}
-
-void __ref intelli_plug_perf_boost(bool on)
-{
-	unsigned int cpu;
-
-	if (intelli_plug_active) {
-		flush_workqueue(intelliplug_wq);
-		if (on) {
-			for_each_possible_cpu(cpu) {
-				if (!cpu_online(cpu))
-					cpu_up(cpu);
-			}
-		} else {
-			queue_delayed_work_on(0, intelliplug_wq,
-				&intelli_plug_work,
-				msecs_to_jiffies(sampling_time));
-		}
-	}
-}
-
-/* sysfs interface for performance boost (BEGIN) */
-static ssize_t intelli_plug_perf_boost_store(struct kobject *kobj,
-			struct kobj_attribute *attr, const char *buf,
-			size_t count)
-{
-
-	int boost_req;
-
-	sscanf(buf, "%du", &boost_req);
-
-	switch(boost_req) {
-		case 0:
-			intelli_plug_perf_boost(0);
-			return count;
-		case 1:
-			intelli_plug_perf_boost(1);
-			return count;
-		default:
-			return -EINVAL;
-	}
-}
-
-static struct kobj_attribute intelli_plug_perf_boost_attribute =
-	__ATTR(perf_boost, 0220,
-		NULL,
-		intelli_plug_perf_boost_store);
-
-static struct attribute *intelli_plug_perf_boost_attrs[] = {
-	&intelli_plug_perf_boost_attribute.attr,
-	NULL,
-};
-
-static struct attribute_group intelli_plug_perf_boost_attr_group = {
-	.attrs = intelli_plug_perf_boost_attrs,
-};
-
-static struct kobject *intelli_plug_perf_boost_kobj;
-/* sysfs interface for performance boost (END) */
-
-#ifdef CONFIG_POWERSUSPEND
-static void intelli_plug_suspend(struct power_suspend *handler)
-#else
-static void intelli_plug_suspend(struct early_suspend *handler)
 #endif
-{
-	if (intelli_plug_active) {
-		int cpu;
-
-		flush_workqueue(intelliplug_wq);
-=======
-#endif
->>>>>>> 704efca... update and refactor intelliplug
 
 	target_cpus = calculate_thread_stats();
 	queue_work_on(0, intelliplug_wq, &up_down_work);
@@ -707,14 +574,6 @@ static int __ref intelli_plug_start(void)
 	mutex_init(&intelli_plug_mutex);
 #endif
 
-<<<<<<< HEAD
-	if (nr_possible_cores > 2) {
-		nr_run_hysteresis = NR_RUN_HYSTERESIS_QUAD;
-		intelli_plug_nr_run_profile_sel = 0;
-	} else {
-		nr_run_hysteresis = NR_RUN_HYSTERESIS_DUAL;
-		intelli_plug_nr_run_profile_sel = NR_RUN_ECO_MODE_PROFILE;
-=======
 	INIT_WORK(&up_down_work, cpu_up_down_work);
 	INIT_DELAYED_WORK(&intelli_plug_work, intelli_plug_work_fn);
 #if defined(CONFIG_LCD_NOTIFY) || \
@@ -735,7 +594,6 @@ static int __ref intelli_plug_start(void)
 			continue;
 		cpu_up(cpu);
 		apply_down_lock(cpu);
->>>>>>> 704efca... update and refactor intelliplug
 	}
 
 	queue_delayed_work_on(0, intelliplug_wq, &intelli_plug_work,
