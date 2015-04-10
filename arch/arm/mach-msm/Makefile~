@@ -425,3 +425,6 @@ obj-$(CONFIG_PANTECH_ERR_CRASH_LOGGING) += pantech_restart.o pantech_sys.o pante
 obj-$(CONFIG_PANTECH_MEM_LEAK_TRACE) += pantech_memlog.o
 obj-$(CONFIG_TURBO_BOOST) += msm_turbo.o
 CFLAGS_board-8974-console.o += -Idrivers/staging/android
+obj-$(CONFIG_ALUCARD_HOTPLUG) += alucard_hotplug.o
+
+obj-$(CONFIG_BRICKED_HOTPLUG) += bricked_hotplug.o

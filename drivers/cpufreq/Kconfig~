@@ -88,13 +88,17 @@ config CPU_FREQ_DEFAULT_GOV_ONDEMAND
 	  governor. If unsure have a look at the help section of the
 	  driver. Fallback governor will be the performance governor.
 
+<<<<<<< HEAD
+<<<<<<< HEAD
+=======
 config CPU_FREQ_DEFAULT_GOV_ELEMENTALX
 	bool "elementalx"
 	select CPU_FREQ_GOV_ELEMENTALX
-
+=======
 config CPU_FREQ_DEFAULT_GOV_ONDEMANDPLUS
 	bool "ondemandplus"
 	select CPU_FREQ_GOV_ONDEMANDPLUS
+>>>>>>> 4b48b35... Add ALL of MY CPU GOVS from My JB Kernel! 8 new govs.
 	select CPU_FREQ_GOV_PERFORMANCE
 	help
 	  Use the CPUFreq governor 'ondemandplus' as default. This allows
@@ -104,6 +108,7 @@ config CPU_FREQ_DEFAULT_GOV_ONDEMANDPLUS
 	  governor. If unsure have a look at the help section of the
 	  driver. Fallback governor will be the performance governor.
 
+>>>>>>> b487f8b... Added HYPER CPU governor
 config CPU_FREQ_DEFAULT_GOV_CONSERVATIVE
 	bool "conservative"
 	select CPU_FREQ_GOV_CONSERVATIVE
@@ -443,6 +448,8 @@ config CPUFREQ_ID_PERFLOCK
 	help
 		Minimum CPU performance lock for Intellidemand governor
 
+<<<<<<< HEAD
+=======
 config CPU_FREQ_GOV_ELEMENTALX
 	tristate "'elementalx' cpufreq policy governor"
 	select CPU_FREQ_TABLE
@@ -470,6 +477,7 @@ config CPU_FREQ_GOV_ONDEMANDPLUS
 
 	  If in doubt, say N.
 
+>>>>>>> b487f8b... Added HYPER CPU governor
 config CPU_FREQ_GOV_INTERACTIVE
 	tristate "'interactive' cpufreq policy governor"
 	help
@@ -561,6 +569,8 @@ config CPUFREQ_LIMIT_MAX_FREQ
 	help
 		Limit Max Freq while screen is on for Intellidemand governor
 
+<<<<<<< HEAD
+=======
 config CPU_FREQ_DEFAULT_GOV_ADAPTIVE
 	bool "adaptive"
 	select CPU_FREQ_GOV_ADAPTIVE
@@ -594,6 +604,7 @@ config CPU_FREQ_GOV_HYPER
 config CPU_FREQ_GOV_PEGASUSQ
 	tristate "'pegasusq' cpufreq policy governor"
 
+>>>>>>> 4b48b35... Add ALL of MY CPU GOVS from My JB Kernel! 8 new govs.
 config CPU_FREQ_GOV_INTELLIACTIVE
 	tristate "'intelliactive' cpufreq policy governor"
 	help
