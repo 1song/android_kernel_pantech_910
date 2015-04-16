@@ -23,7 +23,10 @@
 #include <linux/sort.h>
 #include <linux/err.h>
 #include <linux/of.h>
+<<<<<<< HEAD
 #include <linux/sched.h>
+=======
+>>>>>>> 9fc7d88... cpufreq_stats: Adds the fucntionality to load current values for each frequency
 #include <asm/cputime.h>
 
 static spinlock_t cpufreq_stats_lock;
@@ -130,6 +133,7 @@ static int get_index_all_cpufreq_stat(struct all_cpufreq_stats *all_stat,
 	return -1;
 }
 
+<<<<<<< HEAD
 void acct_update_power(struct task_struct *task, cputime_t cputime) {
 	struct cpufreq_power_stats *powerstats;
 	struct cpufreq_stats *stats;
@@ -149,6 +153,8 @@ void acct_update_power(struct task_struct *task, cputime_t cputime) {
 }
 EXPORT_SYMBOL_GPL(acct_update_power);
 
+=======
+>>>>>>> 9fc7d88... cpufreq_stats: Adds the fucntionality to load current values for each frequency
 static ssize_t show_current_in_state(struct kobject *kobj,
 		struct kobj_attribute *attr, char *buf)
 {
@@ -586,10 +592,17 @@ static int cpufreq_stat_notifier_policy(struct notifier_block *nb,
 
 	if (!per_cpu(all_cpufreq_stats, cpu))
 		cpufreq_allstats_create(cpu, table, count);
+<<<<<<< HEAD
 
 	if (!per_cpu(cpufreq_power_stats, cpu))
 		cpufreq_powerstats_create(cpu, table, count);
 
+=======
+
+	if (!per_cpu(cpufreq_power_stats, cpu))
+		cpufreq_powerstats_create(cpu, table, count);
+
+>>>>>>> 9fc7d88... cpufreq_stats: Adds the fucntionality to load current values for each frequency
 	ret = cpufreq_stats_create_table(policy, table, count);
 	if (ret)
 		return ret;
@@ -656,10 +669,17 @@ static int cpufreq_stats_create_table_cpu(unsigned int cpu)
 
 	if (!per_cpu(all_cpufreq_stats, cpu))
 		cpufreq_allstats_create(cpu, table, count);
+<<<<<<< HEAD
 
 	if (!per_cpu(cpufreq_power_stats, cpu))
 		cpufreq_powerstats_create(cpu, table, count);
 
+=======
+
+	if (!per_cpu(cpufreq_power_stats, cpu))
+		cpufreq_powerstats_create(cpu, table, count);
+
+>>>>>>> 9fc7d88... cpufreq_stats: Adds the fucntionality to load current values for each frequency
 	ret = cpufreq_stats_create_table(policy, table, count);
 
 out:
