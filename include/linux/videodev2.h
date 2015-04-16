@@ -1958,9 +1958,12 @@ enum v4l2_mpeg_vidc_video_priority {
 	V4L2_MPEG_VIDC_VIDEO_PRIORITY_REALTIME_DISABLE = 1,
 };
 
+<<<<<<< HEAD
 #define V4L2_CID_MPEG_VIDC_VIDEO_OPERATING_RATE \
 		(V4L2_CID_MPEG_MSM_VIDC_BASE + 75)
 
+=======
+>>>>>>> 5b1cd75... msm: vidc: Enable session priority support.
 /*  Camera class control IDs */
 #define V4L2_CID_CAMERA_CLASS_BASE 	(V4L2_CTRL_CLASS_CAMERA | 0x900)
 #define V4L2_CID_CAMERA_CLASS 		(V4L2_CTRL_CLASS_CAMERA | 1)
