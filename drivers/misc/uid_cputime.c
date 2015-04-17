@@ -62,10 +62,15 @@ struct uid_entry {
 	cputime_t active_utime;
 	cputime_t active_stime;
 <<<<<<< HEAD
+<<<<<<< HEAD
 	unsigned long long active_power;
 	unsigned long long power;
 =======
 >>>>>>> 0559ddd... proc: uid: Adds accounting for the cputimes per uid.
+=======
+	unsigned long long active_power;
+	unsigned long long power;
+>>>>>>> 192098d... uid_cputime: Extends the cputime functionality to report power per uid
 	struct hlist_node hash;
 };
 
@@ -127,6 +132,7 @@ static int uid_stat_show(struct seq_file *m, void *v)
 		uid_entry->active_stime = 0;
 		uid_entry->active_utime = 0;
 <<<<<<< HEAD
+<<<<<<< HEAD
 		uid_entry->active_power = 0;
 	}
 
@@ -137,6 +143,9 @@ static int uid_stat_show(struct seq_file *m, void *v)
 			read_unlock(&tasklist_lock);
 			mutex_unlock(&uid_lock);
 =======
+=======
+		uid_entry->active_power = 0;
+>>>>>>> 192098d... uid_cputime: Extends the cputime functionality to report power per uid
 	}
 
 	read_lock(&tasklist_lock);
@@ -168,6 +177,7 @@ static int uid_stat_show(struct seq_file *m, void *v)
 		task_times(task, &utime, &stime);
 		uid_entry->active_utime += utime;
 		uid_entry->active_stime += stime;
+		uid_entry->active_power += task->cpu_power;
 	}
 >>>>>>> 0559ddd... proc: uid: Adds accounting for the cputimes per uid.
 	read_unlock(&tasklist_lock);
@@ -177,6 +187,7 @@ static int uid_stat_show(struct seq_file *m, void *v)
 							uid_entry->active_utime;
 		cputime_t total_stime = uid_entry->stime +
 							uid_entry->active_stime;
+<<<<<<< HEAD
 <<<<<<< HEAD
 		unsigned long long total_power = uid_entry->power +
 							uid_entry->active_power;
@@ -191,8 +202,14 @@ static int uid_stat_show(struct seq_file *m, void *v)
 	mutex_unlock(&uid_lock);
 =======
 		seq_printf(m, "%d: %u %u\n", uid_entry->uid,
+=======
+		unsigned long long total_power = uid_entry->power +
+							uid_entry->active_power;
+		seq_printf(m, "%d: %u %u %llu\n", uid_entry->uid,
+>>>>>>> 192098d... uid_cputime: Extends the cputime functionality to report power per uid
 						cputime_to_usecs(total_utime),
-						cputime_to_usecs(total_stime));
+						cputime_to_usecs(total_stime),
+						total_power);
 	}
 
 <<<<<<< HEAD
@@ -330,6 +347,7 @@ static int process_notifier(struct notifier_block *self,
 	uid_entry->utime += utime;
 	uid_entry->stime += stime;
 <<<<<<< HEAD
+<<<<<<< HEAD
 	uid_entry->power += task->cpu_power;
 	task->cpu_power = ULLONG_MAX;
 
@@ -337,6 +355,9 @@ exit:
 	mutex_unlock(&uid_lock);
 	return NOTIFY_OK;
 =======
+=======
+	uid_entry->power += task->cpu_power;
+>>>>>>> 192098d... uid_cputime: Extends the cputime functionality to report power per uid
 
 exit:
 <<<<<<< HEAD
