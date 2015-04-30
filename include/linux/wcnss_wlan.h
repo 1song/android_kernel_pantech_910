@@ -31,7 +31,11 @@ struct wcnss_wlan_config {
 <<<<<<< HEAD
 =======
 	int	is_pronto_v3;
+<<<<<<< HEAD
 >>>>>>> 7525d44... wcnss: add NULL check before accessing pnv pointer
+=======
+	int	iris_id;
+>>>>>>> ac72937... wcnss: Add API to send IRIS name
 };
 
 enum {
@@ -92,6 +96,7 @@ u32 wcnss_get_wlan_rx_buff_count(void);
 int wcnss_wlan_iris_xo_mode(void);
 void wcnss_flush_work(struct work_struct *work);
 void wcnss_flush_delayed_work(struct delayed_work *dwork);
+int wcnss_get_iris_name(char *iris_version);
 
 #ifdef CONFIG_WCNSS_REGISTER_DUMP_ON_BITE
 void wcnss_log_debug_regs_on_bite(void);
