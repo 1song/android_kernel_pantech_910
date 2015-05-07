@@ -174,6 +174,15 @@ static int suspend_enter(suspend_state_t state, bool *wakeup)
 		if (!(suspend_test(TEST_CORE) || *wakeup)) {
 			error = suspend_ops->enter(state);
 			events_check_enabled = false;
+<<<<<<< HEAD
+=======
+		} else {
+			pm_get_active_wakeup_sources(suspend_abort,
+				MAX_SUSPEND_ABORT_LEN);
+			log_suspend_abort_reason(suspend_abort);
+			if (*wakeup)
+				error = -EBUSY;
+>>>>>>> 32898d8... suspend: Return error when pending wakeup source is found.
 		}
 		syscore_resume();
 	}
