@@ -386,12 +386,16 @@ static int __init proc_uid_cputime_init(void)
 					NULL);
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 	proc_create_data("show_uid_stat", S_IRUGO, parent, &uid_stat_fops,
 					NULL);
 
 	profile_event_register(PROFILE_TASK_EXIT, &process_notifier_block);
 =======
 	proc_create_data("show_uid_stat", S_IWUGO, parent, &uid_stat_fops,
+=======
+	proc_create_data("show_uid_stat", S_IRUGO, parent, &uid_stat_fops,
+>>>>>>> 2dcff2a... proc: uid_cputime: fix show_uid_stat permission
 					NULL);
 
 <<<<<<< HEAD
