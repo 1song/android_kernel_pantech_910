@@ -669,9 +669,13 @@ static int selinux_set_mnt_opts(struct super_block *sb,
 	if (strcmp(sb->s_type->name, "proc") == 0)
 		sbsec->flags |= SE_SBPROC | SE_SBGENFS;
 
+<<<<<<< HEAD
 	if (!strcmp(sb->s_type->name, "debugfs") ||
 	    !strcmp(sb->s_type->name, "sysfs") ||
 	    !strcmp(sb->s_type->name, "pstore"))
+=======
+	if (strcmp(sb->s_type->name, "debugfs") == 0)
+>>>>>>> abdda53... selinux: enable per-file labeling for debugfs files.
 		sbsec->flags |= SE_SBGENFS;
 
 	/* Determine the labeling behavior to use for this filesystem type. */
@@ -1312,10 +1316,14 @@ static int inode_doinit_with_dentry(struct inode *inode, struct dentry *opt_dent
 		isec->sid = sbsec->sid;
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 		if ((sbsec->flags & SE_SBGENFS) && !S_ISLNK(inode->i_mode)) {
 =======
 		if ((sbsec->flags & SE_SBPROC) && !S_ISLNK(inode->i_mode)) {
 >>>>>>> 6c29da1... selinux: correctly label /proc inodes in use before the policy is loaded
+=======
+		if ((sbsec->flags & SE_SBGENFS) && !S_ISLNK(inode->i_mode)) {
+>>>>>>> abdda53... selinux: enable per-file labeling for debugfs files.
 			/* We must have a dentry to determine the label on
 			 * procfs inodes */
 			if (opt_dentry)
@@ -1339,11 +1347,16 @@ static int inode_doinit_with_dentry(struct inode *inode, struct dentry *opt_dent
 				goto out_unlock;
 			isec->sclass = inode_mode_to_security_class(inode->i_mode);
 <<<<<<< HEAD
+<<<<<<< HEAD
 			rc = selinux_genfs_get_sid(dentry, isec->sclass,
 						   sbsec->flags, &sid);
 =======
 			rc = selinux_proc_get_sid(dentry, isec->sclass, &sid);
 >>>>>>> 6c29da1... selinux: correctly label /proc inodes in use before the policy is loaded
+=======
+			rc = selinux_genfs_get_sid(dentry, isec->sclass,
+						   sbsec->flags, &sid);
+>>>>>>> abdda53... selinux: enable per-file labeling for debugfs files.
 			dput(dentry);
 			if (rc)
 				goto out_unlock;
