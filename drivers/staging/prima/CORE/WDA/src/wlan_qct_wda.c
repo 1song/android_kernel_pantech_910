@@ -6004,7 +6004,7 @@ void WDA_AddBAReqCallback(WDI_AddBARspinfoType *pAddBARspParams,
  * Request to WDI to Update the ADDBA REQ params.
  */ 
 VOS_STATUS WDA_ProcessAddBAReq(tWDA_CbContext *pWDA, VOS_STATUS status,
-           tANI_U16 baSessionID, tANI_U8 staIdx, tAddBAParams *pAddBAReqParams)
+           tANI_U16 baSessionID, tANI_U8 staIdx, tANI_U8 ucWinSize, tAddBAParams *pAddBAReqParams)
 {
    WDI_Status wstatus;
    WDI_AddBAReqParamsType *wdiAddBAReqParam = 
@@ -6034,7 +6034,7 @@ VOS_STATUS WDA_ProcessAddBAReq(tWDA_CbContext *pWDA, VOS_STATUS status,
       WDI_AddBAReqinfoType *wdiAddBaInfo = &wdiAddBAReqParam->wdiBAInfoType ;
       wdiAddBaInfo->ucSTAIdx = staIdx ;
       wdiAddBaInfo->ucBaSessionID = baSessionID ;
-      wdiAddBaInfo->ucWinSize     = WDA_BA_MAX_WINSIZE ;
+      wdiAddBaInfo->ucWinSize     = ucWinSize ;
    } while(0) ;
    wdiAddBAReqParam->wdiReqStatusCB = NULL ;
    pWdaParams->pWdaContext = pWDA;
@@ -6090,13 +6090,12 @@ void WDA_AddBASessionReqCallback(
    vos_mem_free(pWdaParams->wdaWdiApiMsgParam) ;
    vos_mem_free(pWdaParams);
    /* 
-    * if WDA in update TL state, update TL with BA session parama and send
+    * if BA direction is for recipient, update TL with BA session params and send
     * another request to HAL(/WDI) (ADD_BA_REQ)
     */
-   
    if((VOS_STATUS_SUCCESS == 
                        CONVERT_WDI2VOS_STATUS(wdiAddBaSession->wdiStatus)) && 
-                                 (WDA_BA_UPDATE_TL_STATE == pWDA->wdaState))
+                                 (eBA_RECIPIENT == pAddBAReqParams->baDirection))
    {
       /* Update TL with BA info received from HAL/WDI */
       status =  WDA_TL_BA_SESSION_ADD(pWDA->pVosContext,
@@ -6107,7 +6106,8 @@ void WDA_AddBASessionReqCallback(
                                         wdiAddBaSession->ucWinSize,
                                         wdiAddBaSession->usBaSSN );
       WDA_ProcessAddBAReq(pWDA, status, wdiAddBaSession->usBaSessionID, 
-                                      wdiAddBaSession->ucSTAIdx, pAddBAReqParams) ;
+                                      wdiAddBaSession->ucSTAIdx,
+                                      wdiAddBaSession->ucWinSize, pAddBAReqParams) ;
    }
    else
    {
@@ -6181,11 +6181,7 @@ VOS_STATUS WDA_ProcessAddBASessionReq(tWDA_CbContext *pWDA,
       wdiBAInfoType->usBaTimeout = pAddBAReqParams->baTimeout;
       wdiBAInfoType->usBaSSN = pAddBAReqParams->baSSN;
       wdiBAInfoType->ucBaDirection = pAddBAReqParams->baDirection;
-      /* check the BA direction and update state accordingly */
-      (eBA_RECIPIENT == wdiBAInfoType->ucBaDirection) 
-                                 ? (pWDA->wdaState = WDA_BA_UPDATE_TL_STATE)
-                                 : (pWDA->wdaState = WDA_BA_UPDATE_LIM_STATE);
- 
+
    }while(0) ;
    wdiAddBASessionReqParam->wdiReqStatusCB = NULL ;
    pWdaParams->pWdaContext = pWDA;
@@ -14928,6 +14924,15 @@ void WDA_PNOScanReqCallback(WDI_Status wdiStatus, void* pUserData)
                                            VOS_STATUS_E_FAILURE);
       }
 
+      if (pPNOScanReqParams->enable == 1)
+      {
+          if (pPNOScanReqParams->aNetworks)
+              vos_mem_free(pPNOScanReqParams->aNetworks);
+          if (pPNOScanReqParams->p24GProbeTemplate)
+              vos_mem_free(pPNOScanReqParams->p24GProbeTemplate);
+          if (pPNOScanReqParams->p5GProbeTemplate)
+              vos_mem_free(pPNOScanReqParams->p5GProbeTemplate);
+      }
       vos_mem_free(pWdaParams->wdaWdiApiMsgParam);
       vos_mem_free(pWdaParams->wdaMsgParam);
       vos_mem_free(pWdaParams);
