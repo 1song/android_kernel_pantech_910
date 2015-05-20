@@ -670,12 +670,18 @@ static int selinux_set_mnt_opts(struct super_block *sb,
 		sbsec->flags |= SE_SBPROC | SE_SBGENFS;
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 	if (!strcmp(sb->s_type->name, "debugfs") ||
 	    !strcmp(sb->s_type->name, "sysfs") ||
 	    !strcmp(sb->s_type->name, "pstore"))
 =======
 	if (strcmp(sb->s_type->name, "debugfs") == 0)
 >>>>>>> abdda53... selinux: enable per-file labeling for debugfs files.
+=======
+	if (!strcmp(sb->s_type->name, "debugfs") ||
+	    !strcmp(sb->s_type->name, "sysfs") ||
+	    !strcmp(sb->s_type->name, "pstore"))
+>>>>>>> d233a8d... selinux: enable genfscon labeling for sysfs and pstore files
 		sbsec->flags |= SE_SBGENFS;
 
 	/* Determine the labeling behavior to use for this filesystem type. */
