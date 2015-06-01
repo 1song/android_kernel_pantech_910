@@ -893,14 +893,6 @@ static void handle_sys_watchdog_timeout(enum command_response cmd, void *data)
 						"Sess clean failed :%p",
 						inst);
 
-<<<<<<< HEAD
-			}
-			inst->session = NULL;
-			mutex_unlock(&inst->lock);
-		}
-	}
-	mutex_unlock(&core->sync_lock);
-=======
 	/*
 	* 1. Delete each instance session from hfi list
 	* 2. Notify all clients about hardware error.
@@ -935,7 +927,6 @@ static void handle_sys_watchdog_timeout(enum command_response cmd, void *data)
         else
             msm_comm_unvote_buses(core, DDR_MEM);
 	mutex_unlock(&core->lock);
->>>>>>> c767797... msm: vidc: Fix SYS_ERROR handling
 }
 
 void msm_comm_session_clean(struct msm_vidc_inst *inst)

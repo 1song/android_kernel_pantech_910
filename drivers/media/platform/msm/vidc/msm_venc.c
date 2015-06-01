@@ -978,6 +978,23 @@ static int msm_venc_queue_setup(struct vb2_queue *q,
 	}
 	hdev = inst->core->device;
 
+<<<<<<< HEAD
+=======
+	rc = msm_comm_try_state(inst, MSM_VIDC_OPEN_DONE);
+	if (rc) {
+		dprintk(VIDC_ERR, "Failed to open instance\n");
+		msm_comm_session_clean(inst);
+		return rc;
+	}
+
+	rc = msm_comm_try_get_bufreqs(inst);
+	if (rc) {
+		dprintk(VIDC_ERR,
+				"Failed to get buffer requirements: %d\n", rc);
+		return rc;
+	}
+
+>>>>>>> 61c0002... msm: vidc: Handle max clients error properly
 	switch (q->type) {
 	case V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE:
 		*num_planes = 1;
@@ -2667,6 +2684,7 @@ int msm_venc_s_fmt(struct msm_vidc_inst *inst, struct v4l2_format *f)
 			rc = msm_comm_try_state(inst, MSM_VIDC_OPEN_DONE);
 			if (rc) {
 				dprintk(VIDC_ERR, "Failed to open instance\n");
+                                msm_comm_session_clean(inst);
 				goto exit;
 			}
 			frame_sz.width = inst->prop.width[CAPTURE_PORT];
