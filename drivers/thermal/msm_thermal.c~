@@ -270,6 +270,7 @@ static int update_cpu_min_freq_all(uint32_t min)
 		min_freq_limit = min;
 		complete(&freq_mitigation_complete);
 	} else {
+		get_online_cpus();
 		for_each_possible_cpu(cpu) {
 			cpus[cpu].limited_min_freq = min;
 			update_cpu_freq(cpu);
@@ -1378,6 +1379,7 @@ reset_threshold:
 				cpus[cpu].freq_thresh_clear = false;
 			}
 		}
+		put_online_cpus();
 	}
 	return ret;
 }
