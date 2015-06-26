@@ -164,16 +164,22 @@ static int uid_stat_show(struct seq_file *m, void *v)
 			return -ENOMEM;
 		}
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 6e8e46f... uid_cputime: Fixes double accounting race condition on task exit.
 		/* if this task is exiting, we have already accounted for the
 		 * time and power. */
 		if (task->cpu_power == ULLONG_MAX)
 			continue;
+<<<<<<< HEAD
 		task_times(task, &utime, &stime);
 		uid_entry->active_utime += utime;
 		uid_entry->active_stime += stime;
 		uid_entry->active_power += task->cpu_power;
 	} while_each_thread(temp, task);
 =======
+=======
+>>>>>>> 6e8e46f... uid_cputime: Fixes double accounting race condition on task exit.
 		task_times(task, &utime, &stime);
 		uid_entry->active_utime += utime;
 		uid_entry->active_stime += stime;
