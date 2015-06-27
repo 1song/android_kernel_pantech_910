@@ -188,6 +188,7 @@ void acct_update_power(struct task_struct *task, cputime_t cputime) {
 
 	curr = powerstats->curr[stats->last_index];
 <<<<<<< HEAD
+<<<<<<< HEAD
 	if (task->cpu_power != ULLONG_MAX)
 		task->cpu_power += curr * cputime_to_usecs(cputime);
 }
@@ -197,6 +198,10 @@ EXPORT_SYMBOL_GPL(acct_update_power);
 >>>>>>> 8bdd394... cpufreq_stats: Adds the fucntionality to load current values for each frequency
 =======
 	task->cpu_power += curr * cputime_to_usecs(cputime);
+=======
+	if (task->cpu_power != ULLONG_MAX)
+		task->cpu_power += curr * cputime_to_usecs(cputime);
+>>>>>>> 2e32c4a... cpu_power: Avoids race condition when the task exits.
 }
 EXPORT_SYMBOL_GPL(acct_update_power);
 
