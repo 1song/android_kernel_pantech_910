@@ -3226,7 +3226,10 @@ CONFIG_ANDROID_TIMED_GPIO=y
 CONFIG_ANDROID_LOW_MEMORY_KILLER=y
 CONFIG_ANDROID_LOW_MEMORY_KILLER_AUTODETECT_OOM_ADJ_VALUES=y
 # CONFIG_ANDROID_SWITCH is not set
+<<<<<<< HEAD:defconfig
 # CONFIG_ANDROID_INTF_ALARM_DEV is not set
+=======
+>>>>>>> a10bb31... Revert "(SQUASHED) Revert recent kernel-common changes":arch/arm/configs/cyanogenmod_bacon_defconfig
 # CONFIG_PHONE is not set
 # CONFIG_USB_WPAN_HCD is not set
 
