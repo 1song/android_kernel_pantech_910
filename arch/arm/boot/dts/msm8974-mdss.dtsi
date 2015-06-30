@@ -150,7 +150,7 @@
 				qcom,supply-post-off-sleep = <0>;
 		};
 	};
-*/
+*/	
 	mdss_dsi1: qcom,mdss_dsi@fd922e00 {
 		compatible = "qcom,mdss-dsi-ctrl";
 		label = "MDSS DSI CTRL->1";
