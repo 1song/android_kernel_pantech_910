@@ -3105,12 +3105,22 @@ int ioctl_has_perm(const struct cred *cred, struct file *file,
 	u32 ssid = cred_sid(cred);
 	struct selinux_audit_data sad = {0,};
 	int rc;
+<<<<<<< HEAD
+=======
+	u8 driver = cmd >> 8;
+	u8 xperm = cmd & 0xff;
+>>>>>>> 03ef60a... selinux: extended permissions for ioctls
 
 	COMMON_AUDIT_DATA_INIT(&ad, IOCTL_OP);
 	ad.u.op = &ioctl;
 	ad.u.op->cmd = cmd;
+<<<<<<< HEAD
 	ad.u.op->path = file->f_path;
 	ad.selinux_audit_data = &sad;
+=======
+	ad.selinux_audit_data = &sad;
+	ad.u.op->path = file->f_path;
+>>>>>>> 03ef60a... selinux: extended permissions for ioctls
 
 	if (ssid != fsec->sid) {
 		rc = avc_has_perm(ssid, fsec->sid,
@@ -3124,8 +3134,13 @@ int ioctl_has_perm(const struct cred *cred, struct file *file,
 	if (unlikely(IS_PRIVATE(inode)))
 		return 0;
 
+<<<<<<< HEAD
 	rc = avc_has_operation(ssid, isec->sid, isec->sclass,
 			requested, cmd, &ad);
+=======
+	rc = avc_has_extended_perms(ssid, isec->sid, isec->sclass,
+			requested, driver, xperm, &ad);
+>>>>>>> 03ef60a... selinux: extended permissions for ioctls
 out:
 	return rc;
 }
@@ -3172,7 +3187,10 @@ static int selinux_file_ioctl(struct file *file, unsigned int cmd,
 =======
 	default:
 		error = ioctl_has_perm(cred, file, FILE__IOCTL, (u16) cmd);
+<<<<<<< HEAD
 >>>>>>> 57ce68f... SELinux: per-command whitelisting of ioctls
+=======
+>>>>>>> 03ef60a... selinux: extended permissions for ioctls
 	}
 }
 

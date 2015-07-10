@@ -50,10 +50,14 @@ struct avc_entry {
 	u16			tclass;
 	struct av_decision	avd;
 <<<<<<< HEAD
+<<<<<<< HEAD
 	struct avc_xperms_node	*xp_node;
 =======
 	struct avc_operation_node *ops_node;
 >>>>>>> 57ce68f... SELinux: per-command whitelisting of ioctls
+=======
+	struct avc_xperms_node	*xp_node;
+>>>>>>> 03ef60a... selinux: extended permissions for ioctls
 };
 
 struct avc_node {
@@ -63,6 +67,9 @@ struct avc_node {
 };
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 03ef60a... selinux: extended permissions for ioctls
 struct avc_xperms_decision_node {
 	struct extended_perms_decision xpd;
 	struct list_head xpd_list; /* list of extended_perms_decision */
@@ -71,6 +78,7 @@ struct avc_xperms_decision_node {
 struct avc_xperms_node {
 	struct extended_perms xp;
 	struct list_head xpd_head; /* list head of extended_perms_decision */
+<<<<<<< HEAD
 =======
 struct avc_operation_decision_node {
 	struct operation_decision od;
@@ -81,6 +89,8 @@ struct avc_operation_node {
 	struct operation ops;
 	struct list_head od_head; /* list of operation_decision_node */
 >>>>>>> 57ce68f... SELinux: per-command whitelisting of ioctls
+=======
+>>>>>>> 03ef60a... selinux: extended permissions for ioctls
 };
 
 struct avc_cache {
@@ -114,6 +124,7 @@ static struct avc_cache avc_cache;
 static struct avc_callback_node *avc_callbacks;
 static struct kmem_cache *avc_node_cachep;
 <<<<<<< HEAD
+<<<<<<< HEAD
 static struct kmem_cache *avc_xperms_data_cachep;
 static struct kmem_cache *avc_xperms_decision_cachep;
 static struct kmem_cache *avc_xperms_cachep;
@@ -122,6 +133,11 @@ static struct kmem_cache *avc_operation_decision_node_cachep;
 static struct kmem_cache *avc_operation_node_cachep;
 static struct kmem_cache *avc_operation_perm_cachep;
 >>>>>>> 57ce68f... SELinux: per-command whitelisting of ioctls
+=======
+static struct kmem_cache *avc_xperms_data_cachep;
+static struct kmem_cache *avc_xperms_decision_cachep;
+static struct kmem_cache *avc_xperms_cachep;
+>>>>>>> 03ef60a... selinux: extended permissions for ioctls
 
 static inline int avc_hash(u32 ssid, u32 tsid, u16 tclass)
 {
@@ -213,6 +229,9 @@ void __init avc_init(void)
 
 	avc_node_cachep = kmem_cache_create("avc_node", sizeof(struct avc_node),
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 03ef60a... selinux: extended permissions for ioctls
 					0, SLAB_PANIC, NULL);
 	avc_xperms_cachep = kmem_cache_create("avc_xperms_node",
 					sizeof(struct avc_xperms_node),
@@ -224,6 +243,7 @@ void __init avc_init(void)
 	avc_xperms_data_cachep = kmem_cache_create("avc_xperms_data",
 					sizeof(struct extended_perms_data),
 					0, SLAB_PANIC, NULL);
+<<<<<<< HEAD
 =======
 					     0, SLAB_PANIC, NULL);
 	avc_operation_node_cachep = kmem_cache_create("avc_operation_node",
@@ -237,6 +257,8 @@ void __init avc_init(void)
 				sizeof(struct operation_perm),
 				0, SLAB_PANIC, NULL);
 >>>>>>> 57ce68f... SELinux: per-command whitelisting of ioctls
+=======
+>>>>>>> 03ef60a... selinux: extended permissions for ioctls
 
 	audit_log(current->audit_context, GFP_KERNEL, AUDIT_KERNEL, "AVC INITIALIZED\n");
 }
@@ -275,6 +297,9 @@ int avc_get_hash_stats(char *page)
 
 /*
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 03ef60a... selinux: extended permissions for ioctls
  * using a linked list for extended_perms_decision lookup because the list is
  * always small. i.e. less than 5, typically 1
  */
@@ -369,6 +394,7 @@ static void avc_copy_xperms_decision(struct extended_perms_decision *dest,
 static inline void avc_quick_copy_xperms_decision(u8 perm,
 			struct extended_perms_decision *dest,
 			struct extended_perms_decision *src)
+<<<<<<< HEAD
 =======
  * using a linked list for operation_decision lookup because the list is
  * always small. i.e. less than 5, typically 1
@@ -473,12 +499,17 @@ static inline void avc_quick_copy_operation_decision(u16 cmd,
 			struct operation_decision *dest,
 			struct operation_decision *src)
 >>>>>>> 57ce68f... SELinux: per-command whitelisting of ioctls
+=======
+>>>>>>> 03ef60a... selinux: extended permissions for ioctls
 {
 	/*
 	 * compute index of the u32 of the 256 bits (8 u32s) that contain this
 	 * command permission
 	 */
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 03ef60a... selinux: extended permissions for ioctls
 	u8 i = perm >> 5;
 
 	dest->used = src->used;
@@ -580,6 +611,7 @@ static int avc_xperms_populate(struct avc_node *node,
 	return 0;
 error:
 	avc_xperms_free(dest);
+<<<<<<< HEAD
 =======
 	u8 i = (0xff & cmd) >> 5;
 
@@ -688,10 +720,47 @@ error:
 }
 
 <<<<<<< HEAD
+=======
+	return -ENOMEM;
+
+}
+
+static inline u32 avc_xperms_audit_required(u32 requested,
+					struct av_decision *avd,
+					struct extended_perms_decision *xpd,
+					u8 perm,
+					int result,
+					u32 *deniedp)
+{
+	u32 denied, audited;
+
+	denied = requested & ~avd->allowed;
+	if (unlikely(denied)) {
+		audited = denied & avd->auditdeny;
+		if (audited && xpd) {
+			if (avc_xperms_has_perm(xpd, perm, XPERMS_DONTAUDIT))
+				audited &= ~requested;
+		}
+	} else if (result) {
+		audited = denied = requested;
+	} else {
+		audited = requested & avd->auditallow;
+		if (audited && xpd) {
+			if (!avc_xperms_has_perm(xpd, perm, XPERMS_AUDITALLOW))
+				audited &= ~requested;
+		}
+	}
+
+	*deniedp = denied;
+	return audited;
+}
+
+>>>>>>> 03ef60a... selinux: extended permissions for ioctls
 static void avc_node_free(struct rcu_head *rhead)
 {
 	struct avc_node *node = container_of(rhead, struct avc_node, rhead);
 	avc_xperms_free(node->ae.xp_node);
+<<<<<<< HEAD
 =======
 static inline u32 avc_operation_audit_required(u32 requested,
 					struct av_decision *avd,
@@ -730,6 +799,8 @@ static void avc_node_free(struct rcu_head *rhead)
 	struct avc_node *node = container_of(rhead, struct avc_node, rhead);
 	avc_operation_free(node->ae.ops_node);
 >>>>>>> 57ce68f... SELinux: per-command whitelisting of ioctls
+=======
+>>>>>>> 03ef60a... selinux: extended permissions for ioctls
 	kmem_cache_free(avc_node_cachep, node);
 	avc_cache_stats_incr(frees);
 }
@@ -744,10 +815,14 @@ static void avc_node_delete(struct avc_node *node)
 static void avc_node_kill(struct avc_node *node)
 {
 <<<<<<< HEAD
+<<<<<<< HEAD
 	avc_xperms_free(node->ae.xp_node);
 =======
 	avc_operation_free(node->ae.ops_node);
 >>>>>>> 57ce68f... SELinux: per-command whitelisting of ioctls
+=======
+	avc_xperms_free(node->ae.xp_node);
+>>>>>>> 03ef60a... selinux: extended permissions for ioctls
 	kmem_cache_free(avc_node_cachep, node);
 	avc_cache_stats_incr(frees);
 	atomic_dec(&avc_cache.active_nodes);
@@ -897,10 +972,14 @@ static int avc_latest_notif_update(int seqno, int is_insert)
  * @tclass: target security class
  * @avd: resulting av decision
 <<<<<<< HEAD
+<<<<<<< HEAD
  * @xp_node: resulting extended permissions
 =======
  * @ops: resulting operation decisions
 >>>>>>> 57ce68f... SELinux: per-command whitelisting of ioctls
+=======
+ * @xp_node: resulting extended permissions
+>>>>>>> 03ef60a... selinux: extended permissions for ioctls
  *
  * Insert an AVC entry for the SID pair
  * (@ssid, @tsid) and class @tclass.
@@ -915,10 +994,14 @@ static int avc_latest_notif_update(int seqno, int is_insert)
 static struct avc_node *avc_insert(u32 ssid, u32 tsid, u16 tclass,
 				struct av_decision *avd,
 <<<<<<< HEAD
+<<<<<<< HEAD
 				struct avc_xperms_node *xp_node)
 =======
 				struct avc_operation_node *ops_node)
 >>>>>>> 57ce68f... SELinux: per-command whitelisting of ioctls
+=======
+				struct avc_xperms_node *xp_node)
+>>>>>>> 03ef60a... selinux: extended permissions for ioctls
 {
 	struct avc_node *pos, *node = NULL;
 	int hvalue;
@@ -937,10 +1020,14 @@ static struct avc_node *avc_insert(u32 ssid, u32 tsid, u16 tclass,
 		hvalue = avc_hash(ssid, tsid, tclass);
 		avc_node_populate(node, ssid, tsid, tclass, avd);
 <<<<<<< HEAD
+<<<<<<< HEAD
 		rc = avc_xperms_populate(node, xp_node);
 =======
 		rc = avc_operation_populate(node, ops_node);
 >>>>>>> 57ce68f... SELinux: per-command whitelisting of ioctls
+=======
+		rc = avc_xperms_populate(node, xp_node);
+>>>>>>> 03ef60a... selinux: extended permissions for ioctls
 		if (rc) {
 			kmem_cache_free(avc_node_cachep, node);
 			return NULL;
@@ -1042,6 +1129,7 @@ static noinline int slow_avc_audit(u32 ssid, u32 tsid, u16 tclass,
 	return 0;
 }
 
+<<<<<<< HEAD
 static inline int avc_operation_audit(u32 ssid, u32 tsid, u16 tclass,
 				u32 requested, struct av_decision *avd,
 				struct operation_decision *od,
@@ -1055,6 +1143,22 @@ static inline int avc_operation_audit(u32 ssid, u32 tsid, u16 tclass,
 		return 0;
 	return slow_avc_audit(ssid, tsid, tclass, requested,
 			      audited, denied, result, ad, 0);
+=======
+static inline int avc_xperms_audit(u32 ssid, u32 tsid, u16 tclass,
+				u32 requested, struct av_decision *avd,
+				struct extended_perms_decision *xpd,
+				u8 perm, int result,
+				struct common_audit_data *ad)
+{
+	u32 audited, denied;
+
+	audited = avc_xperms_audit_required(
+			requested, avd, xpd, perm, result, &denied);
+	if (likely(!audited))
+		return 0;
+	return slow_avc_audit(ssid, tsid, tclass, requested,
+			audited, denied, result, ad, 0);
+>>>>>>> 03ef60a... selinux: extended permissions for ioctls
 }
 
 /**
@@ -1172,16 +1276,21 @@ static inline int avc_sidcmp(u32 x, u32 y)
  * @ssid,@tsid,@tclass : identifier of an AVC entry
  * @seqno : sequence number when decision was made
 <<<<<<< HEAD
+<<<<<<< HEAD
  * @xpd: extended_perms_decision to be added to the node
 =======
  * @od: operation_decision to be added to the node
 >>>>>>> 57ce68f... SELinux: per-command whitelisting of ioctls
+=======
+ * @xpd: extended_perms_decision to be added to the node
+>>>>>>> 03ef60a... selinux: extended permissions for ioctls
  *
  * if a valid AVC entry doesn't exist,this function returns -ENOENT.
  * if kmalloc() called internal returns NULL, this function returns -ENOMEM.
  * otherwise, this function updates the AVC entry. The original AVC-entry object
  * will release later by RCU.
  */
+<<<<<<< HEAD
 <<<<<<< HEAD
 static int avc_update_node(u32 event, u32 perms, u8 driver, u8 xperm, u32 ssid,
 			u32 tsid, u16 tclass, u32 seqno,
@@ -1191,6 +1300,11 @@ static int avc_update_node(u32 event, u32 perms, u16 cmd, u32 ssid, u32 tsid,
 			u16 tclass, u32 seqno,
 			struct operation_decision *od,
 >>>>>>> 57ce68f... SELinux: per-command whitelisting of ioctls
+=======
+static int avc_update_node(u32 event, u32 perms, u8 driver, u8 xperm, u32 ssid,
+			u32 tsid, u16 tclass, u32 seqno,
+			struct extended_perms_decision *xpd,
+>>>>>>> 03ef60a... selinux: extended permissions for ioctls
 			u32 flags)
 {
 	int hvalue, rc = 0;
@@ -1237,12 +1351,17 @@ static int avc_update_node(u32 event, u32 perms, u16 cmd, u32 ssid, u32 tsid,
 	avc_node_populate(node, ssid, tsid, tclass, &orig->ae.avd);
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 	if (orig->ae.xp_node) {
 		rc = avc_xperms_populate(node, orig->ae.xp_node);
 =======
 	if (orig->ae.ops_node) {
 		rc = avc_operation_populate(node, orig->ae.ops_node);
 >>>>>>> 57ce68f... SELinux: per-command whitelisting of ioctls
+=======
+	if (orig->ae.xp_node) {
+		rc = avc_xperms_populate(node, orig->ae.xp_node);
+>>>>>>> 03ef60a... selinux: extended permissions for ioctls
 		if (rc) {
 			kmem_cache_free(avc_node_cachep, node);
 			goto out_unlock;
@@ -1253,12 +1372,17 @@ static int avc_update_node(u32 event, u32 perms, u16 cmd, u32 ssid, u32 tsid,
 	case AVC_CALLBACK_GRANT:
 		node->ae.avd.allowed |= perms;
 <<<<<<< HEAD
+<<<<<<< HEAD
 		if (node->ae.xp_node && (flags & AVC_EXTENDED_PERMS))
 			avc_xperms_allow_perm(node->ae.xp_node, driver, xperm);
 =======
 		if (node->ae.ops_node && (flags & AVC_OPERATION_CMD))
 			avc_operation_allow_perm(node->ae.ops_node, cmd);
 >>>>>>> 57ce68f... SELinux: per-command whitelisting of ioctls
+=======
+		if (node->ae.xp_node && (flags & AVC_EXTENDED_PERMS))
+			avc_xperms_allow_perm(node->ae.xp_node, driver, xperm);
+>>>>>>> 03ef60a... selinux: extended permissions for ioctls
 		break;
 	case AVC_CALLBACK_TRY_REVOKE:
 	case AVC_CALLBACK_REVOKE:
@@ -1277,12 +1401,17 @@ static int avc_update_node(u32 event, u32 perms, u16 cmd, u32 ssid, u32 tsid,
 		node->ae.avd.auditdeny &= ~perms;
 		break;
 <<<<<<< HEAD
+<<<<<<< HEAD
 	case AVC_CALLBACK_ADD_XPERMS:
 		avc_add_xperms_decision(node, xpd);
 =======
 	case AVC_CALLBACK_ADD_OPERATION:
 		avc_add_operation(node, od);
 >>>>>>> 57ce68f... SELinux: per-command whitelisting of ioctls
+=======
+	case AVC_CALLBACK_ADD_XPERMS:
+		avc_add_xperms_decision(node, xpd);
+>>>>>>> 03ef60a... selinux: extended permissions for ioctls
 		break;
 	}
 	avc_node_replace(node, orig);
@@ -1359,6 +1488,7 @@ int avc_ss_reset(u32 seqno)
 static noinline struct avc_node *avc_compute_av(u32 ssid, u32 tsid,
 			 u16 tclass, struct av_decision *avd,
 <<<<<<< HEAD
+<<<<<<< HEAD
 			 struct avc_xperms_node *xp_node)
 {
 	rcu_read_unlock();
@@ -1375,15 +1505,28 @@ static noinline struct avc_node *avc_compute_av(u32 ssid, u32 tsid,
 	rcu_read_lock();
 	return avc_insert(ssid, tsid, tclass, avd, ops_node);
 >>>>>>> 57ce68f... SELinux: per-command whitelisting of ioctls
+=======
+			 struct avc_xperms_node *xp_node)
+{
+	rcu_read_unlock();
+	INIT_LIST_HEAD(&xp_node->xpd_head);
+	security_compute_av(ssid, tsid, tclass, avd, &xp_node->xp);
+	rcu_read_lock();
+	return avc_insert(ssid, tsid, tclass, avd, xp_node);
+>>>>>>> 03ef60a... selinux: extended permissions for ioctls
 }
 
 static noinline int avc_denied(u32 ssid, u32 tsid,
 				u16 tclass, u32 requested,
 <<<<<<< HEAD
+<<<<<<< HEAD
 				u8 driver, u8 xperm, unsigned flags,
 =======
 				u16 cmd, unsigned flags,
 >>>>>>> 57ce68f... SELinux: per-command whitelisting of ioctls
+=======
+				u8 driver, u8 xperm, unsigned flags,
+>>>>>>> 03ef60a... selinux: extended permissions for ioctls
 				struct av_decision *avd)
 {
 	if (flags & AVC_STRICT)
@@ -1393,14 +1536,19 @@ static noinline int avc_denied(u32 ssid, u32 tsid,
 		return -EACCES;
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 	avc_update_node(AVC_CALLBACK_GRANT, requested, driver, xperm, ssid,
 =======
 	avc_update_node(AVC_CALLBACK_GRANT, requested, cmd, ssid,
 >>>>>>> 57ce68f... SELinux: per-command whitelisting of ioctls
+=======
+	avc_update_node(AVC_CALLBACK_GRANT, requested, driver, xperm, ssid,
+>>>>>>> 03ef60a... selinux: extended permissions for ioctls
 				tsid, tclass, avd->seqno, NULL, flags);
 	return 0;
 }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 =======
 /*
@@ -1415,10 +1563,22 @@ static noinline int avc_denied(u32 ssid, u32 tsid,
  */
 int avc_has_operation(u32 ssid, u32 tsid, u16 tclass, u32 requested,
 			u16 cmd, struct common_audit_data *ad)
+=======
+/*
+ * The avc extended permissions logic adds an additional 256 bits of
+ * permissions to an avc node when extended permissions for that node are
+ * specified in the avtab. If the additional 256 permissions is not adequate,
+ * as-is the case with ioctls, then multiple may be chained together and the
+ * driver field is used to specify which set contains the permission.
+ */
+int avc_has_extended_perms(u32 ssid, u32 tsid, u16 tclass, u32 requested,
+			u8 driver, u8 xperm, struct common_audit_data *ad)
+>>>>>>> 03ef60a... selinux: extended permissions for ioctls
 {
 	struct avc_node *node;
 	struct av_decision avd;
 	u32 denied;
+<<<<<<< HEAD
 	struct operation_decision *od = NULL;
 	struct operation_decision od_local;
 	struct operation_perm allowed;
@@ -1430,12 +1590,25 @@ int avc_has_operation(u32 ssid, u32 tsid, u16 tclass, u32 requested,
 	int rc = 0, rc2;
 
 	ops_node = &local_ops_node;
+=======
+	struct extended_perms_decision local_xpd;
+	struct extended_perms_decision *xpd = NULL;
+	struct extended_perms_data allowed;
+	struct extended_perms_data auditallow;
+	struct extended_perms_data dontaudit;
+	struct avc_xperms_node local_xp_node;
+	struct avc_xperms_node *xp_node;
+	int rc = 0, rc2;
+
+	xp_node = &local_xp_node;
+>>>>>>> 03ef60a... selinux: extended permissions for ioctls
 	BUG_ON(!requested);
 
 	rcu_read_lock();
 
 	node = avc_lookup(ssid, tsid, tclass);
 	if (unlikely(!node)) {
+<<<<<<< HEAD
 		node = avc_compute_av(ssid, tsid, tclass, &avd, ops_node);
 	} else {
 		memcpy(&avd, &node->ae.avd, sizeof(avd));
@@ -1454,10 +1627,33 @@ int avc_has_operation(u32 ssid, u32 tsid, u16 tclass, u32 requested,
 	if (unlikely(!od)) {
 		/* Compute operation decision if type is flagged */
 		if (!security_operation_test(ops_node->ops.type, type)) {
+=======
+		node = avc_compute_av(ssid, tsid, tclass, &avd, xp_node);
+	} else {
+		memcpy(&avd, &node->ae.avd, sizeof(avd));
+		xp_node = node->ae.xp_node;
+	}
+	/* if extended permissions are not defined, only consider av_decision */
+	if (!xp_node || !xp_node->xp.len)
+		goto decision;
+
+	local_xpd.allowed = &allowed;
+	local_xpd.auditallow = &auditallow;
+	local_xpd.dontaudit = &dontaudit;
+
+	xpd = avc_xperms_decision_lookup(driver, xp_node);
+	if (unlikely(!xpd)) {
+		/*
+		 * Compute the extended_perms_decision only if the driver
+		 * is flagged
+		 */
+		if (!security_xperm_test(xp_node->xp.drivers.p, driver)) {
+>>>>>>> 03ef60a... selinux: extended permissions for ioctls
 			avd.allowed &= ~requested;
 			goto decision;
 		}
 		rcu_read_unlock();
+<<<<<<< HEAD
 		security_compute_operation(ssid, tsid, tclass, type, &od_local);
 		rcu_read_lock();
 		avc_update_node(AVC_CALLBACK_ADD_OPERATION, requested, cmd,
@@ -1468,11 +1664,25 @@ int avc_has_operation(u32 ssid, u32 tsid, u16 tclass, u32 requested,
 	od = &od_local;
 
 	if (!avc_operation_has_perm(od, cmd, OPERATION_ALLOWED))
+=======
+		security_compute_xperms_decision(ssid, tsid, tclass, driver,
+						&local_xpd);
+		rcu_read_lock();
+		avc_update_node(AVC_CALLBACK_ADD_XPERMS, requested, driver, xperm,
+				ssid, tsid, tclass, avd.seqno, &local_xpd, 0);
+	} else {
+		avc_quick_copy_xperms_decision(xperm, &local_xpd, xpd);
+	}
+	xpd = &local_xpd;
+
+	if (!avc_xperms_has_perm(xpd, xperm, XPERMS_ALLOWED))
+>>>>>>> 03ef60a... selinux: extended permissions for ioctls
 		avd.allowed &= ~requested;
 
 decision:
 	denied = requested & ~(avd.allowed);
 	if (unlikely(denied))
+<<<<<<< HEAD
 		rc = avc_denied(ssid, tsid, tclass, requested, cmd,
 				AVC_OPERATION_CMD, &avd);
 
@@ -1480,6 +1690,15 @@ decision:
 
 	rc2 = avc_operation_audit(ssid, tsid, tclass, requested,
 			&avd, od, cmd, rc, ad);
+=======
+		rc = avc_denied(ssid, tsid, tclass, requested, driver, xperm,
+				AVC_EXTENDED_PERMS, &avd);
+
+	rcu_read_unlock();
+
+	rc2 = avc_xperms_audit(ssid, tsid, tclass, requested,
+			&avd, xpd, xperm, rc, ad);
+>>>>>>> 03ef60a... selinux: extended permissions for ioctls
 	if (rc2)
 		return rc2;
 	return rc;
@@ -1513,10 +1732,14 @@ inline int avc_has_perm_noaudit(u32 ssid, u32 tsid,
 {
 	struct avc_node *node;
 <<<<<<< HEAD
+<<<<<<< HEAD
 	struct avc_xperms_node xp_node;
 =======
 	struct avc_operation_node ops_node;
 >>>>>>> 57ce68f... SELinux: per-command whitelisting of ioctls
+=======
+	struct avc_xperms_node xp_node;
+>>>>>>> 03ef60a... selinux: extended permissions for ioctls
 	int rc = 0;
 	u32 denied;
 
@@ -1528,6 +1751,7 @@ inline int avc_has_perm_noaudit(u32 ssid, u32 tsid,
 	if (unlikely(!node))
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 		node = avc_compute_av(ssid, tsid, tclass, avd, &xp_node);
 =======
 		node = avc_compute_av(ssid, tsid, tclass, avd, &ops_node);
@@ -1535,16 +1759,23 @@ inline int avc_has_perm_noaudit(u32 ssid, u32 tsid,
 =======
 		node = avc_compute_av(ssid, tsid, tclass, avd);
 >>>>>>> bdac173... selinux: remove unnecessary pointer reassignment
+=======
+		node = avc_compute_av(ssid, tsid, tclass, avd, &xp_node);
+>>>>>>> 03ef60a... selinux: extended permissions for ioctls
 	else
 		memcpy(avd, &node->ae.avd, sizeof(*avd));
 
 	denied = requested & ~(avd->allowed);
 	if (unlikely(denied))
 <<<<<<< HEAD
+<<<<<<< HEAD
 		rc = avc_denied(ssid, tsid, tclass, requested, 0, 0, flags, avd);
 =======
 		rc = avc_denied(ssid, tsid, tclass, requested, 0, flags, avd);
 >>>>>>> 57ce68f... SELinux: per-command whitelisting of ioctls
+=======
+		rc = avc_denied(ssid, tsid, tclass, requested, 0, 0, flags, avd);
+>>>>>>> 03ef60a... selinux: extended permissions for ioctls
 
 	rcu_read_unlock();
 	return rc;

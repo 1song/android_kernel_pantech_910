@@ -150,11 +150,15 @@ static struct policydb_compat_info policydb_compat[] = {
 	},
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 03ef60a... selinux: extended permissions for ioctls
 	{
 		.version	= POLICYDB_VERSION_XPERMS_IOCTL,
 		.sym_num	= SYM_NUM,
 		.ocon_num	= OCON_NUM,
 	},
+<<<<<<< HEAD
 =======
 >>>>>>> 86ab756... SELinux: Update policy version to support constraints info
 =======
@@ -164,6 +168,8 @@ static struct policydb_compat_info policydb_compat[] = {
 		.ocon_num	= OCON_NUM,
 	},
 >>>>>>> 57ce68f... SELinux: per-command whitelisting of ioctls
+=======
+>>>>>>> 03ef60a... selinux: extended permissions for ioctls
 };
 
 static struct policydb_compat_info *policydb_lookup_compat(int version)

@@ -85,10 +85,14 @@ int avc_audit(u32 ssid, u32 tsid,
 
 #define AVC_STRICT 1 /* Ignore permissive mode. */
 <<<<<<< HEAD
+<<<<<<< HEAD
 #define AVC_EXTENDED_PERMS 2	/* update extended permissions */
 =======
 #define AVC_OPERATION_CMD 2	/* ignore command when updating operations */
 >>>>>>> 57ce68f... SELinux: per-command whitelisting of ioctls
+=======
+#define AVC_EXTENDED_PERMS 2	/* update extended permissions */
+>>>>>>> 03ef60a... selinux: extended permissions for ioctls
 int avc_has_perm_noaudit(u32 ssid, u32 tsid,
 			 u16 tclass, u32 requested,
 			 unsigned flags,
@@ -123,10 +127,14 @@ u32 avc_policy_seqno(void);
 #define AVC_CALLBACK_AUDITDENY_ENABLE	64
 #define AVC_CALLBACK_AUDITDENY_DISABLE	128
 <<<<<<< HEAD
+<<<<<<< HEAD
 #define AVC_CALLBACK_ADD_XPERMS		256
 =======
 #define AVC_CALLBACK_ADD_OPERATION	256
 >>>>>>> 57ce68f... SELinux: per-command whitelisting of ioctls
+=======
+#define AVC_CALLBACK_ADD_XPERMS		256
+>>>>>>> 03ef60a... selinux: extended permissions for ioctls
 
 int avc_add_callback(int (*callback)(u32 event, u32 ssid, u32 tsid,
 				     u16 tclass, u32 perms,

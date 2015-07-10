@@ -96,10 +96,14 @@ static void context_struct_compute_av(struct context *scontext,
 					u16 tclass,
 					struct av_decision *avd,
 <<<<<<< HEAD
+<<<<<<< HEAD
 					struct extended_perms *xperms);
 =======
 					struct operation *ops);
 >>>>>>> 57ce68f... SELinux: per-command whitelisting of ioctls
+=======
+					struct extended_perms *xperms);
+>>>>>>> 03ef60a... selinux: extended permissions for ioctls
 
 struct selinux_mapping {
 	u16 value; /* policy value */
@@ -670,10 +674,39 @@ void services_compute_xperms_drivers(
 }
 
 /*
+<<<<<<< HEAD
  * Compute access vectors and extended permissions based on a context
 =======
  * Compute access vectors and operations ranges based on a context
 >>>>>>> 57ce68f... SELinux: per-command whitelisting of ioctls
+=======
+ * flag which drivers have permissions
+ * only looking for ioctl based extended permssions
+ */
+void services_compute_xperms_drivers(
+		struct extended_perms *xperms,
+		struct avtab_node *node)
+{
+	unsigned int i;
+
+	if (node->datum.u.xperms->specified == AVTAB_XPERMS_IOCTLDRIVER) {
+		/* if one or more driver has all permissions allowed */
+		for (i = 0; i < ARRAY_SIZE(xperms->drivers.p); i++)
+			xperms->drivers.p[i] |= node->datum.u.xperms->perms.p[i];
+	} else if (node->datum.u.xperms->specified == AVTAB_XPERMS_IOCTLFUNCTION) {
+		/* if allowing permissions within a driver */
+		security_xperm_set(xperms->drivers.p,
+					node->datum.u.xperms->driver);
+	}
+
+	/* If no ioctl commands are allowed, ignore auditallow and auditdeny */
+	if (node->key.specified & AVTAB_XPERMS_ALLOWED)
+		xperms->len = 1;
+}
+
+/*
+ * Compute access vectors and extended permissions based on a context
+>>>>>>> 03ef60a... selinux: extended permissions for ioctls
  * structure pair for the permissions in a particular class.
  */
 static void context_struct_compute_av(struct context *scontext,
@@ -681,10 +714,14 @@ static void context_struct_compute_av(struct context *scontext,
 					u16 tclass,
 					struct av_decision *avd,
 <<<<<<< HEAD
+<<<<<<< HEAD
 					struct extended_perms *xperms)
 =======
 					struct operation *ops)
 >>>>>>> 57ce68f... SELinux: per-command whitelisting of ioctls
+=======
+					struct extended_perms *xperms)
+>>>>>>> 03ef60a... selinux: extended permissions for ioctls
 {
 	struct constraint_node *constraint;
 	struct role_allow *ra;
@@ -699,6 +736,7 @@ static void context_struct_compute_av(struct context *scontext,
 	avd->auditallow = 0;
 	avd->auditdeny = 0xffffffff;
 <<<<<<< HEAD
+<<<<<<< HEAD
 	if (xperms) {
 		memset(&xperms->drivers, 0, sizeof(xperms->drivers));
 		xperms->len = 0;
@@ -707,6 +745,11 @@ static void context_struct_compute_av(struct context *scontext,
 		memset(&ops->type, 0, sizeof(ops->type));
 		ops->len = 0;
 >>>>>>> 57ce68f... SELinux: per-command whitelisting of ioctls
+=======
+	if (xperms) {
+		memset(&xperms->drivers, 0, sizeof(xperms->drivers));
+		xperms->len = 0;
+>>>>>>> 03ef60a... selinux: extended permissions for ioctls
 	}
 
 	if (unlikely(!tclass || tclass > policydb.p_classes.nprim)) {
@@ -723,10 +766,14 @@ static void context_struct_compute_av(struct context *scontext,
 	 */
 	avkey.target_class = tclass;
 <<<<<<< HEAD
+<<<<<<< HEAD
 	avkey.specified = AVTAB_AV | AVTAB_XPERMS;
 =======
 	avkey.specified = AVTAB_AV | AVTAB_OP;
 >>>>>>> 57ce68f... SELinux: per-command whitelisting of ioctls
+=======
+	avkey.specified = AVTAB_AV | AVTAB_XPERMS;
+>>>>>>> 03ef60a... selinux: extended permissions for ioctls
 	sattr = flex_array_get(policydb.type_attr_map_array, scontext->type - 1);
 	BUG_ON(!sattr);
 	tattr = flex_array_get(policydb.type_attr_map_array, tcontext->type - 1);
@@ -745,6 +792,9 @@ static void context_struct_compute_av(struct context *scontext,
 				else if (node->key.specified == AVTAB_AUDITDENY)
 					avd->auditdeny &= node->datum.u.data;
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 03ef60a... selinux: extended permissions for ioctls
 				else if (xperms && (node->key.specified & AVTAB_XPERMS))
 					services_compute_xperms_drivers(xperms, node);
 			}
@@ -752,6 +802,7 @@ static void context_struct_compute_av(struct context *scontext,
 			/* Check conditional av table for additional permissions */
 			cond_compute_av(&policydb.te_cond_avtab, &avkey,
 					avd, xperms);
+<<<<<<< HEAD
 =======
 				else if (ops && (node->key.specified & AVTAB_OP))
 					services_compute_operation_type(ops, node);
@@ -760,6 +811,8 @@ static void context_struct_compute_av(struct context *scontext,
 			/* Check conditional av table for additional permissions */
 			cond_compute_av(&policydb.te_cond_avtab, &avkey, avd, ops);
 >>>>>>> 57ce68f... SELinux: per-command whitelisting of ioctls
+=======
+>>>>>>> 03ef60a... selinux: extended permissions for ioctls
 
 		}
 	}
@@ -991,15 +1044,22 @@ static void avd_init(struct av_decision *avd)
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 void services_compute_xperms_decision(struct extended_perms_decision *xpermd,
 =======
 void services_compute_operation_num(struct operation_decision *od,
 >>>>>>> 57ce68f... SELinux: per-command whitelisting of ioctls
+=======
+void services_compute_xperms_decision(struct extended_perms_decision *xpermd,
+>>>>>>> 03ef60a... selinux: extended permissions for ioctls
 					struct avtab_node *node)
 {
 	unsigned int i;
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 03ef60a... selinux: extended permissions for ioctls
 	if (node->datum.u.xperms->specified == AVTAB_XPERMS_IOCTLFUNCTION) {
 		if (xpermd->driver != node->datum.u.xperms->driver)
 			return;
@@ -1044,6 +1104,7 @@ void services_compute_operation_num(struct operation_decision *od,
 				xpermd->dontaudit->p[i] |=
 					node->datum.u.xperms->perms.p[i];
 		}
+<<<<<<< HEAD
 =======
 	if (node->key.specified & AVTAB_OPNUM) {
 		if (od->type != node->datum.u.ops->type)
@@ -1082,17 +1143,23 @@ void services_compute_operation_num(struct operation_decision *od,
 			od->dontaudit->perms[i] |=
 					node->datum.u.ops->op.perms[i];
 >>>>>>> 57ce68f... SELinux: per-command whitelisting of ioctls
+=======
+>>>>>>> 03ef60a... selinux: extended permissions for ioctls
 	} else {
 		BUG();
 	}
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 03ef60a... selinux: extended permissions for ioctls
 void security_compute_xperms_decision(u32 ssid,
 				u32 tsid,
 				u16 orig_tclass,
 				u8 driver,
 				struct extended_perms_decision *xpermd)
+<<<<<<< HEAD
 =======
 void security_compute_operation(u32 ssid,
 				u32 tsid,
@@ -1100,6 +1167,8 @@ void security_compute_operation(u32 ssid,
 				u8 type,
 				struct operation_decision *od)
 >>>>>>> 57ce68f... SELinux: per-command whitelisting of ioctls
+=======
+>>>>>>> 03ef60a... selinux: extended permissions for ioctls
 {
 	u16 tclass;
 	struct context *scontext, *tcontext;
@@ -1110,11 +1179,15 @@ void security_compute_operation(u32 ssid,
 	unsigned int i, j;
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 03ef60a... selinux: extended permissions for ioctls
 	xpermd->driver = driver;
 	xpermd->used = 0;
 	memset(xpermd->allowed->p, 0, sizeof(xpermd->allowed->p));
 	memset(xpermd->auditallow->p, 0, sizeof(xpermd->auditallow->p));
 	memset(xpermd->dontaudit->p, 0, sizeof(xpermd->dontaudit->p));
+<<<<<<< HEAD
 =======
 	od->type = type;
 	od->specified = 0;
@@ -1122,11 +1195,16 @@ void security_compute_operation(u32 ssid,
 	memset(od->auditallow->perms, 0, sizeof(od->auditallow->perms));
 	memset(od->dontaudit->perms, 0, sizeof(od->dontaudit->perms));
 >>>>>>> 57ce68f... SELinux: per-command whitelisting of ioctls
+=======
+>>>>>>> 03ef60a... selinux: extended permissions for ioctls
 
 	read_lock(&policy_rwlock);
 	if (!ss_initialized)
 		goto allow;
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 03ef60a... selinux: extended permissions for ioctls
 
 	scontext = sidtab_search(&sidtab, ssid);
 	if (!scontext) {
@@ -1184,6 +1262,7 @@ allow:
 	memset(xpermd->allowed->p, 0xff, sizeof(xpermd->allowed->p));
 	goto out;
 }
+<<<<<<< HEAD
 =======
 >>>>>>> 57ce68f... SELinux: per-command whitelisting of ioctls
 
@@ -1231,6 +1310,8 @@ allow:
 			     node;
 			     node = avtab_search_node_next(node, avkey.specified))
 				services_compute_operation_num(od, node);
+=======
+>>>>>>> 03ef60a... selinux: extended permissions for ioctls
 
 			cond_compute_operation(&policydb.te_cond_avtab,
 						&avkey, od);
@@ -1250,10 +1331,14 @@ allow:
  * @tclass: target security class
  * @avd: access vector decisions
 <<<<<<< HEAD
+<<<<<<< HEAD
  * @xperms: extended permissions
 =======
  * @od: operation decisions
 >>>>>>> 57ce68f... SELinux: per-command whitelisting of ioctls
+=======
+ * @xperms: extended permissions
+>>>>>>> 03ef60a... selinux: extended permissions for ioctls
  *
  * Compute a set of access vector decisions based on the
  * SID pair (@ssid, @tsid) for the permissions in @tclass.
@@ -1263,10 +1348,14 @@ void security_compute_av(u32 ssid,
 			 u16 orig_tclass,
 			 struct av_decision *avd,
 <<<<<<< HEAD
+<<<<<<< HEAD
 			 struct extended_perms *xperms)
 =======
 			 struct operation *ops)
 >>>>>>> 57ce68f... SELinux: per-command whitelisting of ioctls
+=======
+			 struct extended_perms *xperms)
+>>>>>>> 03ef60a... selinux: extended permissions for ioctls
 {
 	u16 tclass;
 	struct context *scontext = NULL, *tcontext = NULL;
@@ -1274,10 +1363,14 @@ void security_compute_av(u32 ssid,
 	read_lock(&policy_rwlock);
 	avd_init(avd);
 <<<<<<< HEAD
+<<<<<<< HEAD
 	xperms->len = 0;
 =======
 	ops->len = 0;
 >>>>>>> 57ce68f... SELinux: per-command whitelisting of ioctls
+=======
+	xperms->len = 0;
+>>>>>>> 03ef60a... selinux: extended permissions for ioctls
 	if (!ss_initialized)
 		goto allow;
 
@@ -1306,10 +1399,14 @@ void security_compute_av(u32 ssid,
 		goto out;
 	}
 <<<<<<< HEAD
+<<<<<<< HEAD
 	context_struct_compute_av(scontext, tcontext, tclass, avd, xperms);
 =======
 	context_struct_compute_av(scontext, tcontext, tclass, avd, ops);
 >>>>>>> 57ce68f... SELinux: per-command whitelisting of ioctls
+=======
+	context_struct_compute_av(scontext, tcontext, tclass, avd, xperms);
+>>>>>>> 03ef60a... selinux: extended permissions for ioctls
 	map_decision(orig_tclass, avd, policydb.allow_unknown);
 out:
 	read_unlock(&policy_rwlock);
