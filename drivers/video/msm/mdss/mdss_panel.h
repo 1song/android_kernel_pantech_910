@@ -268,6 +268,22 @@ struct fbc_panel_info {
 	u32 lossy_mode_idx;
 };
 
+<<<<<<< HEAD
+=======
+struct mdss_mdp_pp_tear_check {
+	u32 tear_check_en;
+	u32 sync_cfg_height;
+	u32 vsync_init_val;
+	u32 sync_threshold_start;
+	u32 sync_threshold_continue;
+	u32 start_pos;
+	u32 rd_ptr_irq;
+	u32 refx100;
+};
+
+struct mdss_livedisplay_ctx;
+
+>>>>>>> b8ac8aa... video: mdss: LiveDisplay driver
 struct mdss_panel_info {
 	u32 xres;
 	u32 yres;
@@ -315,6 +331,12 @@ struct mdss_panel_info {
 	struct mipi_panel_info mipi;
 	struct lvds_panel_info lvds;
 	struct edp_panel_info edp;
+<<<<<<< HEAD
+=======
+
+	struct mdss_livedisplay_ctx *livedisplay;
+
+>>>>>>> b8ac8aa... video: mdss: LiveDisplay driver
 };
 
 struct mdss_panel_data {

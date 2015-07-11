@@ -48,4 +48,9 @@ ifeq ($(CONFIG_FB_MSM_MDSS_MDP3),y)
 obj-$(CONFIG_FB_MSM_MDSS_DSI_CTRL_STATUS) += dsi_status_v2.o
 else
 obj-$(CONFIG_FB_MSM_MDSS_DSI_CTRL_STATUS) += mdss_dsi_status.o
+<<<<<<< HEAD
 endif
+=======
+
+obj-$(CONFIG_FB_MSM_MDSS) += mdss_livedisplay.o
+>>>>>>> b8ac8aa... video: mdss: LiveDisplay driver
