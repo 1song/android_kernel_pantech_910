@@ -509,65 +509,6 @@ int mdss_mdp_cmd_kickoff(struct mdss_mdp_ctl *ctl, void *arg)
 
 		rc = mdss_mdp_ctl_intf_event(ctl, MDSS_EVENT_PANEL_ON, NULL);
 		WARN(rc, "intf %d panel on error (%d)\n", ctl->intf_num, rc);
-<<<<<<< HEAD
-=======
-
-		ctx->panel_power_state = MDSS_PANEL_POWER_ON;
-		if (sctx)
-			sctx->panel_power_state = MDSS_PANEL_POWER_ON;
-
-		ctx->intf_stopped = 0;
-	} else {
-		pr_debug("%s: panel already on\n", __func__);
-	}
-
-	return rc;
-}
-
-/*
- * There are 3 partial update possibilities
- * left only ==> enable left pingpong_done
- * left + right ==> enable both pingpong_done
- * right only ==> enable right pingpong_done
- *
- * notification is triggered at pingpong_done which will
- * signal timeline to release source buffer
- *
- * for left+right case, pingpong_done is enabled for both and
- * only the last pingpong_done should trigger the notification
- */
-int mdss_mdp_cmd_kickoff(struct mdss_mdp_ctl *ctl, void *arg)
-{
-	struct mdss_mdp_ctl *sctl = NULL;
-	struct mdss_mdp_cmd_ctx *ctx, *sctx = NULL;
-
-	ctx = (struct mdss_mdp_cmd_ctx *) ctl->priv_data;
-	if (!ctx) {
-		pr_err("invalid ctx\n");
-		return -ENODEV;
-	}
-
-	if (ctx->intf_stopped) {
-		pr_err("ctx=%d stopped already\n", ctx->pp_num);
-		return -EPERM;
-	}
-
-	/* sctl will be null for right only in the case of Partial update */
-	sctl = mdss_mdp_get_split_ctl(ctl);
-
-	if (sctl && (sctl->roi.w == 0 || sctl->roi.h == 0)) {
-		/* left update only, set ssctl to null */
-		sctl = NULL;
-	}
-
-	mdss_mdp_ctl_perf_set_transaction_status(ctl,
-		PERF_HW_MDP_STATE, PERF_STATUS_BUSY);
-
-	if (sctl) {
-		sctx = (struct mdss_mdp_cmd_ctx *) sctl->priv_data;
-		mdss_mdp_ctl_perf_set_transaction_status(sctl,
-			PERF_HW_MDP_STATE, PERF_STATUS_BUSY);
->>>>>>> 3b045a1... msm: mdss: add support for LP2 low power state
 	}
 
 	mdss_mdp_cmd_set_partial_roi(ctl);
@@ -640,113 +581,9 @@ int mdss_mdp_cmd_stop(struct mdss_mdp_ctl *ctl)
 
 	mdss_mdp_cmd_clk_off(ctx);
 
-<<<<<<< HEAD
 	flush_work(&ctx->pp_done_work);
 
 	ctx->panel_on = 0;
-=======
-	ctx->panel_power_state = panel_power_state;
-}
-
-int mdss_mdp_cmd_stop(struct mdss_mdp_ctl *ctl, int panel_power_state)
-{
-	struct mdss_mdp_cmd_ctx *ctx = ctl->priv_data;
-	struct mdss_mdp_ctl *sctl = mdss_mdp_get_split_ctl(ctl);
-	bool panel_off = false;
-	bool turn_off_clocks = false;
-	bool send_panel_events = false;
-	int ret = 0;
-
-	if (!ctx) {
-		pr_err("invalid ctx\n");
-		return -ENODEV;
-	}
-
-	if (ctx->panel_power_state == panel_power_state)
-		return 0;
-
-	if (__mdss_mdp_cmd_is_panel_power_off(ctx)) {
-		pr_debug("%s: panel already off\n", __func__);
-		return 0;
-	}
-
-	if (ctx->panel_power_state == panel_power_state) {
-		pr_debug("%s: no transition needed %d --> %d\n", __func__,
-			ctx->panel_power_state, panel_power_state);
-		return 0;
-	}
-
-	pr_debug("%s: transition from %d --> %d\n", __func__,
-		ctx->panel_power_state, panel_power_state);
-
-	if (mdss_panel_is_power_off(panel_power_state)) {
-		/* Transition to display off */
-		send_panel_events = true;
-		turn_off_clocks = true;
-		panel_off = true;
-	} else if (__mdss_mdp_cmd_is_panel_power_on_interactive(ctx)) {
-		/*
-		 * If we are transitioning from interactive to low
-		 * power, then we need to send events to the interface
-		 * so that the panel can be configured in low power
-		 * mode.
-		 */
-		send_panel_events = true;
-		if (mdss_panel_is_power_on_ulp(panel_power_state))
-			turn_off_clocks = true;
-	} else {
-		/* Transitions between low power and ultra low power */
-		if (mdss_panel_is_power_on_ulp(panel_power_state)) {
-			/*
-			 * If we are transitioning from low power to ultra low
-			 * power mode, no more display updates are expected.
-			 * Turn off the interface clocks.
-			 */
-			pr_debug("%s: turn off clocks\n", __func__);
-			turn_off_clocks = true;
-		} else {
-			/*
-			 * Transition from ultra low power to low power does
-			 * not require any special handling. Just rest the
-			 * intf_stopped flag so that the clocks would
-			 * get turned on when the first update comes.
-			 */
-			pr_debug("%s: reset intf_stopped flag.\n", __func__);
-			ctx->intf_stopped = 0;
-			goto end;
-		}
-	}
-
-	if (!turn_off_clocks)
-		goto panel_events;
-
-	pr_debug("%s: turn off interface clocks\n", __func__);
-	mdss_mdp_cmd_stop_sub(ctl, panel_power_state);
-
-	if (sctl) {
-		mdss_mdp_cmd_stop_sub(sctl, panel_power_state);
-	}
-
-panel_events:
-	if ((ctl->num == 0) && send_panel_events) {
-		pr_debug("%s: send panel events\n", __func__);
-		ret = mdss_mdp_ctl_intf_event(ctl, MDSS_EVENT_BLANK,
-				(void *) (long int) panel_power_state);
-		WARN(ret, "intf %d unblank error (%d)\n", ctl->intf_num, ret);
-
-		ret = mdss_mdp_ctl_intf_event(ctl, MDSS_EVENT_PANEL_OFF,
-				(void *) (long int) panel_power_state);
-		WARN(ret, "intf %d unblank error (%d)\n", ctl->intf_num, ret);
-	}
-
-
-	if (!panel_off) {
-		pr_debug("%s: cmd_stop with panel always on\n", __func__);
-		goto end;
-	}
->>>>>>> 3b045a1... msm: mdss: add support for LP2 low power state
-
-	pr_debug("%s: turn off panel\n", __func__);
 
 	mdss_mdp_set_intr_callback(MDSS_MDP_IRQ_PING_PONG_RD_PTR, ctx->pp_num,
 				   NULL, NULL);
@@ -768,17 +605,9 @@ panel_events:
 	ctl->add_vsync_handler = NULL;
 	ctl->remove_vsync_handler = NULL;
 
-<<<<<<< HEAD
-=======
-end:
-	if (!IS_ERR_VALUE(ret))
-		ctx->panel_power_state = panel_power_state;
-	MDSS_XLOG(ctl->num, atomic_read(&ctx->koff_cnt), ctx->clk_enabled,
-				ctx->rdptr_enabled, XLOG_FUNC_EXIT);
->>>>>>> 2eba494... msm: mdss: fix issues with transition from LP3 to LP2
 	pr_debug("%s:-\n", __func__);
 
-	return ret;
+	return 0;
 }
 
 int mdss_mdp_cmd_start(struct mdss_mdp_ctl *ctl)

@@ -1319,15 +1319,6 @@ int mdss_mdp_ctl_stop(struct mdss_mdp_ctl *ctl)
 		mdss_mdp_ctl_perf_commit(ctl->mdata, MDSS_MDP_PERF_UPDATE_ALL);
 	}
 
-<<<<<<< HEAD
-=======
-	ctl->play_cnt = 0;
-	mdss_mdp_ctl_perf_update(ctl, 0);
-
-end:
-	if (!ret)
-		ctl->power_state = power_state;
->>>>>>> 3b045a1... msm: mdss: add support for LP2 low power state
 	mdss_mdp_clk_ctrl(MDP_BLOCK_POWER_OFF, false);
 
 	mutex_unlock(&ctl->lock);
