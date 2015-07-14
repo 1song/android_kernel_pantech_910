@@ -184,6 +184,10 @@ static int mdss_fb_splash_thread(void *data)
 		goto splash_err;
 	}
 
+	do {
+		schedule_timeout_interruptible(SPLASH_THREAD_WAIT_TIMEOUT * HZ);
+	} while (!kthread_should_stop());
+
 	mfd->mdp.splash_fnc(mfd, ov_index, MDP_REMOVE_SPLASH_OV);
 
 splash_err:
