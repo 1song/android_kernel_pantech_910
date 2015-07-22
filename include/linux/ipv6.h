@@ -174,6 +174,7 @@ struct ipv6_devconf {
 	__s32		accept_dad;
 	__s32		force_tllao;
 	__s32		accept_ra_prefix_route;
+	__s32		use_oif_addrs_only;
 	void		*sysctl;
 };
 
@@ -217,6 +218,11 @@ enum {
 	DEVCONF_FORCE_TLLAO,
 	DEVCONF_ACCEPT_RA_PREFIX_ROUTE,
 	DEVCONF_ACCEPT_RA_RT_TABLE,
+<<<<<<< HEAD
+=======
+	DEVCONF_USE_OPTIMISTIC,
+	DEVCONF_USE_OIF_ADDRS_ONLY,
+>>>>>>> 4b1991b... ipv6: sysctl to restrict candidate source addresses
 	DEVCONF_MAX
 };
 
