@@ -282,6 +282,14 @@ static void lowmem_autodetect_oom_adj_values(void)
 	if (oom_score_adj <= OOM_ADJUST_MAX)
 		return;
 
+	lowmem_print(1, "lowmem_shrink: convert oom_adj to oom_score_adj:\n");
+	for (i = 0; i < array_size; i++) {
+		oom_adj = lowmem_adj[i];
+		oom_score_adj = lowmem_oom_adj_to_oom_score_adj(oom_adj);
+		lowmem_adj[i] = oom_score_adj;
+		lowmem_print(1, "oom_adj %d => oom_score_adj %d\n",
+			     oom_adj, oom_score_adj);
+	}
 }
 
 static int lowmem_adj_array_set(const char *val, const struct kernel_param *kp)
