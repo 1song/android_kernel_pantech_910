@@ -147,6 +147,9 @@ obj-$(CONFIG_CORESIGHT)		+= coresight/
 obj-$(CONFIG_BIF)		+= bif/
 obj-$(CONFIG_SENSORS)		+= sensors/
 
+<<<<<<< HEAD
 obj-$(CONFIG_SKY_DMB)		+= dmb/
 
+=======
+>>>>>>> f7dce11... drivers: Add Pantech AVC for Device Logging Configration
 obj-$(CONFIG_PANTECH_SELINUX_DENIAL_LOG)       += avclog/

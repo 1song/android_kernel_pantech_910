@@ -154,8 +154,11 @@ source "drivers/bif/Kconfig"
 
 source "drivers/sensors/Kconfig"
 
+<<<<<<< HEAD
 source "drivers/dmb/Kconfig"
 
+=======
+>>>>>>> f7dce11... drivers: Add Pantech AVC for Device Logging Configration
 source "drivers/avclog/Kconfig"
 
 endmenu
