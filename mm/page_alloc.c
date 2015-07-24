@@ -1415,10 +1415,16 @@ void free_hot_cold_page(struct page *page, int cold)
 	}
 
 #ifdef CONFIG_PANTECH_MEM_LEAK_TRACE
+<<<<<<< HEAD
     writeLog_free_info(0, page);
 #endif
 
 
+=======
+	writeLog_free_info(0, page);
+#endif
+
+>>>>>>> 183adec... kernel: memory: Implement Pantech modifications
 out:
 	local_irq_restore(flags);
 }

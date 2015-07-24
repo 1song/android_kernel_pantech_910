@@ -1622,7 +1622,11 @@ struct task_struct {
 #endif
 
 #ifdef CONFIG_PANTECH_MEM_LEAK_TRACE
+<<<<<<< HEAD
     struct leak_detector_struct leak_detector;
+=======
+	struct leak_detector_struct leak_detector;
+>>>>>>> 183adec... kernel: memory: Implement Pantech modifications
 	struct addtl_task_info lt_info;
 #endif
 

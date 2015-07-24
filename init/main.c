@@ -457,7 +457,11 @@ static void __init mm_init(void)
 	 * bigger than MAX_ORDER unless SPARSEMEM.
 	 */
 #ifdef CONFIG_PANTECH_MEM_LEAK_TRACE
+<<<<<<< HEAD
 	//for swapper. init lock  before using kernel's memory system.
+=======
+	//for swapper. init lock before using kernel's memory system.
+>>>>>>> 183adec... kernel: memory: Implement Pantech modifications
 	rwlock_init(&current->leak_detector.ld_lock);
 #endif 
 	page_cgroup_init_flatmem();
