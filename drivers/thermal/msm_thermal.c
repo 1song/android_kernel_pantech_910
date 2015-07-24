@@ -3273,7 +3273,17 @@ late_initcall(msm_thermal_late_init);
 #define MAX_RAILS 5
 #define MAX_THRESHOLD 2
 
+<<<<<<< HEAD
 static int ecocpu; // FEATURE_PANTECH_ECO_CPU_MODE
+=======
+#ifdef CONFIG_PANTECH
+#define FEATURE_PANTECH_ECO_CPU_MODE
+#endif
+
+#if defined(FEATURE_PANTECH_ECO_CPU_MODE)
+static int ecocpu;
+#endif
+>>>>>>> 1ee1c17... msm: thermal: Add Pantech ECO CPU Mode
 
 static struct msm_thermal_data msm_thermal_info;
 static struct delayed_work check_temp_work;
@@ -4788,7 +4798,11 @@ static struct kernel_param_ops module_ops = {
 module_param_cb(enabled, &module_ops, &enabled, 0644);
 MODULE_PARM_DESC(enabled, "enforce thermal limit on cpu");
 
+<<<<<<< HEAD
 // FEATURE_PANTECH_ECO_CPU_MODE [
+=======
+#if defined(FEATURE_PANTECH_ECO_CPU_MODE)
+>>>>>>> 1ee1c17... msm: thermal: Add Pantech ECO CPU Mode
 static int set_ecocpu(const char *val, const struct kernel_param *kp)
 {
 	int ret = 0;
@@ -4807,7 +4821,11 @@ static struct kernel_param_ops module_ops_ecocpu = {
 
 module_param_cb(ecocpu, &module_ops_ecocpu, &ecocpu, 0644);
 MODULE_PARM_DESC(ecocpu, "ecocpu on");
+<<<<<<< HEAD
 // FEATURE_PANTECH_ECO_CPU_MODE ]
+=======
+#endif /* FEATURE_PANTECH_ECO_CPU_MODE */
+>>>>>>> 1ee1c17... msm: thermal: Add Pantech ECO CPU Mode
 
 static ssize_t show_cc_enabled(struct kobject *kobj,
 		struct kobj_attribute *attr, char *buf)
@@ -5037,7 +5055,13 @@ int __devinit msm_thermal_init(struct msm_thermal_data *pdata)
 
 	enabled = 1;
 
+<<<<<<< HEAD
         ecocpu=0; // FEATURE_PANTECH_ECO_CPU_MODE
+=======
+#if defined(FEATURE_PANTECH_ECO_CPU_MODE)
+	ecocpu=0;
+#endif
+>>>>>>> 1ee1c17... msm: thermal: Add Pantech ECO CPU Mode
 
 	for_each_possible_cpu(cpu) {
 		cpus[cpu].limited_max_freq = UINT_MAX;
