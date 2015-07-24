@@ -148,8 +148,13 @@ obj-$(CONFIG_BIF)		+= bif/
 obj-$(CONFIG_SENSORS)		+= sensors/
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 obj-$(CONFIG_SKY_DMB)		+= dmb/
 
 =======
 >>>>>>> f7dce11... drivers: Add Pantech AVC for Device Logging Configration
+=======
+obj-$(CONFIG_SKY_DMB)		+= dmb/
+
+>>>>>>> 0b9ec81... drivers: Add Pantech DMB for Digital Multimedia Broadcasting
 obj-$(CONFIG_PANTECH_SELINUX_DENIAL_LOG)       += avclog/

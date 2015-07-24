@@ -1225,7 +1225,10 @@ static int __devexit tdmb_remove(struct platform_device *pdev)
   return 0;
 }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 0b9ec81... drivers: Add Pantech DMB for Digital Multimedia Broadcasting
 /*====================================================================
 
 ======================================================================*/
