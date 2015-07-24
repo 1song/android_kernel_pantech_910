@@ -24,7 +24,11 @@ obj-$(CONFIG_LEDS_GPIO_REGISTER)	+= leds-gpio-register.o
 obj-$(CONFIG_LEDS_GPIO)			+= leds-gpio.o
 obj-$(CONFIG_LEDS_LP3944)		+= leds-lp3944.o
 obj-$(CONFIG_LEDS_LP5521)		+= leds-lp5521.o
+ifeq ($(CONFIG_PANTECH),y)
+obj-$(CONFIG_LEDS_LP5523)		+= leds-lp5523-pantech.o
+else
 obj-$(CONFIG_LEDS_LP5523)		+= leds-lp5523.o
+endif
 obj-$(CONFIG_LEDS_TCA6507)		+= leds-tca6507.o
 obj-$(CONFIG_LEDS_CLEVO_MAIL)		+= leds-clevo-mail.o
 obj-$(CONFIG_LEDS_CPLD)			+= leds-cpld.o
