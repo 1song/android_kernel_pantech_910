@@ -11,6 +11,10 @@
  */
 #define PANTECH_ACPUPVS
 
+#ifdef CONFIG_PANTECH
+#define PANTECH_ACPUPVS
+#endif
+
 #include <linux/kernel.h>
 #include <linux/init.h>
 #include <linux/module.h>
@@ -42,7 +46,11 @@
 
 #if !defined(CONFIG_MACH_MSM8974_EF63S) && !defined(CONFIG_MACH_MSM8974_EF63K) && !defined(CONFIG_MACH_MSM8974_EF63L)
 /* Qualcomm patch for upscaling of 25mV 20140303  p13447 shinjg */
+<<<<<<< HEAD
 #define CONFIG_QUALCOMM_25MV_UP_PATCH 
+=======
+#define CONFIG_QUALCOMM_25MV_UP_PATCH
+>>>>>>> aca9c4e... msm: clock-krait-8974: Add Pantech modifications
 #endif
 
 /* Clock inputs coming into Krait subsystem */
@@ -432,6 +440,7 @@ char acpupvs[30] = {0,};
 int proc_speed, proc_pvs, proc_pvs_ver;
 struct proc_dir_entry *acpu_pvs_info;
 
+<<<<<<< HEAD
 static int read_proc_acpu_pvs_info
 (char *page, char **start, off_t off, int count, int *eof, void *data)
 {
@@ -448,6 +457,24 @@ static int write_proc_acpu_pvs_info
 (struct file *file, const char *buffer, unsigned long count, void *data)
 {
     return 0;
+=======
+static int read_proc_acpu_pvs_info(char *page, char **start,
+		off_t off, int count, int *eof, void *data)
+{
+	int len = 0;
+	//p16101 for PVS
+
+	len  = sprintf(page, "SPEED BIN : 0x%x , PVS : 0x%x , PVS VER : 0x%x", proc_speed, proc_pvs, proc_pvs_ver);
+	//p16101 for PVS
+
+	return len;
+}
+
+static int write_proc_acpu_pvs_info(struct file *file, const char *buffer,
+		unsigned long count, void *data)
+{
+	return 0;
+>>>>>>> aca9c4e... msm: clock-krait-8974: Add Pantech modifications
 }
 #endif
 
@@ -510,6 +537,12 @@ static void get_krait_bin_format_b(struct platform_device *pdev,
 	}
 
 	dev_info(&pdev->dev, "PVS version: %d\n", *pvs_ver);
+
+#ifdef CONFIG_CPU_OC
+	dev_info(&pdev->dev, "DooMLoRD: Forcing CPU OC!\n");
+	*speed = 3;
+	dev_info(&pdev->dev, "CPU OC: Speed bin: %d\n", *speed);
+#endif
 
 	devm_iounmap(&pdev->dev, base);
 }
@@ -803,6 +836,7 @@ static int clock_krait_8974_driver_probe(struct platform_device *pdev)
 			"qcom,speed%d-pvs%d-bin-v%d", speed, pvs, pvs_ver);
 
 #ifdef PANTECH_ACPUPVS
+<<<<<<< HEAD
     acpu_pvs_info = create_proc_entry("acpu_pvs_info", S_IRUGO | S_IWUSR | S_IWGRP, NULL);
     if (acpu_pvs_info) {
         proc_speed = speed;
@@ -812,6 +846,17 @@ static int clock_krait_8974_driver_probe(struct platform_device *pdev)
         acpu_pvs_info->write_proc = write_proc_acpu_pvs_info;
         acpu_pvs_info->data       = NULL;
     }
+=======
+	acpu_pvs_info = create_proc_entry("acpu_pvs_info", S_IRUGO | S_IWUSR | S_IWGRP, NULL);
+	if (acpu_pvs_info) {
+		proc_speed = speed;
+		proc_pvs = pvs;
+		proc_pvs_ver = pvs_ver;
+		acpu_pvs_info->read_proc  = read_proc_acpu_pvs_info;
+		acpu_pvs_info->write_proc = write_proc_acpu_pvs_info;
+		acpu_pvs_info->data       = NULL;
+	}
+>>>>>>> aca9c4e... msm: clock-krait-8974: Add Pantech modifications
 #endif
 
 	rows = parse_tbl(dev, table_name, 3,
