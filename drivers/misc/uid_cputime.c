@@ -109,10 +109,14 @@ static int uid_stat_show(struct seq_file *m, void *v)
 {
 	struct uid_entry *uid_entry;
 <<<<<<< HEAD
+<<<<<<< HEAD
 	struct task_struct *task, *temp;
 =======
 	struct task_struct *task;
 >>>>>>> 0559ddd... proc: uid: Adds accounting for the cputimes per uid.
+=======
+	struct task_struct *task, *temp;
+>>>>>>> 2af1b7a... uid_cputime: Iterates over all the threads instead of processes.
 	struct hlist_node *node;
 	cputime_t utime;
 	cputime_t stime;
@@ -149,7 +153,7 @@ static int uid_stat_show(struct seq_file *m, void *v)
 	}
 
 	read_lock(&tasklist_lock);
-	for_each_process(task) {
+	do_each_thread(temp, task) {
 		uid_entry = find_or_register_uid(task_uid(task));
 		if (!uid_entry) {
 			read_unlock(&tasklist_lock);
@@ -184,8 +188,12 @@ static int uid_stat_show(struct seq_file *m, void *v)
 		uid_entry->active_utime += utime;
 		uid_entry->active_stime += stime;
 		uid_entry->active_power += task->cpu_power;
+<<<<<<< HEAD
 	}
 >>>>>>> 0559ddd... proc: uid: Adds accounting for the cputimes per uid.
+=======
+	} while_each_thread(temp, task);
+>>>>>>> 2af1b7a... uid_cputime: Iterates over all the threads instead of processes.
 	read_unlock(&tasklist_lock);
 
 	hash_for_each(hash_table, bkt, node, uid_entry, hash) {
