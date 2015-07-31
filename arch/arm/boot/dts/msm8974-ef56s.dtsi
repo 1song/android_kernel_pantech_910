@@ -84,6 +84,7 @@
 
 	};
 
+<<<<<<< HEAD:arch/arm/boot/dts/msm8974-ef56s.dtsi
     i2c@f9967000 {// I2C BUS Slave connected
         cell-index = <11>;
         compatible = "qcom,i2c-qup";
@@ -181,6 +182,12 @@
 			gpio-key,wakeup;
 			debounce-interval = <15>;
 		};
+=======
+	gpio_keys {
+		compatible = "gpio-keys";
+		input-name = "gpio-keys";
+		status = "ok";
+>>>>>>> 8621018... ARM: dts: oppo: Remove unused devices & cleanup:arch/arm/boot/dts/msm8974-oppo/msm8974-oppo-common.dtsi
 
 		vol_up {
 			label = "volume_up";
@@ -201,6 +208,7 @@
 	};
 	};
 
+<<<<<<< HEAD:arch/arm/boot/dts/msm8974-ef56s.dtsi
     /* block for DMB
 	spi@f9923000 {
 		ethernet-switch@2 {
@@ -216,6 +224,8 @@
 	};
     */
 
+=======
+>>>>>>> 8621018... ARM: dts: oppo: Remove unused devices & cleanup:arch/arm/boot/dts/msm8974-oppo/msm8974-oppo-common.dtsi
 	sound {
 		qcom,model = "msm8974-taiko-mtp-snd-card";
 		qcom,cdc-micbias2-headset-only;
@@ -834,6 +844,7 @@
 		qcom,cdc-micbias3-ext-cap;
 	};
 };
+<<<<<<< HEAD:arch/arm/boot/dts/msm8974-ef56s.dtsi
 
 &spi_epm {
 	epm-adc@0 {
@@ -857,3 +868,5 @@
 &dsi_r63311_1080p_video_ef56 {
        qcom,cont-splash-enabled;
 };
+=======
+>>>>>>> 8621018... ARM: dts: oppo: Remove unused devices & cleanup:arch/arm/boot/dts/msm8974-oppo/msm8974-oppo-common.dtsi
