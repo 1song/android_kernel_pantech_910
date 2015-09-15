@@ -415,7 +415,10 @@ static ssize_t devkmsg_read(struct file *file, char __user *buf,
 {
 	struct devkmsg_user *user = file->private_data;
 	struct log *msg;
+<<<<<<< HEAD
 	u64 ts_usec;
+=======
+>>>>>>> 029d498... kmsg: export printk records to the /dev/kmsg interface
 	size_t i;
 	size_t len;
 	ssize_t ret;
@@ -450,10 +453,15 @@ static ssize_t devkmsg_read(struct file *file, char __user *buf,
 	}
 
 	msg = log_from_idx(user->idx);
+<<<<<<< HEAD
 	ts_usec = msg->ts_nsec;
 	do_div(ts_usec, 1000);
 	len = sprintf(user->buf, "%u,%llu,%llu;",
 			 msg->level, user->seq, ts_usec);
+=======
+	len = sprintf(user->buf, "%u,%llu,%llu;",
+			msg->level, user->seq, msg->ts_nsec / 1000);
+>>>>>>> 029d498... kmsg: export printk records to the /dev/kmsg interface
 
 	/* escape non-printable characters */
 	for (i = 0; i < msg->text_len; i++) {
