@@ -457,6 +457,7 @@ int avtab_read_item(struct avtab *a, void *fp, struct policydb *pol,
 	struct avtab_extended_perms xperms;
 	__le32 buf32[ARRAY_SIZE(xperms.perms.p)];
 	unsigned int android_m_compat_optype = 0;
+<<<<<<< HEAD
 =======
 	struct avtab_operation ops;
 	__le32 buf32[ARRAY_SIZE(ops.op.perms)];
@@ -465,6 +466,8 @@ int avtab_read_item(struct avtab *a, void *fp, struct policydb *pol,
 	struct avtab_extended_perms xperms;
 	__le32 buf32[ARRAY_SIZE(xperms.perms.p)];
 >>>>>>> 03ef60a... selinux: extended permissions for ioctls
+=======
+>>>>>>> 5959cc4... selinux: Android kernel compatibility with M userspace
 	int i, rc;
 	unsigned set;
 
@@ -615,6 +618,9 @@ int avtab_read_item(struct avtab *a, void *fp, struct policydb *pol,
 		}
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 5959cc4... selinux: Android kernel compatibility with M userspace
 		if (avtab_android_m_compat ||
 			    ((xperms.specified != AVTAB_XPERMS_IOCTLFUNCTION) &&
 			    (xperms.specified != AVTAB_XPERMS_IOCTLDRIVER) &&
@@ -631,6 +637,7 @@ int avtab_read_item(struct avtab *a, void *fp, struct policydb *pol,
 				printk(KERN_ERR "SELinux: avtab: truncated entry\n");
 				return rc;
 			}
+<<<<<<< HEAD
 		}
 		rc = next_entry(buf32, fp, sizeof(u32)*ARRAY_SIZE(xperms.perms.p));
 =======
@@ -644,6 +651,8 @@ int avtab_read_item(struct avtab *a, void *fp, struct policydb *pol,
 		if (rc) {
 			printk(KERN_ERR "SELinux: avtab: truncated entry\n");
 			return rc;
+=======
+>>>>>>> 5959cc4... selinux: Android kernel compatibility with M userspace
 		}
 		rc = next_entry(buf32, fp, sizeof(u32)*ARRAY_SIZE(xperms.perms.p));
 >>>>>>> 03ef60a... selinux: extended permissions for ioctls
@@ -778,10 +787,19 @@ int avtab_write_item(struct policydb *p, struct avtab_node *cur, void *fp)
 		}
 =======
 	if (cur->key.specified & AVTAB_XPERMS) {
+<<<<<<< HEAD
 		rc = put_entry(&cur->datum.u.xperms->specified, sizeof(u8), 1, fp);
 		if (rc)
 			return rc;
 >>>>>>> 03ef60a... selinux: extended permissions for ioctls
+=======
+		if (avtab_android_m_compat == 0) {
+			rc = put_entry(&cur->datum.u.xperms->specified,
+					sizeof(u8), 1, fp);
+			if (rc)
+				return rc;
+		}
+>>>>>>> 5959cc4... selinux: Android kernel compatibility with M userspace
 		rc = put_entry(&cur->datum.u.xperms->driver, sizeof(u8), 1, fp);
 		if (rc)
 			return rc;
