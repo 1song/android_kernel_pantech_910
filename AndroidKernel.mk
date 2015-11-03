@@ -130,12 +130,7 @@ $(KERNEL_CONFIG): $(KERNEL_OUT)
 	$(MAKE) -C kernel O=../$(KERNEL_OUT) ARCH=arm CROSS_COMPILE=arm-eabi- $(KERNEL_DEFCONFIG) PERF_DEFCONFIG=msm8974_pantech_perf_defconfig
 else	
 $(KERNEL_CONFIG): $(KERNEL_OUT)
-<<<<<<< HEAD
-	$(MAKE) -C kernel O=../$(KERNEL_OUT) ARCH=arm CROSS_COMPILE=arm-eabi- $(KERNEL_DEFCONFIG)
-endif	
-=======
 	$(MAKE) -C kernel O=../$(KERNEL_OUT) ARCH=arm CROSS_COMPILE=$(CROSS_COMPILE_PATH)arm-eabi- $(KERNEL_DEFCONFIG)
->>>>>>> 8ae62a9... Fix  arm-eabi-gcc build error for kernel by
 
 $(KERNEL_OUT)/piggy : $(TARGET_PREBUILT_INT_KERNEL)
 	$(hide) gunzip -c $(KERNEL_OUT)/arch/arm/boot/compressed/piggy.gzip > $(KERNEL_OUT)/piggy
@@ -157,13 +152,7 @@ kerneltags: $(KERNEL_OUT) $(KERNEL_CONFIG)
 
 kernelconfig: $(KERNEL_OUT) $(KERNEL_CONFIG)
 	env KCONFIG_NOTIMESTAMP=true \
-<<<<<<< HEAD
-	     $(MAKE) -C kernel O=../$(KERNEL_OUT) ARCH=arm CROSS_COMPILE=arm-eabi- xconfig
-#	env KCONFIG_NOTIMESTAMP=true \ #20130225 jylee modify menuconfig -> xconfig
-#	     $(MAKE) -C kernel O=../$(KERNEL_OUT) ARCH=arm CROSS_COMPILE=arm-eabi- menuconfig
-=======
-	     $(MAKE) -C kernel O=../$(KERNEL_OUT) ARCH=arm CROSS_COMPILE=$(CROSS_COMPILE_PATH)arm-eabi- menuconfig
->>>>>>> 8ae62a9... Fix  arm-eabi-gcc build error for kernel by
+	     $(MAKE) -C kernel O=../$(KERNEL_OUT) ARCH=arm CROSS_COMPILE=$(CROSS_COMPILE_PATH)arm-eabi- menuconfigby
 	env KCONFIG_NOTIMESTAMP=true \
 	     $(MAKE) -C kernel O=../$(KERNEL_OUT) ARCH=arm CROSS_COMPILE=$(CROSS_COMPILE_PATH)arm-eabi- savedefconfig
 	cp $(KERNEL_OUT)/defconfig kernel/arch/arm/configs/$(KERNEL_DEFCONFIG)
