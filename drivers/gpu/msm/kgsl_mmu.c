@@ -797,13 +797,8 @@ kgsl_mmu_map(struct kgsl_pagetable *pagetable,
 
 	/* Keep track of the statistics for the sysfs files */
 
-<<<<<<< HEAD
-	KGSL_STATS_ADD(1, pagetable->stats.entries,
-		       pagetable->stats.max_entries);
-=======
 		KGSL_STATS_ADD(1, &pagetable->stats.entries,
 			&pagetable->stats.max_entries);
->>>>>>> 10d2605... msm: kgsl: Correctly increment the pagetable statistics
 
 	KGSL_STATS_ADD(size, pagetable->stats.mapped,
 		       pagetable->stats.max_mapped);
