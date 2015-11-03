@@ -42,37 +42,9 @@
 	__height * __width * __fps; \
 })
 
-<<<<<<< HEAD
-#define GET_NUM_MBS(__h, __w) ({\
-	u32 __mbs = (__h >> 4) * (__w >> 4);\
-	__mbs;\
-})
-static bool is_turbo_requested(struct msm_vidc_core *core,
-		enum session_type type)
-{
-	struct msm_vidc_inst *inst = NULL;
-
-	list_for_each_entry(inst, &core->instances, list) {
-		bool wants_turbo = false;
-
-		mutex_lock(&inst->lock);
-		if (inst->session_type == type &&
-			inst->state >= MSM_VIDC_OPEN_DONE &&
-			inst->state < MSM_VIDC_STOP_DONE) {
-			wants_turbo = inst->flags & VIDC_TURBO;
-		}
-		mutex_unlock(&inst->lock);
-
-		if (wants_turbo)
-			return true;
-	}
-
-	return false;
-=======
 static inline bool is_turbo_session(struct msm_vidc_inst *inst)
 {
 	return !!(inst->flags & VIDC_TURBO);
->>>>>>> 793dccd... msm: vidc: Enable session priority support.
 }
 
 static bool is_thumbnail_session(struct msm_vidc_inst *inst)
@@ -1836,13 +1808,9 @@ static int msm_vidc_load_resources(int flipped_state,
 	u32 ocmem_sz = 0;
 	struct hfi_device *hdev;
 	int num_mbs_per_sec = 0;
-<<<<<<< HEAD
-	int height, width;
-=======
 	enum load_calc_quirks quirks = LOAD_CALC_IGNORE_TURBO_LOAD |
 		LOAD_CALC_IGNORE_THUMBNAIL_LOAD |
 		LOAD_CALC_IGNORE_NON_REALTIME_LOAD;
->>>>>>> 793dccd... msm: vidc: Enable session priority support.
 
 	if (!inst || !inst->core || !inst->core->device) {
 		dprintk(VIDC_ERR, "%s invalid parameters", __func__);
@@ -1855,16 +1823,9 @@ static int msm_vidc_load_resources(int flipped_state,
 		return -EINVAL;
 	}
 
-<<<<<<< HEAD
-	mutex_lock(&inst->core->sync_lock);
-	num_mbs_per_sec = msm_comm_get_load(inst->core, MSM_VIDC_DECODER);
-	num_mbs_per_sec += msm_comm_get_load(inst->core, MSM_VIDC_ENCODER);
-	mutex_unlock(&inst->core->sync_lock);
-=======
 	num_mbs_per_sec =
 		msm_comm_get_load(inst->core, MSM_VIDC_DECODER, quirks) +
 		msm_comm_get_load(inst->core, MSM_VIDC_ENCODER, quirks);
->>>>>>> 793dccd... msm: vidc: Enable session priority support.
 
 	if (num_mbs_per_sec > inst->core->resources.max_load) {
 		dprintk(VIDC_ERR, "HW is overloaded, needed: %d max: %d\n",
@@ -3307,12 +3268,8 @@ static int msm_vidc_load_supported(struct msm_vidc_inst *inst)
 		num_mbs_per_sec = msm_comm_get_load(inst->core,
 			MSM_VIDC_DECODER, quirks);
 		num_mbs_per_sec += msm_comm_get_load(inst->core,
-<<<<<<< HEAD
-			MSM_VIDC_ENCODER);
-		mutex_unlock(&inst->core->sync_lock);
-=======
+
 			MSM_VIDC_ENCODER, quirks);
->>>>>>> 793dccd... msm: vidc: Enable session priority support.
 		if (num_mbs_per_sec > inst->core->resources.max_load) {
 			dprintk(VIDC_ERR,
 				"H/w is overloaded. needed: %d max: %d\n",
