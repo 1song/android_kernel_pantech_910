@@ -124,12 +124,7 @@ static struct msm_gpiomux_config mdm_configs[] __initdata = {
 	},
 };
 
-<<<<<<< HEAD
-#if defined(CONFIG_PANTECH_CONSOLE_UART10)
-static struct gpiomux_setting gpio_uart_config = {
-=======
 static struct gpiomux_setting gpio_uart_config __initdata = {
->>>>>>> 9c47560... ARM: msm: GCC Version change.
 	.func = GPIOMUX_FUNC_2,
 	.drv = GPIOMUX_DRV_16MA,
 	.pull = GPIOMUX_PULL_NONE,
