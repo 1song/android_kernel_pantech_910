@@ -978,6 +978,8 @@ static int msm_venc_queue_setup(struct vb2_queue *q,
 	}
 	hdev = inst->core->device;
 
+<<<<<<< HEAD
+=======
 	rc = msm_comm_try_state(inst, MSM_VIDC_OPEN_DONE);
 	if (rc) {
 		dprintk(VIDC_ERR, "Failed to open instance\n");
@@ -992,6 +994,7 @@ static int msm_venc_queue_setup(struct vb2_queue *q,
 		return rc;
 	}
 
+>>>>>>> 61c0002... msm: vidc: Handle max clients error properly
 	switch (q->type) {
 	case V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE:
 		*num_planes = 1;
