@@ -3506,12 +3506,7 @@ static int taiko_codec_enable_anc(struct snd_soc_dapm_widget *w,
 			snd_soc_write(codec, reg, (old_val & ~mask) |
 				(val & mask));
 		}
-<<<<<<< HEAD
-		release_firmware(fw);
-=======
-		if (!hwdep_cal)
-			release_firmware(fw);
->>>>>>> ff294eb... ASoC: wcd9320: avoid wrong free of resource while enabling ANC
+
 		break;
 	case SND_SOC_DAPM_PRE_PMD:
 		msleep(40);

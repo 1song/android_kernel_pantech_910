@@ -146,6 +146,8 @@ typedef tANI_U8 tSirVersionString[SIR_VERSION_STRING_LEN];
 #define WLAN_EXTSCAN_MAX_RSSI_SAMPLE_SIZE     8
 #endif /* WLAN_FEATURE_EXTSCAN */
 
+#define WLAN_DISA_MAX_PAYLOAD_SIZE                1600
+
 enum eSirHostMsgTypes
 {
     SIR_HAL_APP_SETUP_NTF = SIR_HAL_HOST_MSG_START,
@@ -3816,14 +3818,14 @@ typedef struct sSirPNOScanReq
   void                *callbackContext;
   eSirPNOMode         modePNO;
   tANI_U8             ucNetworksCount; 
-  tSirNetworkType     aNetworks[SIR_PNO_MAX_SUPP_NETWORKS];
+  tSirNetworkType     *aNetworks;
   tSirScanTimersType  scanTimers;
   
   /*added by SME*/
   tANI_U16  us24GProbeTemplateLen; 
-  tANI_U8   p24GProbeTemplate[SIR_PNO_MAX_PB_REQ_SIZE];
+  tANI_U8   *p24GProbeTemplate;
   tANI_U16  us5GProbeTemplateLen; 
-  tANI_U8   p5GProbeTemplate[SIR_PNO_MAX_PB_REQ_SIZE]; 
+  tANI_U8   *p5GProbeTemplate;
 } tSirPNOScanReq, *tpSirPNOScanReq;
 
 typedef struct sSirSetRSSIFilterReq
@@ -5427,8 +5429,6 @@ typedef struct
     tSirMacAddr    macAddr;
 } tSirSpoofMacAddrReq, *tpSirSpoofMacAddrReq;
 
-<<<<<<< HEAD
-=======
 typedef struct
 {
    //BIT order is most likely little endian.
@@ -5608,5 +5608,4 @@ typedef struct
     void *data;
     tSirMonModeCb callback;
 }tSirMonModeReq, *ptSirMonModeReq;
->>>>>>> a38196d... prima: Update to release LA.BF.1.1.3-00110-8x74.0
 #endif /* __SIR_API_H */

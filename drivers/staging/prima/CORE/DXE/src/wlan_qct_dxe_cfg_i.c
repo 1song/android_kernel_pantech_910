@@ -535,18 +535,6 @@ wpt_status dxeChannelDefaultConfig
    {
       channelEntry->extraConfig.chan_mask |= WLANDXE_DESC_CTRL_DFMT;
    }
-   /* TX Channel, Set DIQ bit, Clear SIQ bit since source is not WQ */
-   if((WDTS_CHANNEL_TX_LOW_PRI  == channelEntry->channelType) ||
-      (WDTS_CHANNEL_TX_HIGH_PRI == channelEntry->channelType))
-   {
-      channelEntry->extraConfig.chan_mask |= WLANDXE_CH_CTRL_DIQ_MASK;
-      if (wpalWcnssIsProntoHwVer3())
-      {
-         HDXE_MSG(eWLAN_MODULE_DAL_DATA, eWLAN_PAL_TRACE_LEVEL_INFO,
-               "Using WQ 6 for TX Low/High PRI Channel");
-         channelEntry->channelConfig.refWQ = WLANDXE_PRONTO_TX_WQ;
-      }
-   }
    /* RX Channel, Set SIQ bit, Clear DIQ bit since source is not WQ */
    else if((WDTS_CHANNEL_RX_LOW_PRI  == channelEntry->channelType) ||
            (WDTS_CHANNEL_RX_HIGH_PRI == channelEntry->channelType) ||

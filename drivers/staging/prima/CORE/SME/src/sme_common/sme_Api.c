@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2012-2015 The Linux Foundation. All rights reserved.
  *
  * Previously licensed under the ISC license by Qualcomm Atheros, Inc.
  *
@@ -469,6 +469,13 @@ tSmeCmd *smeGetCommandBuffer( tpAniSirGlobal pMac )
         VOS_BUG(0);
     }
 
+    if( pRetCmd )
+    {
+         vos_mem_set((tANI_U8 *)&pRetCmd->command, sizeof(pRetCmd->command), 0);
+         vos_mem_set((tANI_U8 *)&pRetCmd->sessionId, sizeof(pRetCmd->sessionId), 0);
+         vos_mem_set((tANI_U8 *)&pRetCmd->u, sizeof(pRetCmd->u), 0);
+    }
+
     return( pRetCmd );
 }
 
@@ -707,8 +714,6 @@ end:
     return status;
 }
 
-<<<<<<< HEAD
-=======
 eHalStatus smeProcessPnoCommand(tpAniSirGlobal pMac, tSmeCmd *pCmd)
 {
     tpSirPNOScanReq pnoReqBuf;
@@ -757,7 +762,6 @@ static void smeProcessNanReq(tpAniSirGlobal pMac, tSmeCmd *pCommand )
     }
 }
 
->>>>>>> a38196d... prima: Update to release LA.BF.1.1.3-00110-8x74.0
 tANI_BOOLEAN smeProcessCommand( tpAniSirGlobal pMac )
 {
     tANI_BOOLEAN fContinue = eANI_BOOLEAN_FALSE;
@@ -1107,7 +1111,22 @@ sme_process_cmd:
                                 }
                             }
                             break;
+                        case eSmeCommandPnoReq:
+                            csrLLUnlock( &pMac->sme.smeCmdActiveList );
+                            status = smeProcessPnoCommand(pMac, pCommand);
+                            if (!HAL_STATUS_SUCCESS(status)){
+                                smsLog(pMac, LOGE,
+                                  FL("failed to post SME PNO SCAN %d"), status);
+                            }
+                            //We need to re-run the command
+                            fContinue = eANI_BOOLEAN_TRUE;
 
+                            if (csrLLRemoveEntry(&pMac->sme.smeCmdActiveList,
+                                              &pCommand->Link, LL_ACCESS_LOCK))
+                            {
+                                csrReleaseCommand(pMac, pCommand);
+                            }
+                            break;
                         case eSmeCommandAddTs:
                         case eSmeCommandDelTs:
                             csrLLUnlock( &pMac->sme.smeCmdActiveList );
@@ -2060,8 +2079,6 @@ eHalStatus sme_getBcnMissRate(tHalHandle hHal, tANI_U8 sessionId, void *callback
     return eHAL_STATUS_FAILURE;
 }
 
-<<<<<<< HEAD
-=======
 eHalStatus sme_EncryptMsgResponseHandler(tHalHandle hHal,
                                       tpSirEncryptedDataRspParams pEncRspParams)
 {
@@ -2098,7 +2115,6 @@ eHalStatus sme_UpdateMaxRateInd(tHalHandle hHal,
     return status;
 }
 
->>>>>>> a38196d... prima: Update to release LA.BF.1.1.3-00110-8x74.0
 /*--------------------------------------------------------------------------
 
   \brief sme_ProcessMsg() - The main message processor for SME.
@@ -2531,8 +2547,6 @@ eHalStatus sme_ProcessMsg(tHalHandle hHal, vos_msg_t* pMsg)
                 break;
 #endif /* FEATURE_WLAN_CH_AVOID */
 
-<<<<<<< HEAD
-=======
           case eWNI_SME_ENCRYPT_MSG_RSP:
               MTRACE(vos_trace(VOS_MODULE_ID_SME,
                      TRACE_CODE_SME_RX_WDA_MSG, NO_SESSION, pMsg->type));
@@ -2579,7 +2593,6 @@ eHalStatus sme_ProcessMsg(tHalHandle hHal, vos_msg_t* pMsg)
               }
               break;
 
->>>>>>> a38196d... prima: Update to release LA.BF.1.1.3-00110-8x74.0
           default:
 
              if ( ( pMsg->type >= eWNI_SME_MSG_TYPES_BEGIN )
@@ -2933,6 +2946,7 @@ eHalStatus sme_ScanRequest(tHalHandle hHal, tANI_U8 sessionId, tCsrScanRequest *
         {
             smsLog(pMac, LOGE, FL("fScanEnable %d isCoexScoIndSet: %d "),
                      pMac->scan.fScanEnable, pMac->isCoexScoIndSet);
+            status = eHAL_STATUS_RESOURCES;
         }
     } while( 0 );
 
@@ -12637,8 +12651,6 @@ void sme_disable_dfs_channel(tHalHandle hHal, bool disbale_dfs)
               "%s: Modified fEnableDFSChnlScan: %d", __func__,
                                pMac->scan.fEnableDFSChnlScan);
 }
-<<<<<<< HEAD
-=======
 
 /* ---------------------------------------------------------------------------
     \fn sme_Encryptmsgsend
@@ -13095,4 +13107,3 @@ eHalStatus sme_DeleteAllTDLSPeers(tHalHandle hHal, uint8_t sessionId)
     status = palSendMBMessage( pMac->hHdd, pMsg );
     return status;
 }
->>>>>>> a38196d... prima: Update to release LA.BF.1.1.3-00110-8x74.0

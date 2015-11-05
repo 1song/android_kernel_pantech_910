@@ -165,8 +165,6 @@ static const hdd_freq_chan_map_t freq_chan_map[] = { {2412, 1}, {2417, 2},
 #define WE_SET_TDLS_OFF_CHAN_MODE        16
 #endif
 #define  WE_SET_SCAN_BAND_PREFERENCE     17
-<<<<<<< HEAD
-=======
 #define  WE_SET_MIRACAST_VENDOR_CONFIG     18
 #define WE_GET_FRAME_LOG                 19
 #ifdef FEATURE_WLAN_TDLS
@@ -174,7 +172,6 @@ static const hdd_freq_chan_map_t freq_chan_map[] = { {2412, 1}, {2417, 2},
 #endif
 #define  WE_SET_RTS_CTS_HTVHT             21
 #define  WE_SET_MONITOR_STATE             22
->>>>>>> a38196d... prima: Update to release LA.BF.1.1.3-00110-8x74.0
 
 /* Private ioctls and their sub-ioctls */
 #define WLAN_PRIV_SET_NONE_GET_INT    (SIOCIWFIRSTPRIV + 1)
@@ -199,6 +196,7 @@ static const hdd_freq_chan_map_t freq_chan_map[] = { {2412, 1}, {2417, 2},
 #endif
 #define WE_SET_AP_WPS_IE     4  //This is called in station mode to set probe rsp ie.
 #define WE_SET_CONFIG        5
+#define WE_SET_ENCRYPT_MSG   6
 
 /* Private ioctls and their sub-ioctls */
 #define WLAN_PRIV_SET_THREE_INT_GET_NONE   (SIOCIWFIRSTPRIV + 4)
@@ -531,14 +529,6 @@ void hdd_wlan_get_version(hdd_adapter_t *pAdapter, union iwreq_data *wrqu,
     else
     {
         pHWversion = "Unknown";
-    }
-
-    status = wcnss_get_iris_name(iris_name);
-
-    if (!status) {
-        pIRISversion = iris_name;
-    } else {
-        pIRISversion = "Unknown";
     }
 
     wrqu->data.length = scnprintf(extra, WE_MAX_STR_LEN,
@@ -3642,8 +3632,6 @@ static int iw_softap_set_channel_range( struct net_device *dev,
     return ret;
 }
 
-<<<<<<< HEAD
-=======
 static uint8 chartohex(char c)
 {
     uint8 val = 0;
@@ -3854,7 +3842,6 @@ hdd_encrypt_msg_cb(v_VOID_t *pUserData, v_VOID_t *pEncInfoRsp)
             pEncryptedDataRsp->encryptedPayload.length, 0);
 }
 
->>>>>>> a38196d... prima: Update to release LA.BF.1.1.3-00110-8x74.0
 VOS_STATUS  wlan_hdd_enter_bmps(hdd_adapter_t *pAdapter, int mode)
 {
    struct statsContext context;
@@ -5793,9 +5780,6 @@ static int __iw_setint_getnone(struct net_device *dev,
             }
             break;
         }
-<<<<<<< HEAD
-
-=======
         /* The WE_SET_MIRACAST_VENDOR_CONFIG IOCTL should be set before the
          * connection happens so that the params can take effect during
          * association. Also this should not be used in STA+p2p concurrency
@@ -5920,7 +5904,6 @@ static int __iw_setint_getnone(struct net_device *dev,
            break;
         }
 
->>>>>>> a38196d... prima: Update to release LA.BF.1.1.3-00110-8x74.0
         default:
         {
             hddLog(LOGE, "Invalid IOCTL setvalue command %d value %d",
@@ -5959,6 +5942,7 @@ static int __iw_setchar_getnone(struct net_device *dev,
     hdd_config_t  *pConfig;
 #endif /* WLAN_FEATURE_VOWIFI */
     struct iw_point s_priv_data;
+    tSirpkt80211 *pkt;
 
     ENTER();
     pAdapter = (netdev_priv(dev));
@@ -6057,6 +6041,38 @@ static int __iw_setchar_getnone(struct net_device *dev,
              ret = -EINVAL;
           }
           break;
+       case WE_SET_ENCRYPT_MSG:
+          pkt = vos_mem_malloc(sizeof(tSirpkt80211));
+          if (NULL == pkt)
+          {
+              hddLog(VOS_TRACE_LEVEL_ERROR,
+                      "%s: vos_mem_alloc failed", __func__);
+              return -ENOMEM;
+          }
+
+          memset(pkt, 0, sizeof(tSirpkt80211));
+
+          if (FALSE == sme_IsFeatureSupportedByFW(DISA)) {
+              hddLog(VOS_TRACE_LEVEL_ERROR,
+                      FL("Firmware is not DISA capable"));
+              ret = -EINVAL;
+              vos_mem_free(pkt);
+              break;
+          }
+
+          parse_Bufferforpkt(pkt, pBuffer, wrqu->data.length);
+
+          ret = sme_Encryptmsgsend(pHddCtx->hHal, (u8 *)pkt,
+                  sizeof(tSirpkt80211), hdd_encrypt_msg_cb);
+          if (eHAL_STATUS_SUCCESS != ret) {
+              hddLog(VOS_TRACE_LEVEL_ERROR,
+                      FL("SENDEncryptMSG: fail to post WDA cmd"));
+              ret = -EINVAL;
+          }
+          vos_mem_free(pkt);
+
+          break;
+
        default:
        {
            hddLog(LOGE, "%s: Invalid sub command %d",__func__, sub_cmd);
@@ -8977,7 +8993,7 @@ VOS_STATUS iw_set_pno(struct net_device *dev, struct iw_request_info *info,
      overflow.  This API is only invoked via ioctl, so it is
      serialized by the kernel rtnl_lock and hence does not need to be
      reentrant */
-  static tSirPNOScanReq pnoRequest;
+  tSirPNOScanReq pnoRequest = {0};
   char *ptr;
   v_U8_t i,j, ucParams, ucMode;
   eHalStatus status = eHAL_STATUS_FAILURE;
@@ -9084,6 +9100,18 @@ VOS_STATUS iw_set_pno(struct net_device *dev, struct iw_request_info *info,
   }
 
   ptr += nOffset;
+
+  pnoRequest.aNetworks =
+           vos_mem_malloc(sizeof(tSirNetworkType)*pnoRequest.ucNetworksCount);
+  if (pnoRequest.aNetworks == NULL)
+  {
+       VOS_TRACE(VOS_MODULE_ID_SME, VOS_TRACE_LEVEL_ERROR,
+           FL("failed to allocate memory aNetworks %u"),
+               (uint32)sizeof(tSirNetworkType)*pnoRequest.ucNetworksCount);
+       goto error;
+  }
+  vos_mem_zero(pnoRequest.aNetworks,
+               sizeof(tSirNetworkType)*pnoRequest.ucNetworksCount);
 
   for ( i = 0; i < pnoRequest.ucNetworksCount; i++ )
   {
@@ -9271,6 +9299,24 @@ VOS_STATUS iw_set_pno(struct net_device *dev, struct iw_request_info *info,
   {
      pnoRequest.modePNO = SIR_PNO_MODE_ON_SUSPEND;
   }
+  pnoRequest.p24GProbeTemplate = vos_mem_malloc(SIR_PNO_MAX_PB_REQ_SIZE);
+  if (pnoRequest.p24GProbeTemplate == NULL){
+      VOS_TRACE(VOS_MODULE_ID_SME, VOS_TRACE_LEVEL_ERROR,
+          FL("failed to allocate memory p24GProbeTemplate %u"),
+              SIR_PNO_MAX_PB_REQ_SIZE);
+      goto error;
+  }
+
+  pnoRequest.p5GProbeTemplate = vos_mem_malloc(SIR_PNO_MAX_PB_REQ_SIZE);
+  if (pnoRequest.p5GProbeTemplate == NULL){
+      VOS_TRACE(VOS_MODULE_ID_SME, VOS_TRACE_LEVEL_ERROR,
+          FL("failed to allocate memory p5GProbeTemplate %u"),
+              SIR_PNO_MAX_PB_REQ_SIZE);
+      goto error;
+  }
+
+  vos_mem_zero(pnoRequest.p24GProbeTemplate, SIR_PNO_MAX_PB_REQ_SIZE);
+  vos_mem_zero(pnoRequest.p5GProbeTemplate, SIR_PNO_MAX_PB_REQ_SIZE);
 
   status = sme_SetPreferredNetworkList(WLAN_HDD_GET_HAL_CTX(pAdapter), &pnoRequest,
                                 pAdapter->sessionId,
@@ -9285,6 +9331,12 @@ error:
     VOS_TRACE(VOS_MODULE_ID_HDD, VOS_TRACE_LEVEL_ERROR,
                 "%s: Failed to enable PNO", __func__);
     pHddCtx->isPnoEnable = FALSE;
+    if (pnoRequest.aNetworks)
+        vos_mem_free(pnoRequest.aNetworks);
+    if (pnoRequest.p24GProbeTemplate)
+        vos_mem_free(pnoRequest.p24GProbeTemplate);
+    if (pnoRequest.p5GProbeTemplate)
+        vos_mem_free(pnoRequest.p5GProbeTemplate);
     return VOS_STATUS_E_FAILURE;
 }/*iw_set_pno*/
 
@@ -10223,8 +10275,6 @@ static const struct iw_priv_args we_private_args[] = {
         0,
         "getFrameLogs" },
 
-<<<<<<< HEAD
-=======
     {   WE_SET_MIRACAST_VENDOR_CONFIG,
         IW_PRIV_TYPE_INT | IW_PRIV_SIZE_FIXED | 1,
         0, "setMiracstConf" },
@@ -10240,7 +10290,6 @@ static const struct iw_priv_args we_private_args[] = {
         IW_PRIV_TYPE_INT | IW_PRIV_SIZE_FIXED | 1,
         0, "setRtsCtsHtVht" },
 
->>>>>>> a38196d... prima: Update to release LA.BF.1.1.3-00110-8x74.0
     /* handlers for main ioctl */
     {   WLAN_PRIV_SET_NONE_GET_INT,
         0,
@@ -10326,6 +10375,12 @@ static const struct iw_priv_args we_private_args[] = {
         IW_PRIV_TYPE_CHAR| 512,
         0,
         "setConfig" },
+
+    {   WE_SET_ENCRYPT_MSG,
+        IW_PRIV_TYPE_CHAR| 512,
+        0,
+        "encryptMsg" },
+
 
     /* handlers for main ioctl */
     {   WLAN_PRIV_SET_THREE_INT_GET_NONE,

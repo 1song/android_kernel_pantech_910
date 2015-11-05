@@ -349,19 +349,6 @@ static void log_store(int facility, int level,
 	log_next_seq++;
 }
 
-<<<<<<< HEAD
-#ifdef CONFIG_PANTECH_ERR_CRASH_LOGGING
-static pantech_log_header dmesg_header;
-pantech_log_header *get_pantech_klog_dump_address(void)
-{
-    dmesg_header.klog_buf_address = (unsigned int*)virt_to_phys((void*)log_buf);
-    dmesg_header.klog_end_idx = (unsigned int*)virt_to_phys((void*)&log_end);
-	dmesg_header.klog_size = (unsigned int)log_buf_len;
-	
-    return &dmesg_header;
-}
-#endif
-=======
 /* /dev/kmsg - userspace message inject/listen interface */
 struct devkmsg_user {
 	u64 seq;
@@ -633,7 +620,6 @@ const struct file_operations kmsg_fops = {
 	.release = devkmsg_release,
 };
 
->>>>>>> 029d498... kmsg: export printk records to the /dev/kmsg interface
 
 #ifdef CONFIG_KEXEC
 /*
@@ -1349,54 +1335,6 @@ asmlinkage int vprintk_emit(int facility, int level,
 		buflen = 0;
 	}
 
-<<<<<<< HEAD
-			if (printk_time) {
-				/* Add the current time stamp */
-#ifdef CONFIG_PANTECH_ERR_CRASH_LOGGING
-                char tbuf[50+EXTRA_BUF_SIZE], *tp;
-                unsigned tlen;
-                unsigned long long t;
-                unsigned long nanosec_rem;
-                
-                struct timespec time;
-                struct tm tmresult;
-                
-                t = cpu_clock(printk_cpu);
-                nanosec_rem = do_div(t, 1000000000);
-                
-                time = __current_kernel_time();
-                time_to_tm(time.tv_sec,sys_tz.tz_minuteswest * 60* (-1),&tmresult);
-                tlen = sprintf(tbuf, "[%5lu.%06lu / %02d-%02d %02d:%02d:%02d.%03lu]-CPU:%d %c[%15s:%5d] ",
-                               (unsigned long) t,
-                               nanosec_rem / 1000,
-                               tmresult.tm_mon+1,
-                               tmresult.tm_mday,
-                               tmresult.tm_hour,
-                               tmresult.tm_min,
-                               tmresult.tm_sec,
-                               (unsigned long) time.tv_nsec/1000000,
-                               printk_cpu,
-                               in_interrupt() ? 'I' : ' ',
-                               current->comm,
-                               task_pid_nr(current));
-#else
-				char tbuf[50], *tp;
-				unsigned tlen;
-				unsigned long long t;
-				unsigned long nanosec_rem;
-                
-				t = cpu_clock(printk_cpu);
-				nanosec_rem = do_div(t, 1000000000);
-				tlen = sprintf(tbuf, "[%5lu.%06lu] ",
-                               (unsigned long) t,
-                               nanosec_rem / 1000);
-#endif
-
-				for (tp = tbuf; tp < tbuf + tlen; tp++)
-					emit_log_char(*tp);
-				printed_len += tlen;
-			}
-=======
 	if (buflen == 0) {
 		/* remember level for first message in the buffer */
 		if (level == -1)
@@ -1404,7 +1342,6 @@ asmlinkage int vprintk_emit(int facility, int level,
 		else
 			buflevel = level;
 	}
->>>>>>> c7d29db... printk: convert byte-buffer to variable-length record buffer
 
 	if (buflen || !newline) {
 		/* append to existing buffer, or buffer until next message */

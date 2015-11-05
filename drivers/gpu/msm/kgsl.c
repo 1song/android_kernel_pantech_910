@@ -2848,9 +2848,6 @@ static long kgsl_ioctl_map_user_mem(struct kgsl_device_private *dev_priv,
 	/* Adjust the returned value for a non 4k aligned offset */
 	param->gpuaddr = entry->memdesc.gpuaddr + (param->offset & ~PAGE_MASK);
 
-	KGSL_STATS_ADD(param->len, kgsl_driver.stats.mapped,
-		kgsl_driver.stats.mapped_max);
-
 	kgsl_process_add_stats(private, entry->memtype, param->len);
 
 	trace_kgsl_mem_map(entry, param->fd);

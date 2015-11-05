@@ -1081,8 +1081,6 @@ static void copy_flags(unsigned long clone_flags, struct task_struct *p)
 	p->flags = new_flags;
 }
 
-<<<<<<< HEAD
-=======
 static void copy_seccomp(struct task_struct *p)
 {
 #ifdef CONFIG_SECCOMP
@@ -1116,7 +1114,6 @@ static void copy_seccomp(struct task_struct *p)
 #endif
 }
 
->>>>>>> 2dc8975... seccomp: Replace BUG(!spin_is_locked()) with assert_spin_lock
 SYSCALL_DEFINE1(set_tid_address, int __user *, tidptr)
 {
 	current->clear_child_tid = tidptr;

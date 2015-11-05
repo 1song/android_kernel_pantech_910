@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2012-2015 The Linux Foundation. All rights reserved.
  *
  * Previously licensed under the ISC license by Qualcomm Atheros, Inc.
  *
@@ -677,11 +677,8 @@ void __hdd_softap_tx_timeout(struct net_device *dev)
    hdd_adapter_t *pAdapter =  WLAN_HDD_GET_PRIV_PTR(dev);
    struct netdev_queue *txq;
    int i = 0;
-<<<<<<< HEAD
-=======
    int status = 0;
    hdd_context_t *pHddCtx;
->>>>>>> a38196d... prima: Update to release LA.BF.1.1.3-00110-8x74.0
 
    VOS_TRACE( VOS_MODULE_ID_HDD_SAP_DATA, VOS_TRACE_LEVEL_ERROR,
       "%s: Transmission timeout occurred", __func__);
@@ -694,8 +691,6 @@ void __hdd_softap_tx_timeout(struct net_device *dev)
       return;
    }
 
-<<<<<<< HEAD
-=======
    pHddCtx = WLAN_HDD_GET_CTX(pAdapter);
    status = wlan_hdd_validate_context(pHddCtx);
    if (status != 0)
@@ -703,7 +698,6 @@ void __hdd_softap_tx_timeout(struct net_device *dev)
        return;
    }
 
->>>>>>> a38196d... prima: Update to release LA.BF.1.1.3-00110-8x74.0
    ++pAdapter->hdd_stats.hddTxRxStats.txTimeoutCount;
 
    for (i = 0; i < 8; i++)
@@ -829,8 +823,6 @@ VOS_STATUS hdd_softap_init_tx_rx( hdd_adapter_t *pAdapter )
    pAdapter->aTxQueueLimit[WLANTL_AC_BE] = HDD_SOFTAP_TX_BE_QUEUE_MAX_LEN;
    pAdapter->aTxQueueLimit[WLANTL_AC_VI] = HDD_SOFTAP_TX_VI_QUEUE_MAX_LEN;
    pAdapter->aTxQueueLimit[WLANTL_AC_VO] = HDD_SOFTAP_TX_VO_QUEUE_MAX_LEN;
-
-   spin_lock_init( &pSapCtx->staInfo_lock );
 
    for (STAId = 0; STAId < WLAN_MAX_STA_COUNT; STAId++)
    {

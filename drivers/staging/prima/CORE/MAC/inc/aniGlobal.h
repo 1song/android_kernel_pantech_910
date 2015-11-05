@@ -1062,14 +1062,11 @@ typedef struct sAniSirGlobal
 
     v_BOOL_t isCoexScoIndSet;
     v_U8_t miracast_mode;
-<<<<<<< HEAD
-=======
     v_U8_t fBtcEnableIndTimerVal;
     v_U8_t roamDelayStatsEnabled;
     tANI_BOOLEAN miracastVendorConfig;
     v_BOOL_t fActiveScanOnDFSChannels;
     tAuthAckStatus  authAckStatus;
->>>>>>> a38196d... prima: Update to release LA.BF.1.1.3-00110-8x74.0
 } tAniSirGlobal;
 
 #ifdef FEATURE_WLAN_TDLS

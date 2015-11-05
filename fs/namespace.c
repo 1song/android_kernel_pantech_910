@@ -1710,13 +1710,7 @@ static int do_remount(struct path *path, int flags, int mnt_flags,
 	else
 		err = do_remount_sb(sb, flags, data, 0);
 	if (!err) {
-<<<<<<< HEAD
-		br_write_lock(vfsmount_lock);
-		mnt_flags |= mnt->mnt.mnt_flags & MNT_PROPAGATION_MASK;
-=======
 		br_write_lock(&vfsmount_lock);
-		mnt_flags |= mnt->mnt.mnt_flags & ~MNT_USER_SETTABLE_MASK;
->>>>>>> a255431... brlocks/lglocks: API cleanups
 		mnt->mnt.mnt_flags = mnt_flags;
 		br_write_unlock(&vfsmount_lock);
 	}
@@ -2206,11 +2200,9 @@ long do_mount(const char *dev_name, const char *dir_name,
 	if (retval)
 		goto dput_out;
 
-	/* Default to noatime/nodiratime unless overriden */
-	if (!(flags & MS_RELATIME)) {
-		mnt_flags |= MNT_NOATIME;
-		mnt_flags |= MNT_NODIRATIME;
-	}
+	/* Default to relatime unless overriden */
+	if (!(flags & MS_NOATIME))
+		mnt_flags |= MNT_RELATIME;
 
 	/* Separate the per-mountpoint flags */
 	if (flags & MS_NOSUID)
@@ -2423,9 +2415,9 @@ SYSCALL_DEFINE5(mount, char __user *, dev_name, char __user *, dir_name,
 		char __user *, type, unsigned long, flags, void __user *, data)
 {
 	int ret;
-	char *kernel_type;
-	char *kernel_dir;
-	char *kernel_dev;
+	char *kernel_type = NULL;
+	char *kernel_dir = NULL;
+	char *kernel_dev = NULL;
 	unsigned long data_page;
 
 	ret = copy_mount_string(type, &kernel_type);
@@ -2567,14 +2559,10 @@ SYSCALL_DEFINE2(pivot_root, const char __user *, new_root,
 	/* make sure we can reach put_old from new_root */
 	if (!is_path_reachable(real_mount(old.mnt), old.dentry, &new))
 		goto out4;
-<<<<<<< HEAD
-	br_write_lock(vfsmount_lock);
-=======
 	/* make certain new is below the root */
 	if (!is_path_reachable(new_mnt, new.dentry, &root))
 		goto out4;
 	br_write_lock(&vfsmount_lock);
->>>>>>> a255431... brlocks/lglocks: API cleanups
 	detach_mnt(new_mnt, &parent_path);
 	detach_mnt(root_mnt, &root_parent);
 	/* mount old root on put_old */

@@ -1357,7 +1357,7 @@ int msm_vidc_close(void *instance)
 	int rc = 0;
 	int i;
 
-	if (!inst || !inst->core)
+	if (!inst)
 		return -EINVAL;
 
 	v4l2_fh_del(&inst->event_handler);
@@ -1375,9 +1375,7 @@ int msm_vidc_close(void *instance)
 	}
 
 	core = inst->core;
-	msm_comm_session_clean(inst);
-
-	mutex_lock(&core->lock);
+	mutex_lock(&core->sync_lock);
 	list_for_each_safe(ptr, next, &core->instances) {
 		temp = list_entry(ptr, struct msm_vidc_inst, list);
 		if (temp == inst)

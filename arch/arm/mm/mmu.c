@@ -1506,8 +1506,6 @@ static void __init map_lowmem(void)
 	}
 }
 
-<<<<<<< HEAD
-=======
 #ifdef CONFIG_FORCE_PAGES
 /*
  * remap a PMD into pages
@@ -1610,7 +1608,6 @@ static void __init remap_pages(void)
 }
 #endif
 
->>>>>>> d7f2e5c... arm: mm: fix bootup bug with odd-section boundry in memory hole.
 /*
  * paging_init() sets up the page tables, initialises the zone memory
  * maps, and sets up the zero page, bad page and bad page tables.

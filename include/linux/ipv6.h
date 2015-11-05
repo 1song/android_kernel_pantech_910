@@ -218,11 +218,8 @@ enum {
 	DEVCONF_FORCE_TLLAO,
 	DEVCONF_ACCEPT_RA_PREFIX_ROUTE,
 	DEVCONF_ACCEPT_RA_RT_TABLE,
-<<<<<<< HEAD
-=======
 	DEVCONF_USE_OPTIMISTIC,
 	DEVCONF_USE_OIF_ADDRS_ONLY,
->>>>>>> 4b1991b... ipv6: sysctl to restrict candidate source addresses
 	DEVCONF_MAX
 };
 

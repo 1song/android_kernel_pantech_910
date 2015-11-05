@@ -170,7 +170,17 @@ safeChannelType safeChannels[NUM_20MHZ_RF_CHANNELS] =
   --------------------------------------------------------------------------*/
 int __hdd_hostapd_open (struct net_device *dev)
 {
+   hdd_adapter_t *pAdapter =  WLAN_HDD_GET_PRIV_PTR(dev);
+
    ENTER();
+
+   if(!test_bit(SOFTAP_BSS_STARTED, &pAdapter->event_flags))
+   {
+       //WMM_INIT OR BSS_START not completed
+       hddLog( LOGW, "Ignore hostadp open request");
+       EXIT();
+       return 0;
+   }
 
    MTRACE(vos_trace(VOS_MODULE_ID_HDD,
                     TRACE_CODE_HDD_HOSTAPD_OPEN_REQUEST, NO_SESSION, 0));
@@ -210,13 +220,6 @@ int __hdd_hostapd_stop (struct net_device *dev)
 {
    ENTER();
 
-<<<<<<< HEAD
-   //Stop all tx queues
-   netif_tx_disable(dev);
-   
-   //Turn OFF carrier state
-   netif_carrier_off(dev);
-=======
    if(NULL != dev) {
        hddLog(VOS_TRACE_LEVEL_INFO, FL("Disabling queues"));
        //Stop all tx queues
@@ -225,7 +228,6 @@ int __hdd_hostapd_stop (struct net_device *dev)
        //Turn OFF carrier state
        netif_carrier_off(dev);
    }
->>>>>>> a38196d... prima: Update to release LA.BF.1.1.3-00110-8x74.0
 
    EXIT();
    return 0;
@@ -1633,9 +1635,6 @@ void hdd_hostapd_ch_avoid_cb
    /* Get SAP context first
     * SAP and P2PGO would not concurrent */
    pHostapdAdapter = hdd_get_adapter(hddCtxt, WLAN_HDD_SOFTAP);
-<<<<<<< HEAD
-   if ((pHostapdAdapter) && (unsafeChannelCount))
-=======
 #ifdef WLAN_FEATURE_AP_HT40_24G
    if (NULL == pHostapdAdapter)
    {
@@ -1645,7 +1644,6 @@ void hdd_hostapd_ch_avoid_cb
    if ((pHostapdAdapter) &&
        (test_bit(SOFTAP_BSS_STARTED, &pHostapdAdapter->event_flags)) &&
        (unsafeChannelCount))
->>>>>>> a38196d... prima: Update to release LA.BF.1.1.3-00110-8x74.0
    {
       VOS_TRACE(VOS_MODULE_ID_HDD, VOS_TRACE_LEVEL_INFO,
                 "%s : Current operation channel %d",
@@ -4787,6 +4785,12 @@ VOS_STATUS hdd_init_ap_mode( hdd_adapter_t *pAdapter )
     v_U16_t unsafeChannelList[NUM_20MHZ_RF_CHANNELS];
     v_U16_t unsafeChannelCount;
 #endif /* FEATURE_WLAN_CH_AVOID */
+
+    if (pHddCtx->isLogpInProgress) {
+       VOS_TRACE(VOS_MODULE_ID_HDD, VOS_TRACE_LEVEL_INFO,
+                       "%s:LOGP in Progress. Ignore!!!",__func__);
+       status = VOS_STATUS_E_FAILURE;
+    }
 
     ENTER();
        // Allocate the Wireless Extensions state structure

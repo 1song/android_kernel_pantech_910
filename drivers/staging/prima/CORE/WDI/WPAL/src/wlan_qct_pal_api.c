@@ -409,24 +409,7 @@ void wpalWlanReload(void)
 ---------------------------------------------------------------------------*/
 void wpalWcnssResetIntr(void)
 {
-#ifdef HAVE_WCNSS_RESET_INTR
-   wcnss_reset_fiq(true);
-#endif
    return;
-}
-
-/*---------------------------------------------------------------------------
-    wpalWcnssIsProntoHwVer3 -  Check if Pronto Hw ver3
-
-    Param:
-       None
-    Return:
-       TRUE if Ponto Hw Ver 3
-       Therefore use WQ6 instead of WQ23 for TX Low/High Priority Channel
----------------------------------------------------------------------------*/
-int wpalWcnssIsProntoHwVer3(void)
-{
-   return wcnss_is_hw_pronto_ver3();
 }
 
 /*---------------------------------------------------------------------------

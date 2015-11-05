@@ -469,9 +469,6 @@ static void *kgsl_gpummu_create_pagetable(void)
 	/* ptpool allocations are from coherent memory, so update the
 	   device statistics acordingly */
 
-	KGSL_STATS_ADD(KGSL_PAGETABLE_SIZE, kgsl_driver.stats.coherent,
-		       kgsl_driver.stats.coherent_max);
-
 	return (void *)gpummu_pt;
 
 err_flushfilter:

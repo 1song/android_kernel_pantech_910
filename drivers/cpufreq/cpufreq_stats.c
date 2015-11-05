@@ -20,16 +20,10 @@
 #include <linux/kobject.h>
 #include <linux/spinlock.h>
 #include <linux/notifier.h>
-<<<<<<< HEAD
-=======
 #include <linux/sort.h>
 #include <linux/err.h>
 #include <linux/of.h>
-<<<<<<< HEAD
->>>>>>> d4fc8dc... cpufreq_stats: Adds the fucntionality to load current values for each frequency
-=======
 #include <linux/sched.h>
->>>>>>> 2ba8bc4... sched: cpufreq: Adds a field cpu_power in the task_struct
 #include <asm/cputime.h>
 
 static spinlock_t cpufreq_stats_lock;
@@ -54,8 +48,6 @@ struct cpufreq_stats {
 #endif
 };
 
-<<<<<<< HEAD
-=======
 struct all_cpufreq_stats {
 	unsigned int state_num;
 	cputime64_t *time_in_state;
@@ -76,7 +68,6 @@ struct all_freq_table {
 static struct all_freq_table *all_freq_table;
 
 static DEFINE_PER_CPU(struct all_cpufreq_stats *, all_cpufreq_stats);
->>>>>>> d4fc8dc... cpufreq_stats: Adds the fucntionality to load current values for each frequency
 static DEFINE_PER_CPU(struct cpufreq_stats *, cpufreq_stats_table);
 static DEFINE_PER_CPU(struct cpufreq_power_stats *, cpufreq_power_stats);
 
@@ -126,8 +117,6 @@ static ssize_t show_time_in_state(struct cpufreq_policy *policy, char *buf)
 	return len;
 }
 
-<<<<<<< HEAD
-=======
 static int get_index_all_cpufreq_stat(struct all_cpufreq_stats *all_stat,
 		unsigned int freq)
 {
@@ -226,7 +215,6 @@ out:
 	return len;
 }
 
->>>>>>> d4fc8dc... cpufreq_stats: Adds the fucntionality to load current values for each frequency
 #ifdef CONFIG_CPU_FREQ_STAT_DETAILS
 static ssize_t show_trans_table(struct cpufreq_policy *policy, char *buf)
 {
@@ -290,15 +278,12 @@ static struct attribute_group stats_attr_group = {
 	.name = "stats"
 };
 
-<<<<<<< HEAD
-=======
 static struct kobj_attribute _attr_all_time_in_state = __ATTR(all_time_in_state,
 		0444, show_all_time_in_state, NULL);
 
 static struct kobj_attribute _attr_current_in_state = __ATTR(current_in_state,
 		0444, show_current_in_state, NULL);
 
->>>>>>> d4fc8dc... cpufreq_stats: Adds the fucntionality to load current values for each frequency
 static int freq_table_get_index(struct cpufreq_stats *stat, unsigned int freq)
 {
 	int index;
@@ -333,8 +318,6 @@ static void cpufreq_stats_free_sysfs(unsigned int cpu)
 		cpufreq_cpu_put(policy);
 }
 
-<<<<<<< HEAD
-=======
 static void cpufreq_allstats_free(void)
 {
 	int cpu;
@@ -375,7 +358,6 @@ static void cpufreq_powerstats_free(void)
 	}
 }
 
->>>>>>> d4fc8dc... cpufreq_stats: Adds the fucntionality to load current values for each frequency
 static int cpufreq_stats_create_table(struct cpufreq_policy *policy,
 		struct cpufreq_frequency_table *table, int count)
 {
@@ -443,8 +425,6 @@ error_get_fail:
 	return ret;
 }
 
-<<<<<<< HEAD
-=======
 static void cpufreq_powerstats_create(unsigned int cpu,
 		struct cpufreq_frequency_table *table, int count) {
 	unsigned int alloc_size, i = 0, j = 0, ret = 0;
@@ -583,7 +563,6 @@ static void cpufreq_allstats_create(unsigned int cpu,
 	spin_unlock(&cpufreq_stats_lock);
 }
 
->>>>>>> d4fc8dc... cpufreq_stats: Adds the fucntionality to load current values for each frequency
 static int cpufreq_stat_notifier_policy(struct notifier_block *nb,
 		unsigned long val, void *data)
 {
@@ -596,9 +575,6 @@ static int cpufreq_stat_notifier_policy(struct notifier_block *nb,
 	table = cpufreq_frequency_get_table(cpu);
 	if (!table)
 		return 0;
-<<<<<<< HEAD
-	ret = cpufreq_stats_create_table(policy, table);
-=======
 
 	for (i = 0; table[i].frequency != CPUFREQ_TABLE_END; i++) {
 		unsigned int freq = table[i].frequency;
@@ -615,7 +591,6 @@ static int cpufreq_stat_notifier_policy(struct notifier_block *nb,
 		cpufreq_powerstats_create(cpu, table, count);
 
 	ret = cpufreq_stats_create_table(policy, table, count);
->>>>>>> d4fc8dc... cpufreq_stats: Adds the fucntionality to load current values for each frequency
 	if (ret)
 		return ret;
 	return 0;
@@ -671,9 +646,6 @@ static int cpufreq_stats_create_table_cpu(unsigned int cpu)
 	if (!table)
 		goto out;
 
-<<<<<<< HEAD
-	ret = cpufreq_stats_create_table(policy, table);
-=======
 	for (i = 0; table[i].frequency != CPUFREQ_TABLE_END; i++) {
 		unsigned int freq = table[i].frequency;
 
@@ -689,7 +661,6 @@ static int cpufreq_stats_create_table_cpu(unsigned int cpu)
 		cpufreq_powerstats_create(cpu, table, count);
 
 	ret = cpufreq_stats_create_table(policy, table, count);
->>>>>>> d4fc8dc... cpufreq_stats: Adds the fucntionality to load current values for each frequency
 
 out:
 	cpufreq_cpu_put(policy);
@@ -760,8 +731,6 @@ static int __init cpufreq_stats_init(void)
 	for_each_online_cpu(cpu) {
 		cpufreq_update_policy(cpu);
 	}
-<<<<<<< HEAD
-=======
 
 	create_all_freq_table();
 	ret = sysfs_create_file(cpufreq_global_kobject,
@@ -774,7 +743,6 @@ static int __init cpufreq_stats_init(void)
 	if (ret)
 		pr_warn("Cannot create sysfs file for cpufreq current stats\n");
 
->>>>>>> d4fc8dc... cpufreq_stats: Adds the fucntionality to load current values for each frequency
 	return 0;
 }
 static void __exit cpufreq_stats_exit(void)
@@ -790,11 +758,9 @@ static void __exit cpufreq_stats_exit(void)
 		cpufreq_stats_free_table(cpu);
 		cpufreq_stats_free_sysfs(cpu);
 	}
-<<<<<<< HEAD
-=======
+
 	cpufreq_allstats_free();
 	cpufreq_powerstats_free();
->>>>>>> d4fc8dc... cpufreq_stats: Adds the fucntionality to load current values for each frequency
 }
 
 MODULE_AUTHOR("Zou Nan hai <nanhai.zou@intel.com>");

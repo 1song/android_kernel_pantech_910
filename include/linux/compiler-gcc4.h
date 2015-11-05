@@ -11,7 +11,6 @@
 
 #define __used			__attribute__((__used__))
 #define __must_check 		__attribute__((warn_unused_result))
-#define __compiler_offsetof(a,b) __builtin_offsetof(a,b)
 
 #if __GNUC_MINOR__ >= 3
 /* Mark functions as cold. gcc will assume any path leading to a call

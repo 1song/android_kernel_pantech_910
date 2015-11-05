@@ -1678,8 +1678,6 @@ WLANTL_ChangeSTAState
 
 /*===========================================================================
 
-<<<<<<< HEAD
-=======
   FUNCTION    WLANTL_UpdateTdlsSTAClient
 
   DESCRIPTION
@@ -1777,7 +1775,6 @@ void WLANTL_SetIsConversionReq(v_PVOID_t pvosGCtx, v_BOOL_t isConversionReq)
 
 /*===========================================================================
 
->>>>>>> a38196d... prima: Update to release LA.BF.1.1.3-00110-8x74.0
   FUNCTION    WLANTL_STAPtkInstalled
 
   DESCRIPTION

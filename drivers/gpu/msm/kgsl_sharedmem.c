@@ -452,8 +452,6 @@ static int kgsl_page_alloc_map_kernel(struct kgsl_memdesc *memdesc)
 
 		memdesc->hostptr = vmap(pages, count,
 					VM_IOREMAP, page_prot);
-		KGSL_STATS_ADD(memdesc->size, kgsl_driver.stats.vmalloc,
-				kgsl_driver.stats.vmalloc_max);
 		vfree(pages);
 	}
 	if (!memdesc->hostptr)
@@ -730,8 +728,6 @@ _kgsl_sharedmem_page_alloc(struct kgsl_memdesc *memdesc,
 		kgsl_driver.stats.histogram[order]++;
 
 done:
-	KGSL_STATS_ADD(memdesc->size, kgsl_driver.stats.page_alloc,
-		kgsl_driver.stats.page_alloc_max);
 
 	if ((memdesc->sglen_alloc * sizeof(struct page *)) > PAGE_SIZE)
 		vfree(pages);
@@ -803,9 +799,6 @@ kgsl_sharedmem_alloc_coherent(struct kgsl_memdesc *memdesc, size_t size)
 
 	/* Record statistics */
 
-	KGSL_STATS_ADD(size, kgsl_driver.stats.coherent,
-		       kgsl_driver.stats.coherent_max);
-
 err:
 	if (result)
 		kgsl_sharedmem_free(memdesc);
@@ -854,9 +847,6 @@ _kgsl_sharedmem_ebimem(struct kgsl_memdesc *memdesc,
 
 	if (result)
 		goto err;
-
-	KGSL_STATS_ADD(size, kgsl_driver.stats.coherent,
-		kgsl_driver.stats.coherent_max);
 
 err:
 	if (result)

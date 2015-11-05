@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2012-2015 The Linux Foundation. All rights reserved.
  *
  * Previously licensed under the ISC license by Qualcomm Atheros, Inc.
  *
@@ -545,8 +545,6 @@ void limInitOperatingClasses(tHalHandle hHal);
 tANI_U8 limGetOPClassFromChannel(tANI_U8 *country,
                                  tANI_U8 channel,
                                  tANI_U8 offset);
-<<<<<<< HEAD
-=======
 void limParseBeaconForTim(tpAniSirGlobal pMac, tANI_U8* pRxPacketInfo,
                           tpPESession psessionEntry);
 
@@ -560,5 +558,4 @@ extern tANI_U32 limGetMaxRateFlags(tpDphHashNode pStaDs,
 void limDecrementPendingMgmtCount (tpAniSirGlobal pMac);
 
 eHalStatus limTxBdComplete(tpAniSirGlobal pMac, void *pData);
->>>>>>> a38196d... prima: Update to release LA.BF.1.1.3-00110-8x74.0
 #endif /* __LIM_UTILS_H */

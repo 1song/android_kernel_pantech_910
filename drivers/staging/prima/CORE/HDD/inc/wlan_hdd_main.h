@@ -212,7 +212,7 @@
 #define HDD_PNO_SCAN_TIMERS_SET_ONE      1
 /* value should not be greater than PNO_MAX_SCAN_TIMERS */
 #define HDD_PNO_SCAN_TIMERS_SET_MULTIPLE 6
-#define WLAN_WAIT_TIME_PNO  500
+#define WLAN_WAIT_TIME_PNO  2000
 #endif
 
 #define MAX_USER_COMMAND_SIZE 4096
@@ -864,6 +864,10 @@ typedef struct hdd_scaninfo_s
 
    hdd_scan_pending_option_e scan_pending_option;
    tANI_U8 sessionId;
+   /* time to store last station scan done. */
+   v_TIME_t     last_scan_timestamp;
+   tANI_U8 last_scan_channelList[WNI_CFG_VALID_CHANNEL_LIST_LEN];
+   tANI_U8 last_scan_numChannels;
 
 }hdd_scaninfo_t;
 
@@ -946,14 +950,10 @@ struct hdd_adapter_s
 
 #ifdef WLAN_NS_OFFLOAD
    /** IPv6 notifier callback for handling NS offload on change in IP */
-   struct notifier_block ipv6_notifier;
-   bool ipv6_notifier_registered;
    struct work_struct  ipv6NotifierWorkQueue;
 #endif
     
    /** IPv4 notifier callback for handling ARP offload on change in IP */
-   struct notifier_block ipv4_notifier;
-   bool ipv4_notifier_registered;
    struct work_struct  ipv4NotifierWorkQueue;
 
    //TODO Move this to sta Ctx
@@ -1434,8 +1434,6 @@ struct hdd_context_s
     macAddrSpoof_t spoofMacAddr;
     /* flag to decide if driver need to scan DFS channels or not */
     v_BOOL_t  disable_dfs_flag;
-<<<<<<< HEAD
-=======
 
 #ifdef WLAN_NS_OFFLOAD
     /*
@@ -1455,7 +1453,6 @@ struct hdd_context_s
     struct hdd_ll_stats_context ll_stats_context;
 #endif /* End of WLAN_FEATURE_LINK_LAYER_STATS */
     v_BOOL_t isSetBandByNL;
->>>>>>> a38196d... prima: Update to release LA.BF.1.1.3-00110-8x74.0
 };
 
 

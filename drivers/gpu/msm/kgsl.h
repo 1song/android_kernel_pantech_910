@@ -72,10 +72,6 @@
    the statisic is greater then _max, set _max
 */
 
-#define KGSL_STATS_ADD(_size, _stat, _max) \
-	do { _stat += (_size); if (_stat > _max) _max = _stat; } while (0)
-
-
 #define KGSL_MEMFREE_HIST_SIZE	((int)(PAGE_SIZE * 2))
 
 #define KGSL_MAX_NUMIBS 100000

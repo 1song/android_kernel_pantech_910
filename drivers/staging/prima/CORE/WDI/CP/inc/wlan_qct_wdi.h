@@ -151,13 +151,10 @@ of NV fragment is nt possbile.The next multiple of 1Kb is 3K */
 /* Periodic Tx pattern offload feature */
 #define PERIODIC_TX_PTRN_MAX_SIZE 1536
 #define MAXNUM_PERIODIC_TX_PTRNS 6
-<<<<<<< HEAD
-=======
 #define WDI_DISA_MAX_PAYLOAD_SIZE                1600
 #define MAX_NUM_OF_BUFFER 3
 #define VALID_FW_LOG_TYPES      2
 #define MAX_LOG_BUFFER_LENGTH      128 * 1024
->>>>>>> a38196d... prima: Update to release LA.BF.1.1.3-00110-8x74.0
 
 /*============================================================================
  *     GENERIC STRUCTURES 
@@ -3887,6 +3884,20 @@ typedef struct
 }WDI_EnterImpsReqParamsType;
 
 /*---------------------------------------------------------------------------
+  WDI_ExitImpsReqParamsType
+  Exit IMPS parameters passed to WDI from WDA
+----------------------------------------------------------------------------*/
+typedef struct
+{
+   /*Request status callback offered by UMAC */
+   WDI_ReqStatusCb         wdiReqStatusCB;
+   /*The user data passed in by UMAC, it will be sent back when the above
+   function pointer will be called */
+   void*                   pUserData;
+
+}WDI_ExitImpsReqParamsType;
+
+/*---------------------------------------------------------------------------
   WDI_EnterBmpsReqParamsType
   Enter BMPS parameters passed from WDI to WDA
 ---------------------------------------------------------------------------*/
@@ -6014,8 +6025,6 @@ typedef struct
    wpt_uint32 reserved;
 } WDI_SpoofMacAddrInfoType;
 
-<<<<<<< HEAD
-=======
 //This is to force compiler to use the maximum of an int for enum
 #define SIR_MAX_ENUM_SIZE    0x7FFFFFFF
 // Enum to specify whether key is used
@@ -6133,7 +6142,6 @@ typedef struct
 
 }WDI_MonStartReqType;
 
->>>>>>> a38196d... prima: Update to release LA.BF.1.1.3-00110-8x74.0
 /*----------------------------------------------------------------------------
  *   WDI callback types
  *--------------------------------------------------------------------------*/
@@ -8041,8 +8049,6 @@ typedef void  (*WDI_LLStatsClearRspCb)(void *pEventData,
 
 typedef void  (*WDI_SetSpoofMacAddrRspCb)(
                         WDI_SpoofMacAddrRspParamType* wdiRsp, void *pUserData);
-<<<<<<< HEAD
-=======
 
 typedef void  (*WDI_FWStatsGetRspCb)(WDI_Status status,void *fwStatsResp,
                                          void *pUserData);
@@ -8057,7 +8063,6 @@ typedef void  (*WDI_FatalEventLogsRspCb)(
 
 typedef void  (*WDI_MonModeRspCb)(void *pEventData,void *pUserData);
 
->>>>>>> a38196d... prima: Update to release LA.BF.1.1.3-00110-8x74.0
 /*========================================================================
  *     Function Declarations and Documentation
  ==========================================================================*/
@@ -9284,6 +9289,7 @@ WDI_EnterImpsReq
 WDI_Status 
 WDI_ExitImpsReq
 (
+   WDI_ExitImpsReqParamsType *pwdiExitImpsReqParams,
    WDI_ExitImpsRspCb  wdiExitImpsRspCb,
    void*                   pUserData
 );
@@ -11534,8 +11540,6 @@ WDI_SpoofMacAddrInfoType *pWdiReq,
   void*                          pUserData
 );
 
-<<<<<<< HEAD
-=======
 WDI_Status
 WDI_EncryptMsgReq(void* pwdiEncryptMsgParams,
         WDI_EncryptMsgRspCb wdiEncryptMsgCbRsp,
@@ -11598,7 +11602,6 @@ WDI_EnableDisableCAEventInd
 wpt_uint32 val
 );
 
->>>>>>> a38196d... prima: Update to release LA.BF.1.1.3-00110-8x74.0
 #ifdef __cplusplus
  }
 #endif 

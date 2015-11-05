@@ -249,8 +249,6 @@ VOS_STATUS WDA_ProcessLLStatsGetReq(tWDA_CbContext *pWDA,
 VOS_STATUS WDA_ProcessLLStatsClearReq(tWDA_CbContext *pWDA,
                                       tSirLLStatsClearReq *wdaRequest);
 #endif /* WLAN_FEATURE_LINK_LAYER_STATS */
-<<<<<<< HEAD
-=======
 
 v_VOID_t WDA_ProcessFWStatsGetReq(tWDA_CbContext *pWDA,
                                       tSirFWStatsGetReq *wdaRequest);
@@ -331,7 +329,6 @@ VOS_STATUS WDA_ProcessNanRequest(tWDA_CbContext *pWDA,
 
 
 
->>>>>>> a38196d... prima: Update to release LA.BF.1.1.3-00110-8x74.0
 /*
  * FUNCTION: WDA_open
  * Allocate the WDA context 
@@ -4749,6 +4746,8 @@ void WDA_UpdateBSSParams(tWDA_CbContext *pWDA,
                          tAddBssParams *wdaBssParams)
 {
    v_U8_t keyIndex = 0;
+   v_U8_t i = 0;
+
    /* copy bssReq Params to WDI structure */
    vos_mem_copy(wdiBssParams->macBSSID,
                            wdaBssParams->bssId, sizeof(tSirMacAddr)) ;
@@ -4825,16 +4824,43 @@ void WDA_UpdateBSSParams(tWDA_CbContext *pWDA,
                   wdaBssParams->extSetStaKeyParam.key[keyIndex].unicast;
                wdiBssParams->wdiExtSetKeyParam.wdiKey[keyIndex].keyDirection =
                   wdaBssParams->extSetStaKeyParam.key[keyIndex].keyDirection;
-               vos_mem_copy(wdiBssParams->wdiExtSetKeyParam.wdiKey[keyIndex].keyRsc, 
-                            wdaBssParams->extSetStaKeyParam.key[keyIndex].keyRsc, WLAN_MAX_KEY_RSC_LEN);
+
+               if(WDA_getHostWlanFeatCaps(DISA) && WDA_getFwWlanFeatCaps(DISA))
+               {
+                  for (i = 0; i < WLAN_MAX_KEY_RSC_LEN; i ++)
+                  {
+                    wdiBssParams->wdiExtSetKeyParam.wdiKey[keyIndex].keyRsc[i] =
+                     ~(wdaBssParams->extSetStaKeyParam.key[keyIndex].keyRsc[i]);
+                  }
+
+                  for (i = 0; i < SIR_MAC_MAX_KEY_LENGTH; i++)
+                  {
+                      wdiBssParams->wdiExtSetKeyParam.wdiKey[keyIndex].key[i] =
+                        ~(wdaBssParams->extSetStaKeyParam.key[keyIndex].key[i]);
+                  }
+                  VOS_TRACE(VOS_MODULE_ID_WDA, VOS_TRACE_LEVEL_INFO,
+                          FL("%s: Negated Keys"), __func__);
+               }
+               else
+               {
+                   VOS_TRACE(VOS_MODULE_ID_WDA, VOS_TRACE_LEVEL_INFO,
+                           FL("%s: No change in Keys "), __func__);
+                   vos_mem_copy(
+                       wdiBssParams->wdiExtSetKeyParam.wdiKey[keyIndex].keyRsc,
+                       wdaBssParams->extSetStaKeyParam.key[keyIndex].keyRsc,
+                       WLAN_MAX_KEY_RSC_LEN);
+                   vos_mem_copy(
+                       wdiBssParams->wdiExtSetKeyParam.wdiKey[keyIndex].key,
+                       wdaBssParams->extSetStaKeyParam.key[keyIndex].key,
+                       SIR_MAC_MAX_KEY_LENGTH);
+               }
+
                wdiBssParams->wdiExtSetKeyParam.wdiKey[keyIndex].paeRole =
                   wdaBssParams->extSetStaKeyParam.key[keyIndex].paeRole;
                wdiBssParams->wdiExtSetKeyParam.wdiKey[keyIndex].keyLength =
                   wdaBssParams->extSetStaKeyParam.key[keyIndex].keyLength;
-               vos_mem_copy(wdiBssParams->wdiExtSetKeyParam.wdiKey[keyIndex].key, 
-                            wdaBssParams->extSetStaKeyParam.key[keyIndex].key, SIR_MAC_MAX_KEY_LENGTH);
             }
-            wdiBssParams->wdiExtSetKeyParam.ucNumKeys = 
+            wdiBssParams->wdiExtSetKeyParam.ucNumKeys =
                SIR_MAC_MAX_NUM_OF_DEFAULT_KEYS;
          }
       }
@@ -6489,7 +6515,7 @@ void WDA_AddBAReqCallback(WDI_AddBARspinfoType *pAddBARspParams,
  * Request to WDI to Update the ADDBA REQ params.
  */ 
 VOS_STATUS WDA_ProcessAddBAReq(tWDA_CbContext *pWDA, VOS_STATUS status,
-           tANI_U16 baSessionID, tANI_U8 staIdx, tAddBAParams *pAddBAReqParams)
+           tANI_U16 baSessionID, tANI_U8 staIdx, tANI_U8 ucWinSize, tAddBAParams *pAddBAReqParams)
 {
    WDI_Status wstatus;
    WDI_AddBAReqParamsType *wdiAddBAReqParam = 
@@ -6519,7 +6545,7 @@ VOS_STATUS WDA_ProcessAddBAReq(tWDA_CbContext *pWDA, VOS_STATUS status,
       WDI_AddBAReqinfoType *wdiAddBaInfo = &wdiAddBAReqParam->wdiBAInfoType ;
       wdiAddBaInfo->ucSTAIdx = staIdx ;
       wdiAddBaInfo->ucBaSessionID = baSessionID ;
-      wdiAddBaInfo->ucWinSize     = WDA_BA_MAX_WINSIZE ;
+      wdiAddBaInfo->ucWinSize     = ucWinSize ;
    } while(0) ;
    wdiAddBAReqParam->wdiReqStatusCB = NULL ;
    pWdaParams->pWdaContext = pWDA;
@@ -6589,7 +6615,6 @@ void WDA_AddBASessionReqCallback(
     * if BA direction is for recipient, update TL with BA session params and send
     * another request to HAL(/WDI) (ADD_BA_REQ)
     */
-   
    if((VOS_STATUS_SUCCESS == 
                        CONVERT_WDI2VOS_STATUS(wdiAddBaSession->wdiStatus)) && 
                                  (eBA_RECIPIENT == pAddBAReqParams->baDirection))
@@ -6603,7 +6628,8 @@ void WDA_AddBASessionReqCallback(
                                         wdiAddBaSession->ucWinSize,
                                         wdiAddBaSession->usBaSSN );
       WDA_ProcessAddBAReq(pWDA, status, wdiAddBaSession->usBaSessionID, 
-                                      wdiAddBaSession->ucSTAIdx, pAddBAReqParams) ;
+                                      wdiAddBaSession->ucSTAIdx,
+                                      wdiAddBaSession->ucWinSize, pAddBAReqParams) ;
    }
    else
    {
@@ -8629,18 +8655,65 @@ VOS_STATUS WDA_ProcessEnterImpsReq(tWDA_CbContext *pWDA)
    }
    return CONVERT_WDI2VOS_STATUS(status) ;
 }
+
+/*
+ * FUNCTION: WDA_ExitImpsRespCallback
+ * send Exit IMPS RSP back to PE
+ */
+void WDA_ExitImpsRespCallback(WDI_Status status, void* pUserData)
+{
+   tWDA_ReqParams *pWdaParams = (tWDA_ReqParams *)pUserData;
+   tWDA_CbContext *pWDA;
+
+   VOS_TRACE( VOS_MODULE_ID_WDA, VOS_TRACE_LEVEL_INFO,
+                                          "<------ %s " ,__func__);
+
+   if (NULL == pWdaParams)
+   {
+      VOS_TRACE( VOS_MODULE_ID_WDA, VOS_TRACE_LEVEL_ERROR,
+              "%s: pWdaParams received NULL", __func__);
+      VOS_ASSERT(0);
+      return;
+   }
+   pWDA = (tWDA_CbContext *)pWdaParams->pWdaContext;
+
+   vos_mem_free(pWdaParams->wdaWdiApiMsgParam);
+   vos_mem_free(pWdaParams);
+
+   WDA_SendMsg(pWDA, WDA_EXIT_IMPS_RSP, NULL , (status));
+   return;
+}
+
 /*
  * FUNCTION: WDA_ExitImpsReqCallback
- * send Exit IMPS RSP back to PE
  */ 
 void WDA_ExitImpsReqCallback(WDI_Status status, void* pUserData)
 {
-   tWDA_CbContext *pWDA = (tWDA_CbContext *)pUserData ;
+   tWDA_ReqParams *pWdaParams = (tWDA_ReqParams *)pUserData;
    VOS_TRACE( VOS_MODULE_ID_WDA, VOS_TRACE_LEVEL_INFO,
                                           "<------ %s " ,__func__);
-   WDA_SendMsg(pWDA, WDA_EXIT_IMPS_RSP, NULL , (status)) ;
-   return ;
+   if(NULL == pWdaParams)
+   {
+      VOS_TRACE( VOS_MODULE_ID_WDA, VOS_TRACE_LEVEL_ERROR,
+                 "%s: pWdaParams received NULL", __func__);
+      VOS_ASSERT(0);
+      return;
+   }
+
+   if (IS_WDI_STATUS_FAILURE(status))
+   {
+       vos_mem_free(pWdaParams->wdaWdiApiMsgParam);
+       vos_mem_free(pWdaParams);
+       if (WDI_STATUS_DEV_INTERNAL_FAILURE == status)
+       {
+           VOS_TRACE( VOS_MODULE_ID_WDA, VOS_TRACE_LEVEL_ERROR,
+                  FL("reload wlan driver"));
+           wpalWlanReload();
+       }
+   }
+   return;
 }
+
 /*
  * FUNCTION: WDA_ProcessExitImpsReq
  * Request to WDI to Exit IMPS power state.
@@ -8648,23 +8721,47 @@ void WDA_ExitImpsReqCallback(WDI_Status status, void* pUserData)
 VOS_STATUS WDA_ProcessExitImpsReq(tWDA_CbContext *pWDA)
 {
    WDI_Status status = WDI_STATUS_SUCCESS ;
+   tWDA_ReqParams *pWdaParams;
+   WDI_ExitImpsReqParamsType *wdiExitImpsReqParams;
+
    VOS_TRACE( VOS_MODULE_ID_WDA, VOS_TRACE_LEVEL_INFO,
                                           "------> %s " ,__func__);
-   status = WDI_ExitImpsReq((WDI_ExitImpsRspCb)WDA_ExitImpsReqCallback, pWDA);
-   if(IS_WDI_STATUS_FAILURE(status))
+   wdiExitImpsReqParams = (WDI_ExitImpsReqParamsType *)vos_mem_malloc(
+                          sizeof(WDI_ExitImpsReqParamsType));
+   if (NULL == wdiExitImpsReqParams)
    {
-      if (WDI_STATUS_DEV_INTERNAL_FAILURE == status)
-      {
-          VOS_TRACE( VOS_MODULE_ID_WDA, VOS_TRACE_LEVEL_ERROR,
-                     FL("reload wlan driver"));
-          wpalWlanReload();
-      }
-      else
-      {
-          VOS_TRACE( VOS_MODULE_ID_WDA, VOS_TRACE_LEVEL_ERROR,
-              "Failure in Exit IMPS REQ WDI API, free all the memory " );
-          WDA_SendMsg(pWDA, WDA_EXIT_IMPS_RSP, NULL , CONVERT_WDI2SIR_STATUS(status)) ;
-      }
+       VOS_TRACE( VOS_MODULE_ID_WDA, VOS_TRACE_LEVEL_ERROR,
+                   "%s: VOS MEM Alloc Failure", __func__);
+       VOS_ASSERT(0);
+       return VOS_STATUS_E_NOMEM;
+   }
+   pWdaParams = (tWDA_ReqParams *)vos_mem_malloc(sizeof(tWDA_ReqParams));
+   if(NULL == pWdaParams)
+   {
+      VOS_TRACE( VOS_MODULE_ID_WDA, VOS_TRACE_LEVEL_ERROR,
+                 "%s: VOS MEM Alloc Failure", __func__);
+      VOS_ASSERT(0);
+      vos_mem_free(wdiExitImpsReqParams);
+      return VOS_STATUS_E_NOMEM;
+   }
+   wdiExitImpsReqParams->wdiReqStatusCB = WDA_ExitImpsReqCallback;
+   wdiExitImpsReqParams->pUserData = pWdaParams;
+
+   /* Store param pointer as passed in by caller */
+   /* store Params pass it to WDI */
+   pWdaParams->wdaWdiApiMsgParam = wdiExitImpsReqParams;
+   pWdaParams->pWdaContext = pWDA;
+   pWdaParams->wdaMsgParam = wdiExitImpsReqParams;
+   status = WDI_ExitImpsReq(wdiExitImpsReqParams,
+                           (WDI_ExitImpsRspCb)WDA_ExitImpsRespCallback,
+                           pWdaParams);
+   if (IS_WDI_STATUS_FAILURE(status))
+   {
+       VOS_TRACE( VOS_MODULE_ID_WDA, VOS_TRACE_LEVEL_ERROR,
+                  "Failure in Exit IMPS REQ WDI API, free all the memory " );
+       vos_mem_free(pWdaParams->wdaWdiApiMsgParam);
+       vos_mem_free(pWdaParams);
+       WDA_SendMsg(pWDA, WDA_EXIT_IMPS_RSP, NULL , CONVERT_WDI2SIR_STATUS(status)) ;
    }
    return CONVERT_WDI2VOS_STATUS(status) ;
 }
@@ -14446,8 +14543,6 @@ VOS_STATUS WDA_McProcessMsg( v_CONTEXT_t pVosContext, vos_msg_t *pMsg )
           WDA_ProcessSetSpoofMacAddrReq(pWDA, (tpSpoofMacAddrReqParams)pMsg->bodyptr);
           break;
       }
-<<<<<<< HEAD
-=======
       case WDA_ENCRYPT_MSG_REQ:
       {
          WDA_ProcessEncryptMsgReq(pWDA, (u8 *)pMsg->bodyptr);
@@ -14480,7 +14575,6 @@ VOS_STATUS WDA_McProcessMsg( v_CONTEXT_t pVosContext, vos_msg_t *pMsg )
          WDA_ProcessEnableDisableCAEventInd(pWDA, pMsg->bodyval);
          break;
       }
->>>>>>> a38196d... prima: Update to release LA.BF.1.1.3-00110-8x74.0
       default:
       {
          VOS_TRACE( VOS_MODULE_ID_WDA, VOS_TRACE_LEVEL_INFO,
@@ -16015,6 +16109,15 @@ void WDA_PNOScanRespCallback(WDI_Status status, void* pUserData)
                            VOS_STATUS_SUCCESS : VOS_STATUS_E_FAILURE);
    }
 
+   if (pPNOScanReqParams->enable == 1)
+   {
+       if (pPNOScanReqParams->aNetworks)
+           vos_mem_free(pPNOScanReqParams->aNetworks);
+       if (pPNOScanReqParams->p24GProbeTemplate)
+           vos_mem_free(pPNOScanReqParams->p24GProbeTemplate);
+       if (pPNOScanReqParams->p5GProbeTemplate)
+           vos_mem_free(pPNOScanReqParams->p5GProbeTemplate);
+   }
    vos_mem_free(pWdaParams->wdaWdiApiMsgParam);
    vos_mem_free(pWdaParams->wdaMsgParam);
    vos_mem_free(pWdaParams);
@@ -16051,6 +16154,15 @@ void WDA_PNOScanReqCallback(WDI_Status wdiStatus, void* pUserData)
                                            VOS_STATUS_E_FAILURE);
       }
 
+      if (pPNOScanReqParams->enable == 1)
+      {
+          if (pPNOScanReqParams->aNetworks)
+              vos_mem_free(pPNOScanReqParams->aNetworks);
+          if (pPNOScanReqParams->p24GProbeTemplate)
+              vos_mem_free(pPNOScanReqParams->p24GProbeTemplate);
+          if (pPNOScanReqParams->p5GProbeTemplate)
+              vos_mem_free(pPNOScanReqParams->p5GProbeTemplate);
+      }
       vos_mem_free(pWdaParams->wdaWdiApiMsgParam);
       vos_mem_free(pWdaParams->wdaMsgParam);
       vos_mem_free(pWdaParams);
@@ -16191,9 +16303,18 @@ VOS_STATUS WDA_ProcessSetPrefNetworkReq(tWDA_CbContext *pWDA,
          pPNOScanReqParams->statusCallback(pPNOScanReqParams->callbackContext,
                                            VOS_STATUS_E_FAILURE);
       }
-
+      if (pPNOScanReqParams->enable == 1)
+      {
+          if (pPNOScanReqParams->aNetworks)
+              vos_mem_free(pPNOScanReqParams->aNetworks);
+          if (pPNOScanReqParams->p24GProbeTemplate)
+              vos_mem_free(pPNOScanReqParams->p24GProbeTemplate);
+          if (pPNOScanReqParams->p5GProbeTemplate)
+              vos_mem_free(pPNOScanReqParams->p5GProbeTemplate);
+      }
       vos_mem_free(pWdaParams->wdaWdiApiMsgParam) ;
       vos_mem_free(pWdaParams->wdaMsgParam);
+
       pWdaParams->wdaWdiApiMsgParam = NULL;
       pWdaParams->wdaMsgParam = NULL;
    }
@@ -19169,8 +19290,6 @@ VOS_STATUS WDA_ProcessLLStatsClearReq(tWDA_CbContext *pWDA,
 }
 
 #endif /* WLAN_FEATURE_LINK_LAYER_STATS */
-<<<<<<< HEAD
-=======
 
 void WDA_FWStatsGetRspCallback(WDI_Status status,void *fwStatsResp,void *pUserData)
 {
@@ -19516,4 +19635,3 @@ VOS_STATUS WDA_ProcessEnableDisableCAEventInd(tWDA_CbContext *pWDA, tANI_U8 val)
     }
     return CONVERT_WDI2VOS_STATUS(status) ;
 }
->>>>>>> a38196d... prima: Update to release LA.BF.1.1.3-00110-8x74.0

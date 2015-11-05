@@ -3618,8 +3618,6 @@ eHalStatus sme_SetHT2040Mode(tHalHandle hHal,
 
 void sme_disable_dfs_channel(tHalHandle hHal, bool disable_dfs);
 
-<<<<<<< HEAD
-=======
 /* HDD Callback function */
 typedef void(*pEncryptMsgRSPCb)(void *pUserData, void *infoParam);
 
@@ -3716,5 +3714,4 @@ eHalStatus sme_fatal_event_logs_req(tHalHandle hHal, tANI_U32 is_fatal,
 eHalStatus sme_enableDisableChanAvoidIndEvent(tHalHandle hHal,
                                               tANI_U8 set_value);
 
->>>>>>> a38196d... prima: Update to release LA.BF.1.1.3-00110-8x74.0
 #endif //#if !defined( __SME_API_H )

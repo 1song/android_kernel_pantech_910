@@ -98,28 +98,9 @@ DEFINE_PER_CPU(struct avc_cache_stats, avc_cache_stats) = { 0 };
 static struct avc_cache avc_cache;
 static struct avc_callback_node *avc_callbacks;
 static struct kmem_cache *avc_node_cachep;
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-#ifdef CONFIG_PANTECH_SELINUX_DENIAL_LOG //P11536-SHPARK-SELinux 
-static struct pantech_avc_format pantech_avc;
-struct pantech_avc_format pantech_get_avc(void)
-{     
-    return pantech_avc;
-}
-#endif
-=======
-static struct kmem_cache *avc_operation_decision_node_cachep;
-static struct kmem_cache *avc_operation_node_cachep;
-static struct kmem_cache *avc_operation_perm_cachep;
->>>>>>> badee8e... SELinux: per-command whitelisting of ioctls
-=======
->>>>>>> a0c451f... Revert "SELinux: per-command whitelisting of ioctls"
-=======
 static struct kmem_cache *avc_xperms_data_cachep;
 static struct kmem_cache *avc_xperms_decision_cachep;
 static struct kmem_cache *avc_xperms_cachep;
->>>>>>> 59156c3... selinux: extended permissions for ioctls
 
 static inline int avc_hash(u32 ssid, u32 tsid, u16 tclass)
 {
@@ -462,36 +443,6 @@ error:
 
 }
 
-static inline u32 avc_xperms_audit_required(u32 requested,
-					struct av_decision *avd,
-					struct extended_perms_decision *xpd,
-					u8 perm,
-					int result,
-					u32 *deniedp)
-{
-	u32 denied, audited;
-
-	denied = requested & ~avd->allowed;
-	if (unlikely(denied)) {
-		audited = denied & avd->auditdeny;
-		if (audited && xpd) {
-			if (avc_xperms_has_perm(xpd, perm, XPERMS_DONTAUDIT))
-				audited &= ~requested;
-		}
-	} else if (result) {
-		audited = denied = requested;
-	} else {
-		audited = requested & avd->auditallow;
-		if (audited && xpd) {
-			if (!avc_xperms_has_perm(xpd, perm, XPERMS_AUDITALLOW))
-				audited &= ~requested;
-		}
-	}
-
-	*deniedp = denied;
-	return audited;
-}
-
 static void avc_node_free(struct rcu_head *rhead)
 {
 	struct avc_node *node = container_of(rhead, struct avc_node, rhead);
@@ -713,153 +664,6 @@ found:
 	}
 out:
 	return node;
-}
-
-/**
- * avc_audit_pre_callback - SELinux specific information
- * will be called by generic audit code
- * @ab: the audit buffer
- * @a: audit_data
- */
-static void avc_audit_pre_callback(struct audit_buffer *ab, void *a)
-{
-	struct common_audit_data *ad = a;
-	audit_log_format(ab, "avc:  %s ",
-			 ad->selinux_audit_data->slad->denied ? "denied" : "granted");
-	avc_dump_av(ab, ad->selinux_audit_data->slad->tclass,
-			ad->selinux_audit_data->slad->audited);
-	audit_log_format(ab, " for ");
-}
-
-/**
- * avc_audit_post_callback - SELinux specific information
- * will be called by generic audit code
- * @ab: the audit buffer
- * @a: audit_data
- */
-static void avc_audit_post_callback(struct audit_buffer *ab, void *a)
-{
-	struct common_audit_data *ad = a;
-	audit_log_format(ab, " ");
-	avc_dump_query(ab, ad->selinux_audit_data->slad->ssid,
-			   ad->selinux_audit_data->slad->tsid,
-			   ad->selinux_audit_data->slad->tclass);
-}
-
-/* This is the slow part of avc audit with big stack footprint */
-static noinline int slow_avc_audit(u32 ssid, u32 tsid, u16 tclass,
-		u32 requested, u32 audited, u32 denied,
-		struct common_audit_data *a,
-		unsigned flags)
-{
-	struct common_audit_data stack_data;
-	struct selinux_audit_data sad = {0,};
-	struct selinux_late_audit_data slad;
-
-	if (!a) {
-		a = &stack_data;
-		COMMON_AUDIT_DATA_INIT(a, NONE);
-		a->selinux_audit_data = &sad;
-	}
-
-	/*
-	 * When in a RCU walk do the audit on the RCU retry.  This is because
-	 * the collection of the dname in an inode audit message is not RCU
-	 * safe.  Note this may drop some audits when the situation changes
-	 * during retry. However this is logically just as if the operation
-	 * happened a little later.
-	 */
-	if ((a->type == LSM_AUDIT_DATA_INODE) &&
-	    (flags & MAY_NOT_BLOCK))
-		return -ECHILD;
-
-	slad.tclass = tclass;
-	slad.requested = requested;
-	slad.ssid = ssid;
-	slad.tsid = tsid;
-	slad.audited = audited;
-	slad.denied = denied;
-
-	a->selinux_audit_data->slad = &slad;
-	common_lsm_audit(a, avc_audit_pre_callback, avc_audit_post_callback);
-	return 0;
-}
-
-static inline int avc_xperms_audit(u32 ssid, u32 tsid, u16 tclass,
-				u32 requested, struct av_decision *avd,
-				struct extended_perms_decision *xpd,
-				u8 perm, int result,
-				struct common_audit_data *ad)
-{
-	u32 audited, denied;
-
-	audited = avc_xperms_audit_required(
-			requested, avd, xpd, perm, result, &denied);
-	if (likely(!audited))
-		return 0;
-	return slow_avc_audit(ssid, tsid, tclass, requested,
-			audited, denied, result, ad, 0);
-}
-
-/**
- * avc_audit - Audit the granting or denial of permissions.
- * @ssid: source security identifier
- * @tsid: target security identifier
- * @tclass: target security class
- * @requested: requested permissions
- * @avd: access vector decisions
- * @result: result from avc_has_perm_noaudit
- * @a:  auxiliary audit data
- * @flags: VFS walk flags
- *
- * Audit the granting or denial of permissions in accordance
- * with the policy.  This function is typically called by
- * avc_has_perm() after a permission check, but can also be
- * called directly by callers who use avc_has_perm_noaudit()
- * in order to separate the permission check from the auditing.
- * For example, this separation is useful when the permission check must
- * be performed under a lock, to allow the lock to be released
- * before calling the auditing code.
- */
-inline int avc_audit(u32 ssid, u32 tsid,
-	       u16 tclass, u32 requested,
-	       struct av_decision *avd, int result, struct common_audit_data *a,
-	       unsigned flags)
-{
-	u32 denied, audited;
-	denied = requested & ~avd->allowed;
-	if (unlikely(denied)) {
-		audited = denied & avd->auditdeny;
-		/*
-		 * a->selinux_audit_data->auditdeny is TRICKY!  Setting a bit in
-		 * this field means that ANY denials should NOT be audited if
-		 * the policy contains an explicit dontaudit rule for that
-		 * permission.  Take notice that this is unrelated to the
-		 * actual permissions that were denied.  As an example lets
-		 * assume:
-		 *
-		 * denied == READ
-		 * avd.auditdeny & ACCESS == 0 (not set means explicit rule)
-		 * selinux_audit_data->auditdeny & ACCESS == 1
-		 *
-		 * We will NOT audit the denial even though the denied
-		 * permission was READ and the auditdeny checks were for
-		 * ACCESS
-		 */
-		if (a &&
-		    a->selinux_audit_data->auditdeny &&
-		    !(a->selinux_audit_data->auditdeny & avd->auditdeny))
-			audited = 0;
-	} else if (result)
-		audited = denied = requested;
-	else
-		audited = requested & avd->auditallow;
-	if (likely(!audited))
-		return 0;
-
-	return slow_avc_audit(ssid, tsid, tclass,
-		requested, audited, denied,
-		a, flags);
 }
 
 /**
@@ -1101,87 +905,6 @@ static noinline int avc_denied(u32 ssid, u32 tsid,
 	return 0;
 }
 
-/*
- * The avc extended permissions logic adds an additional 256 bits of
- * permissions to an avc node when extended permissions for that node are
- * specified in the avtab. If the additional 256 permissions is not adequate,
- * as-is the case with ioctls, then multiple may be chained together and the
- * driver field is used to specify which set contains the permission.
- */
-int avc_has_extended_perms(u32 ssid, u32 tsid, u16 tclass, u32 requested,
-			u8 driver, u8 xperm, struct common_audit_data *ad)
-{
-	struct avc_node *node;
-	struct av_decision avd;
-	u32 denied;
-	struct extended_perms_decision local_xpd;
-	struct extended_perms_decision *xpd = NULL;
-	struct extended_perms_data allowed;
-	struct extended_perms_data auditallow;
-	struct extended_perms_data dontaudit;
-	struct avc_xperms_node local_xp_node;
-	struct avc_xperms_node *xp_node;
-	int rc = 0, rc2;
-
-	xp_node = &local_xp_node;
-	BUG_ON(!requested);
-
-	rcu_read_lock();
-
-	node = avc_lookup(ssid, tsid, tclass);
-	if (unlikely(!node)) {
-		node = avc_compute_av(ssid, tsid, tclass, &avd, xp_node);
-	} else {
-		memcpy(&avd, &node->ae.avd, sizeof(avd));
-		xp_node = node->ae.xp_node;
-	}
-	/* if extended permissions are not defined, only consider av_decision */
-	if (!xp_node || !xp_node->xp.len)
-		goto decision;
-
-	local_xpd.allowed = &allowed;
-	local_xpd.auditallow = &auditallow;
-	local_xpd.dontaudit = &dontaudit;
-
-	xpd = avc_xperms_decision_lookup(driver, xp_node);
-	if (unlikely(!xpd)) {
-		/*
-		 * Compute the extended_perms_decision only if the driver
-		 * is flagged
-		 */
-		if (!security_xperm_test(xp_node->xp.drivers.p, driver)) {
-			avd.allowed &= ~requested;
-			goto decision;
-		}
-		rcu_read_unlock();
-		security_compute_xperms_decision(ssid, tsid, tclass, driver,
-						&local_xpd);
-		rcu_read_lock();
-		avc_update_node(AVC_CALLBACK_ADD_XPERMS, requested, driver, xperm,
-				ssid, tsid, tclass, avd.seqno, &local_xpd, 0);
-	} else {
-		avc_quick_copy_xperms_decision(xperm, &local_xpd, xpd);
-	}
-	xpd = &local_xpd;
-
-	if (!avc_xperms_has_perm(xpd, xperm, XPERMS_ALLOWED))
-		avd.allowed &= ~requested;
-
-decision:
-	denied = requested & ~(avd.allowed);
-	if (unlikely(denied))
-		rc = avc_denied(ssid, tsid, tclass, requested, driver, xperm,
-				AVC_EXTENDED_PERMS, &avd);
-
-	rcu_read_unlock();
-
-	rc2 = avc_xperms_audit(ssid, tsid, tclass, requested,
-			&avd, xpd, xperm, rc, ad);
-	if (rc2)
-		return rc2;
-	return rc;
-}
-
 /**
  * avc_has_perm_noaudit - Check permissions but perform no auditing.
  * @ssid: source security identifier
@@ -1226,14 +949,6 @@ inline int avc_has_perm_noaudit(u32 ssid, u32 tsid,
 	if (unlikely(denied))
 		rc = avc_denied(ssid, tsid, tclass, requested, 0, 0, flags, avd);
 
-#ifdef CONFIG_PANTECH_SELINUX_DENIAL_LOG //P11536-SHPARK-SELinux 
-	pantech_avc.real_denied= rc;
-	if(avd->flags == 1)
-	  pantech_avc.permissive_domain= 1;
-	else
-	  pantech_avc.permissive_domain = 0;
-#endif
-
 	rcu_read_unlock();
 	return rc;
 }
@@ -1264,8 +979,6 @@ int avc_has_perm_flags(u32 ssid, u32 tsid, u16 tclass,
 
 	rc = avc_has_perm_noaudit(ssid, tsid, tclass, requested, 0, &avd);
 
-	rc2 = avc_audit(ssid, tsid, tclass, requested, &avd, rc, auditdata,
-			flags);
 	if (rc2)
 		return rc2;
 	return rc;

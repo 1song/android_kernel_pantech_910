@@ -190,8 +190,8 @@ static placeHolderInCapBitmap supportEnabledFeatures[] =
 
    ,MAC_SPOOFED_SCAN               //44
    ,FEATURE_NOT_SUPPORTED          //45
-   ,FEATURE_NOT_SUPPORTED          //46
-   ,FEATURE_NOT_SUPPORTED          //47
+   ,DISA                           //46
+   ,FW_STATS                       //47
    ,WPS_PRBRSP_TMPL                //48
    ,BCN_IE_FLT_DELTA               //49
    ,FEATURE_NOT_SUPPORTED          //50
@@ -467,8 +467,6 @@ WDI_ReqProcFuncType  pfnReqProcTbl[WDI_MAX_UMAC_IND] =
   NULL,
 #endif /* WLAN_FEATURE_EXTSCAN */
   WDI_ProcessSpoofMacAddrReq,       /* WDI_SPOOF_MAC_ADDR_REQ */
-<<<<<<< HEAD
-=======
 
   WDI_ProcessGetFwStatsReq,                   /*WDI_GET_FW_STATS_REQ*/
 
@@ -482,7 +480,6 @@ WDI_ReqProcFuncType  pfnReqProcTbl[WDI_MAX_UMAC_IND] =
   WDI_ProcessMonStartReq,          /* WDI_MON_START_REQ */
   WDI_ProcessMonStopReq,           /* WDI_MON_STOP_REQ */
   WDI_ProcessFatalEventLogsReq,     /*WDI_FATAL_EVENT_LOGGING_REQ*/
->>>>>>> a38196d... prima: Update to release LA.BF.1.1.3-00110-8x74.0
   /*-------------------------------------------------------------------------
     Indications
   -------------------------------------------------------------------------*/
@@ -744,8 +741,6 @@ WDI_RspProcFuncType  pfnRspProcTbl[WDI_MAX_RESP] =
     NULL,
 #endif /* WLAN_FEATURE_EXTSCAN */
     WDI_ProcessSpoofMacAddrRsp,                /* WDI_SPOOF_MAC_ADDR_RSP */
-<<<<<<< HEAD
-=======
 
     WDI_ProcessGetFwStatsRsp,                     /*WDI_GET_FW_STATS_RSP*/
 
@@ -758,7 +753,6 @@ WDI_RspProcFuncType  pfnRspProcTbl[WDI_MAX_RESP] =
     WDI_ProcessMonStartRsp,                    /* WDI_MON_START_RSP*/
     WDI_ProcessMonStopRsp,                    /* WDI_MON_STOP_RSP*/
     WDI_ProcessFatalEventLogsRsp,              /*WDI_FATAL_EVENT_LOGGING_RSP*/
->>>>>>> a38196d... prima: Update to release LA.BF.1.1.3-00110-8x74.0
   /*---------------------------------------------------------------------
     Indications
   ---------------------------------------------------------------------*/
@@ -1179,8 +1173,6 @@ static char *WDI_getReqMsgString(wpt_uint16 wdiReqMsgId)
     CASE_RETURN_STRING( WDI_EXTSCAN_RESET_SIGNF_RSSI_CHANGE_REQ);
 #endif /* WLAN_FEATURE_EXTSCAN */
     CASE_RETURN_STRING( WDI_SPOOF_MAC_ADDR_REQ);
-<<<<<<< HEAD
-=======
     CASE_RETURN_STRING( WDI_GET_FW_STATS_REQ);
     CASE_RETURN_STRING( WDI_ENCRYPT_MSG_REQ);
     CASE_RETURN_STRING( WDI_FW_LOGGING_INIT_REQ);
@@ -1191,7 +1183,6 @@ static char *WDI_getReqMsgString(wpt_uint16 wdiReqMsgId)
     CASE_RETURN_STRING( WDI_MON_STOP_REQ );
     CASE_RETURN_STRING( WDI_FATAL_EVENT_LOGGING_REQ );
     CASE_RETURN_STRING( WDI_SEND_FREQ_RANGE_CONTROL_IND );
->>>>>>> a38196d... prima: Update to release LA.BF.1.1.3-00110-8x74.0
     default:
         return "Unknown WDI MessageId";
   }
@@ -1323,14 +1314,11 @@ static char *WDI_getRespMsgString(wpt_uint16 wdiRespMsgId)
     CASE_RETURN_STRING( WDI_HAL_EXTSCAN_SIG_RSSI_RESULT_IND);
 
 #endif /* WLAN_FEATURE_EXTSCAN */
-<<<<<<< HEAD
-=======
     CASE_RETURN_STRING( WDI_GET_FW_STATS_RSP);
     CASE_RETURN_STRING( WDI_ENCRYPT_MSG_RSP);
     CASE_RETURN_STRING( WDI_FW_LOGGING_INIT_RSP);
     CASE_RETURN_STRING( WDI_GET_FRAME_LOG_RSP);
     CASE_RETURN_STRING (WDI_FATAL_EVENT_LOGGING_RSP);
->>>>>>> a38196d... prima: Update to release LA.BF.1.1.3-00110-8x74.0
     default:
         return "Unknown WDI MessageId";
   }
@@ -1486,8 +1474,6 @@ void WDI_TraceHostFWCapabilities(tANI_U32 *capabilityBitmap)
                           pCapStr += strlen("BMU_ERROR_GENERIC_RECOVERY");
                           break;
 
-<<<<<<< HEAD
-=======
                      case DISA: snprintf(pCapStr, sizeof("DISA"), "%s", "DISA");
                           pCapStr += strlen("DISA");
                           break;
@@ -1500,7 +1486,6 @@ void WDI_TraceHostFWCapabilities(tANI_U32 *capabilityBitmap)
                           break;
 
 
->>>>>>> a38196d... prima: Update to release LA.BF.1.1.3-00110-8x74.0
                  }
                  *pCapStr++ = ',';
                  *pCapStr++ = ' ';
@@ -3854,6 +3839,7 @@ WDI_EnterImpsReq
 WDI_Status
 WDI_ExitImpsReq
 (
+   WDI_ExitImpsReqParamsType *pwdiExitImpsReqParams,
    WDI_ExitImpsRspCb  wdiExitImpsRspCb,
    void*                   pUserData
 )
@@ -3876,8 +3862,8 @@ WDI_ExitImpsReq
     Fill in Event data and post to the Main FSM
   ------------------------------------------------------------------------*/
   wdiEventData.wdiRequest      = WDI_EXIT_IMPS_REQ;
-  wdiEventData.pEventData      = NULL;
-  wdiEventData.uEventDataSize  = 0;
+  wdiEventData.pEventData      = pwdiExitImpsReqParams;
+  wdiEventData.uEventDataSize  = sizeof(*pwdiExitImpsReqParams);
   wdiEventData.pCBfnc          = wdiExitImpsRspCb;
   wdiEventData.pUserData       = pUserData;
 
@@ -9419,6 +9405,7 @@ WDI_ProcessSetBssKeyReq
   WDI_Status                   wdiStatus           = WDI_STATUS_SUCCESS;
   tSetBssKeyReqMsg             halSetBssKeyReqMsg  = {{0}};
   wpt_uint8                    keyIndex            = 0;
+  wpt_uint8                    i;
 
   /*- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
@@ -9512,17 +9499,40 @@ WDI_ProcessSetBssKeyReq
                      pwdiSetBSSKeyParams->wdiBSSKeyInfo.aKeys[keyIndex].unicast;
     halSetBssKeyReqMsg.setBssKeyParams.key[keyIndex].keyDirection =
                 pwdiSetBSSKeyParams->wdiBSSKeyInfo.aKeys[keyIndex].keyDirection;
-    wpalMemoryCopy(halSetBssKeyReqMsg.setBssKeyParams.key[keyIndex].keyRsc,
+
+    if(WDI_getHostWlanFeatCaps(DISA) && WDI_getFwWlanFeatCaps(DISA))
+    {
+      for (i = 0; i < WDI_MAX_KEY_RSC_LEN; i++)
+      {
+        halSetBssKeyReqMsg.setBssKeyParams.key[keyIndex].keyRsc[i] =
+            ~(pwdiSetBSSKeyParams->wdiBSSKeyInfo.aKeys[keyIndex].keyRsc[i]);
+      }
+
+      for (i = 0; i < WDI_MAX_KEY_LENGTH; i++)
+      {
+        halSetBssKeyReqMsg.setBssKeyParams.key[keyIndex].key[i] =
+             ~(pwdiSetBSSKeyParams->wdiBSSKeyInfo.aKeys[keyIndex].key[i]);
+      }
+
+      WPAL_TRACE(eWLAN_MODULE_DAL_CTRL, eWLAN_PAL_TRACE_LEVEL_INFO,
+             "%s: Negated Keys", __func__);
+    }
+    else
+    {
+      WPAL_TRACE(eWLAN_MODULE_DAL_CTRL, eWLAN_PAL_TRACE_LEVEL_INFO,
+             "%s: No change in Keys", __func__);
+      wpalMemoryCopy(halSetBssKeyReqMsg.setBssKeyParams.key[keyIndex].keyRsc,
                      pwdiSetBSSKeyParams->wdiBSSKeyInfo.aKeys[keyIndex].keyRsc,
                      WDI_MAX_KEY_RSC_LEN);
+      wpalMemoryCopy(halSetBssKeyReqMsg.setBssKeyParams.key[keyIndex].key,
+                     pwdiSetBSSKeyParams->wdiBSSKeyInfo.aKeys[keyIndex].key,
+                     WDI_MAX_KEY_LENGTH);
+    }
     halSetBssKeyReqMsg.setBssKeyParams.key[keyIndex].paeRole =
                      pwdiSetBSSKeyParams->wdiBSSKeyInfo.aKeys[keyIndex].paeRole;
     halSetBssKeyReqMsg.setBssKeyParams.key[keyIndex].keyLength =
                    pwdiSetBSSKeyParams->wdiBSSKeyInfo.aKeys[keyIndex].keyLength;
-    wpalMemoryCopy(halSetBssKeyReqMsg.setBssKeyParams.key[keyIndex].key,
-                         pwdiSetBSSKeyParams->wdiBSSKeyInfo.aKeys[keyIndex].key,
-                        WDI_MAX_KEY_LENGTH);
-   }
+  }
 
   wpalMemoryCopy( pSendBuffer+usDataOffset,
                     &halSetBssKeyReqMsg.setBssKeyParams,
@@ -9693,6 +9703,7 @@ WDI_ProcessSetStaKeyReq
   wpt_uint8                    ucCurrentBSSSesIdx;
   tSetStaKeyReqMsg             halSetStaKeyReqMsg  = {{0}};
   wpt_uint8                    keyIndex            = 0;
+  wpt_uint8                    i;
 
   /*- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
@@ -9796,17 +9807,40 @@ WDI_ProcessSetStaKeyReq
                      pwdiSetSTAKeyParams->wdiKeyInfo.wdiKey[keyIndex].unicast;
     halSetStaKeyReqMsg.setStaKeyParams.key[keyIndex].keyDirection =
                 pwdiSetSTAKeyParams->wdiKeyInfo.wdiKey[keyIndex].keyDirection;
-    wpalMemoryCopy(halSetStaKeyReqMsg.setStaKeyParams.key[keyIndex].keyRsc,
+
+    if(WDI_getHostWlanFeatCaps(DISA) && WDI_getFwWlanFeatCaps(DISA))
+    {
+      for (i = 0; i < WDI_MAX_KEY_RSC_LEN; i++)
+      {
+        halSetStaKeyReqMsg.setStaKeyParams.key[keyIndex].keyRsc[i] =
+             ~(pwdiSetSTAKeyParams->wdiKeyInfo.wdiKey[keyIndex].keyRsc[i]);
+      }
+
+      for (i = 0; i< WDI_MAX_KEY_LENGTH; i++)
+      {
+        halSetStaKeyReqMsg.setStaKeyParams.key[keyIndex].key[i] =
+             ~(pwdiSetSTAKeyParams->wdiKeyInfo.wdiKey[keyIndex].key[i]);
+      }
+
+      WPAL_TRACE(eWLAN_MODULE_DAL_CTRL, eWLAN_PAL_TRACE_LEVEL_INFO,
+             "%s: Negated Keys", __func__);
+    }
+    else
+    {
+      WPAL_TRACE(eWLAN_MODULE_DAL_CTRL, eWLAN_PAL_TRACE_LEVEL_INFO,
+             "%s: No change in Keys", __func__);
+      wpalMemoryCopy(halSetStaKeyReqMsg.setStaKeyParams.key[keyIndex].keyRsc,
                      pwdiSetSTAKeyParams->wdiKeyInfo.wdiKey[keyIndex].keyRsc,
                      WDI_MAX_KEY_RSC_LEN);
+      wpalMemoryCopy(halSetStaKeyReqMsg.setStaKeyParams.key[keyIndex].key,
+                     pwdiSetSTAKeyParams->wdiKeyInfo.wdiKey[keyIndex].key,
+                     WDI_MAX_KEY_LENGTH);
+    }
     halSetStaKeyReqMsg.setStaKeyParams.key[keyIndex].paeRole =
                      pwdiSetSTAKeyParams->wdiKeyInfo.wdiKey[keyIndex].paeRole;
     halSetStaKeyReqMsg.setStaKeyParams.key[keyIndex].keyLength =
                    pwdiSetSTAKeyParams->wdiKeyInfo.wdiKey[keyIndex].keyLength;
-    wpalMemoryCopy(halSetStaKeyReqMsg.setStaKeyParams.key[keyIndex].key,
-                         pwdiSetSTAKeyParams->wdiKeyInfo.wdiKey[keyIndex].key,
-                        WDI_MAX_KEY_LENGTH);
-   }
+  }
 
   wpalMemoryCopy( pSendBuffer+usDataOffset,
                     &halSetStaKeyReqMsg.setStaKeyParams,
@@ -9991,6 +10025,7 @@ WDI_ProcessSetStaBcastKeyReq
   wpt_uint8                    ucCurrentBSSSesIdx;
   tSetStaKeyReqMsg             halSetStaKeyReqMsg  = {{0}};
   wpt_uint8                    keyIndex            = 0;
+  wpt_uint8                    i;
 
   /*- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
@@ -10094,18 +10129,40 @@ WDI_ProcessSetStaBcastKeyReq
                      pwdiSetSTAKeyParams->wdiKeyInfo.wdiKey[keyIndex].unicast;
     halSetStaKeyReqMsg.setStaKeyParams.key[keyIndex].keyDirection =
                 pwdiSetSTAKeyParams->wdiKeyInfo.wdiKey[keyIndex].keyDirection;
-    wpalMemoryCopy(halSetStaKeyReqMsg.setStaKeyParams.key[keyIndex].keyRsc,
+
+    if(WDI_getHostWlanFeatCaps(DISA) && WDI_getFwWlanFeatCaps(DISA))
+    {
+      for (i = 0; i < WDI_MAX_KEY_RSC_LEN; i++)
+      {
+        halSetStaKeyReqMsg.setStaKeyParams.key[keyIndex].keyRsc[i] =
+             ~(pwdiSetSTAKeyParams->wdiKeyInfo.wdiKey[keyIndex].keyRsc[i]);
+      }
+
+      for (i = 0; i< WDI_MAX_KEY_LENGTH; i++)
+      {
+        halSetStaKeyReqMsg.setStaKeyParams.key[keyIndex].key[i] =
+             ~(pwdiSetSTAKeyParams->wdiKeyInfo.wdiKey[keyIndex].key[i]);
+      }
+
+      WPAL_TRACE(eWLAN_MODULE_DAL_CTRL, eWLAN_PAL_TRACE_LEVEL_INFO,
+             "%s: Negated Keys", __func__);
+    }
+    else
+    {
+      WPAL_TRACE(eWLAN_MODULE_DAL_CTRL, eWLAN_PAL_TRACE_LEVEL_INFO,
+             "%s: No change in Keys", __func__);
+      wpalMemoryCopy(halSetStaKeyReqMsg.setStaKeyParams.key[keyIndex].keyRsc,
                      pwdiSetSTAKeyParams->wdiKeyInfo.wdiKey[keyIndex].keyRsc,
                      WDI_MAX_KEY_RSC_LEN);
+      wpalMemoryCopy(halSetStaKeyReqMsg.setStaKeyParams.key[keyIndex].key,
+                     pwdiSetSTAKeyParams->wdiKeyInfo.wdiKey[keyIndex].key,
+                     WDI_MAX_KEY_LENGTH);
+    }
     halSetStaKeyReqMsg.setStaKeyParams.key[keyIndex].paeRole =
                      pwdiSetSTAKeyParams->wdiKeyInfo.wdiKey[keyIndex].paeRole;
     halSetStaKeyReqMsg.setStaKeyParams.key[keyIndex].keyLength =
                    pwdiSetSTAKeyParams->wdiKeyInfo.wdiKey[keyIndex].keyLength;
-    wpalMemoryCopy(halSetStaKeyReqMsg.setStaKeyParams.key[keyIndex].key,
-                         pwdiSetSTAKeyParams->wdiKeyInfo.wdiKey[keyIndex].key,
-                        WDI_MAX_KEY_LENGTH);
-   }
-
+  }
   wpalMemoryCopy( pSendBuffer+usDataOffset,
                     &halSetStaKeyReqMsg.setStaKeyParams,
                     sizeof(halSetStaKeyReqMsg.setStaKeyParams));
@@ -14114,13 +14171,16 @@ WDI_ProcessExitImpsReq
    wpt_uint8*               pSendBuffer         = NULL;
    wpt_uint16               usDataOffset        = 0;
    wpt_uint16               usSendSize          = 0;
+   WDI_ExitImpsReqParamsType *pwdiExitImpsReqParams = NULL;
    /*- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
    /*-------------------------------------------------------------------------
      Sanity check
    -------------------------------------------------------------------------*/
    if (( NULL == pEventData ) ||
-       ( NULL == (wdiExitImpsRspCb   = (WDI_ExitImpsRspCb)pEventData->pCBfnc)))
+       ( NULL == (wdiExitImpsRspCb   = (WDI_ExitImpsRspCb)pEventData->pCBfnc)) ||
+        (NULL == (pwdiExitImpsReqParams =
+                 (WDI_ExitImpsReqParamsType*)pEventData->pEventData)))
    {
       WPAL_TRACE( eWLAN_MODULE_DAL_CTRL, eWLAN_PAL_TRACE_LEVEL_WARN,
                   "%s: Invalid parameters", __func__);
@@ -14143,7 +14203,8 @@ WDI_ProcessExitImpsReq
       WDI_ASSERT(0);
       return WDI_STATUS_E_FAILURE;
    }
-
+   pWDICtx->wdiReqStatusCB = pwdiExitImpsReqParams->wdiReqStatusCB;
+   pWDICtx->pReqStatusUserData = pwdiExitImpsReqParams->pUserData;
    /*-------------------------------------------------------------------------
      Send Get STA Request to HAL
    -------------------------------------------------------------------------*/
@@ -22403,7 +22464,8 @@ WDI_SendMsg
                 WDI_getRespMsgString(pWDICtx->wdiExpectedResponse),
                 pWDICtx->wdiExpectedResponse);
 
-     wdiStatus = WDI_STATUS_E_FAILURE;
+     wdiStatus = (ret == eWLAN_PAL_STATUS_E_FAILURE) ?
+                  WDI_STATUS_DEV_INTERNAL_FAILURE : WDI_STATUS_E_FAILURE;
    }
    else
    {
@@ -22436,8 +22498,10 @@ WDI_SendMsg
      (wdiStatus) to WDI_STATUS_PENDING. This makes sure that WDA doesnt
      end up repeating the functonality in the req callback  for the
      WDI_STATUS_E_FAILURE case*/
-     if (wdiStatus == WDI_STATUS_E_FAILURE)
+     if (wdiStatus != WDI_STATUS_SUCCESS)
+     {
        wdiStatus = WDI_STATUS_PENDING;
+     }
    }
 
   if ( wdiStatus == WDI_STATUS_SUCCESS )
@@ -22453,10 +22517,6 @@ WDI_SendMsg
   {
      /*Inform upper stack layers that a transport fatal error occurred*/
      WDI_DetectedDeviceError(pWDICtx, WDI_ERR_TRANSPORT_FAILURE);
-     if (eWLAN_PAL_STATUS_E_FAILURE == ret)
-     {
-         wdiStatus = WDI_STATUS_DEV_INTERNAL_FAILURE;
-     }
   }
 
   return wdiStatus;
@@ -24195,8 +24255,6 @@ WDI_2_HAL_REQ_TYPE
 #endif /* WLAN_FEATURE_EXTSCAN */
   case WDI_SPOOF_MAC_ADDR_REQ:
        return WLAN_HAL_MAC_SPOOFED_SCAN_REQ;
-<<<<<<< HEAD
-=======
   case WDI_GET_FW_STATS_REQ:
        return WLAN_HAL_FW_STATS_REQ;
   case WDI_ENCRYPT_MSG_REQ:
@@ -24219,7 +24277,6 @@ WDI_2_HAL_REQ_TYPE
        return WLAN_HAL_FATAL_EVENT_LOGGING_REQ;
   case WDI_SEND_FREQ_RANGE_CONTROL_IND:
        return WLAN_HAL_SEND_FREQ_RANGE_CONTROL_IND;
->>>>>>> a38196d... prima: Update to release LA.BF.1.1.3-00110-8x74.0
   default:
     return WLAN_HAL_MSG_MAX;
   }
@@ -24533,9 +24590,6 @@ case WLAN_HAL_DEL_STA_SELF_RSP:
 #endif /* WLAN_FEATURE_EXTSCAN */
   case WLAN_HAL_MAC_SPOOFED_SCAN_RSP:
        return WDI_SPOOF_MAC_ADDR_RSP;
-<<<<<<< HEAD
-
-=======
   case WLAN_HAL_FW_STATS_RSP:
        return WDI_GET_FW_STATS_RSP;
   case WLAN_HAL_ENCRYPT_DATA_RSP:
@@ -24556,7 +24610,6 @@ case WLAN_HAL_DEL_STA_SELF_RSP:
        return WDI_MON_STOP_RSP;
   case WLAN_HAL_FATAL_EVENT_LOGGING_RSP:
        return WDI_FATAL_EVENT_LOGGING_RSP;
->>>>>>> a38196d... prima: Update to release LA.BF.1.1.3-00110-8x74.0
   default:
     return eDRIVER_TYPE_MAX;
   }
@@ -34334,8 +34387,6 @@ WDI_ProcessSpoofMacAddrRsp
 
   return WDI_STATUS_SUCCESS;
 }
-<<<<<<< HEAD
-=======
 
 /**
  @brief Process Get Frame Log Rsp function
@@ -35406,4 +35457,3 @@ WDI_EnableDisableCAEventInd
   return WDI_PostMainEvent(&gWDICb, WDI_REQUEST_EVENT, &wdiEventData);
 
 } /* WDI_EnableDisableCAEventInd */
->>>>>>> a38196d... prima: Update to release LA.BF.1.1.3-00110-8x74.0

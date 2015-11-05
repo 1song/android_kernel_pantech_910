@@ -4559,9 +4559,6 @@ void *WLANDXE_Open
       currentChannel = &tempDxeCtrlBlk->dxeChannel[idx];
       currentChannel->channelType = idx;
 
-      /* Config individual channels from channel default setup table */
-      status = dxeChannelDefaultConfig(tempDxeCtrlBlk,
-                                       currentChannel);
       if(eWLAN_PAL_STATUS_SUCCESS != status)
       {
          HDXE_MSG(eWLAN_MODULE_DAL_DATA, eWLAN_PAL_TRACE_LEVEL_ERROR,

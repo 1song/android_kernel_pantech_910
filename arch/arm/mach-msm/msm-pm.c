@@ -67,11 +67,11 @@
 
 #define MAX_BUF_SIZE  512
 
-<<<<<<< HEAD
-static int msm_pm_debug_mask __refdata = 1;.
-=======
+#if defined(CONFIG_CHECK_HWREV_FOR_CHANGING_PROXIMITY_THRESHOLD)
+static void save_hwrev_forSensor_toProcfs(void);
+#endif
+
 static int msm_pm_debug_mask = 1;
->>>>>>> cf47ce4... Revert "ARM: msm: GCC Version change."
 module_param_named(
 	debug_mask, msm_pm_debug_mask, int, S_IRUGO | S_IWUSR | S_IWGRP
 );

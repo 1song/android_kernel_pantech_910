@@ -358,16 +358,7 @@ int wlan_log_to_user(VOS_TRACE_LEVEL log_level, char *to_be_sent, int length)
 		pr_err("%s\n", to_be_sent);
 	} else {
 
-<<<<<<< HEAD
-	// wlan logging svc resources are not yet initialized
-	if (!gwlan_logging.pcur_node) {
-	    return -EIO;
-	}
-
-	/* Format the Log time [Secondselapsedinaday.microseconds] */
-=======
 	/* Format the Log time [hr:min:sec.microsec] */
->>>>>>> a38196d... prima: Update to release LA.BF.1.1.3-00110-8x74.0
 	do_gettimeofday(&tv);
 
 	/* Convert rtc to local time */
@@ -383,6 +374,12 @@ int wlan_log_to_user(VOS_TRACE_LEVEL log_level, char *to_be_sent, int length)
 	total_log_len = length + tlen + 1 + 1;
 
 	spin_lock_irqsave(&gwlan_logging.spin_lock, flags);
+
+	// wlan logging svc resources are not yet initialized
+	if (!gwlan_logging.pcur_node) {
+	    spin_unlock_irqrestore(&gwlan_logging.spin_lock, flags);
+	    return -EIO;
+	}
 
 	pfilled_length = &gwlan_logging.pcur_node->filled_length;
 

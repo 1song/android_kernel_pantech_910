@@ -130,83 +130,6 @@ void __attribute__ ((weak)) arch_suspend_enable_irqs(void)
 }
 
 /**
- * suspend_enter - Make the system enter the given sleep state.
- * @state: System sleep state to enter.
- * @wakeup: Returns information that the sleep state should not be re-entered.
- *
- * This function should be called after devices have been suspended.
- */
-static int suspend_enter(suspend_state_t state, bool *wakeup)
-{
-	int error;
-
-	if (suspend_ops->prepare) {
-		error = suspend_ops->prepare();
-		if (error)
-			goto Platform_finish;
-	}
-
-	error = dpm_suspend_end(PMSG_SUSPEND);
-	if (error) {
-		printk(KERN_ERR "PM: Some devices failed to power down\n");
-		goto Platform_finish;
-	}
-
-	if (suspend_ops->prepare_late) {
-		error = suspend_ops->prepare_late();
-		if (error)
-			goto Platform_wake;
-	}
-
-	if (suspend_test(TEST_PLATFORM))
-		goto Platform_wake;
-
-	error = disable_nonboot_cpus();
-	if (error || suspend_test(TEST_CPUS))
-		goto Enable_cpus;
-
-	arch_suspend_disable_irqs();
-	BUG_ON(!irqs_disabled());
-
-	error = syscore_suspend();
-	if (!error) {
-		*wakeup = pm_wakeup_pending();
-		if (!(suspend_test(TEST_CORE) || *wakeup)) {
-			error = suspend_ops->enter(state);
-			events_check_enabled = false;
-<<<<<<< HEAD
-=======
-		} else {
-			pm_get_active_wakeup_sources(suspend_abort,
-				MAX_SUSPEND_ABORT_LEN);
-			log_suspend_abort_reason(suspend_abort);
-			if (*wakeup)
-				error = -EBUSY;
->>>>>>> 32898d8... suspend: Return error when pending wakeup source is found.
-		}
-		syscore_resume();
-	}
-
-	arch_suspend_enable_irqs();
-	BUG_ON(irqs_disabled());
-
- Enable_cpus:
-	enable_nonboot_cpus();
-
- Platform_wake:
-	if (suspend_ops->wake)
-		suspend_ops->wake();
-
-	dpm_resume_start(PMSG_RESUME);
-
- Platform_finish:
-	if (suspend_ops->finish)
-		suspend_ops->finish();
-
-	return error;
-}
-
-/**
  * suspend_devices_and_enter - Suspend devices and enter system sleep state.
  * @state: System sleep state to enter.
  */
@@ -234,11 +157,6 @@ int suspend_devices_and_enter(suspend_state_t state)
 	suspend_test_finish("suspend devices");
 	if (suspend_test(TEST_DEVICES))
 		goto Recover_platform;
-
-	do {
-		error = suspend_enter(state, &wakeup);
-	} while (!error && !wakeup
-		&& suspend_ops->suspend_again && suspend_ops->suspend_again());
 
  Resume_devices:
 	suspend_test_start();

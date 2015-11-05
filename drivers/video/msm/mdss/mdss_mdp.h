@@ -1,9 +1,5 @@
 /*
-<<<<<<< HEAD
  * Copyright (c) 2012-2013, The Linux Foundation. All rights reserved.
-=======
- * Copyright (c) 2012-2015, The Linux Foundation. All rights reserved.
->>>>>>> a86f46d... msm: mdss: Acquire lock for source format b/w line and block mode
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -184,11 +180,6 @@ struct mdss_mdp_ctl {
 	struct mdss_mdp_mixer *mixer_right;
 	struct mutex lock;
 	struct mutex *shared_lock;
-<<<<<<< HEAD
-=======
-	struct mutex *wb_lock;
-	spinlock_t spin_lock;
->>>>>>> a86f46d... msm: mdss: Acquire lock for source format b/w line and block mode
 
 	struct mdss_panel_data *panel_data;
 	struct mdss_mdp_vsync_handler vsync_handler;

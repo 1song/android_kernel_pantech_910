@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2011-2015. The Linux Foundation. All rights reserved.
  *
  * Previously licensed under the ISC license by Qualcomm Atheros, Inc.
  *
@@ -83,6 +83,10 @@ static const tANI_U8 aUnsortedChannelList[]= {52,56,60,64,100,104,108,112,116,
 #define SUCCESS 1                   //defined temporarily for BT-AMP
 
 #define MAX_BA_WINDOW_SIZE_FOR_CISCO 25
+#define MAX_DTIM_PERIOD 15
+#define MAX_DTIM_COUNT  15
+#define DTIM_PERIOD_DEFAULT 1
+#define DTIM_COUNT_DEFAULT  1
 static void
 limProcessChannelSwitchSuspendLink(tpAniSirGlobal pMac,
                                     eHalStatus status,
@@ -6010,14 +6014,25 @@ tSirRetStatus limPostMlmAddBAReq( tpAniSirGlobal pMac,
           FL( "Requesting ADDBA with Cisco 1225 AP, window size 25"));
       pMlmAddBAReq->baBufferSize = MAX_BA_WINDOW_SIZE_FOR_CISCO;
   }
+  else if (pMac->miracastVendorConfig)
+  {
+      if (wlan_cfgGetInt(pMac, WNI_CFG_NUM_BUFF_ADVERT , &val) != eSIR_SUCCESS)
+      {
+           limLog(pMac, LOGE, FL("Unable to get WNI_CFG_NUM_BUFF_ADVERT"));
+           status = eSIR_FAILURE;
+           goto returnFailure;
+      }
+
+      pMlmAddBAReq->baBufferSize = val;
+  }
   else
       pMlmAddBAReq->baBufferSize = 0;
 
   limLog( pMac, LOGW,
-      FL( "Requesting an ADDBA to setup a %s BA session with STA %d for TID %d" ),
+      FL( "Requesting an ADDBA to setup a %s BA session with STA %d for TID %d buff = %d" ),
       (pMlmAddBAReq->baPolicy ? "Immediate": "Delayed"),
       pStaDs->staIndex,
-      tid );
+      tid, pMlmAddBAReq->baBufferSize );
 
   // BA Timeout
   if (wlan_cfgGetInt(pMac, WNI_CFG_BA_TIMEOUT, &val) != eSIR_SUCCESS)
@@ -7311,14 +7326,21 @@ void limHandleHeartBeatFailureTimeout(tpAniSirGlobal pMac)
             psessionEntry = &pMac->lim.gpSession[i];
             if(psessionEntry->LimHBFailureStatus == eANI_BOOLEAN_TRUE)
             {
-                limLog(pMac, LOGE, FL("Probe_hb_failure: SME %d, MLME %d, HB-Count %d"),psessionEntry->limSmeState,
-                        psessionEntry->limMlmState, psessionEntry->LimRxedBeaconCntDuringHB);
+                limLog(pMac, LOGE,
+                        FL("Probe_hb_failure: SME %d, MLME %d, HB-Count %d BCN count %d"),
+                        psessionEntry->limSmeState, psessionEntry->limMlmState,
+                        psessionEntry->LimRxedBeaconCntDuringHB,
+                        psessionEntry->currentBssBeaconCnt);
 #ifdef FEATURE_WLAN_DIAG_SUPPORT_LIM //FEATURE_WLAN_DIAG_SUPPORT
                 limDiagEventReport(pMac, WLAN_PE_DIAG_HB_FAILURE_TIMEOUT, psessionEntry, 0, 0);
 #endif
                 if (psessionEntry->limMlmState == eLIM_MLM_LINK_ESTABLISHED_STATE)
                 {
-                    if ((!LIM_IS_CONNECTION_ACTIVE(psessionEntry)) &&
+                    /* Disconnect even if we have not received a single beacon
+                     * after connection.
+                     */
+                    if (((!LIM_IS_CONNECTION_ACTIVE(psessionEntry)) ||
+                         (0 == psessionEntry->currentBssBeaconCnt)) &&
                         (psessionEntry->limSmeState != eLIM_SME_WT_DISASSOC_STATE)&&
                         (psessionEntry->limSmeState != eLIM_SME_WT_DEAUTH_STATE))
                     {
@@ -8344,8 +8366,6 @@ limSetProtectedBit(tpAniSirGlobal  pMac,
         pMacHdr->fc.wep = 1;
 } /*** end limSetProtectedBit() ***/
 #endif
-<<<<<<< HEAD
-=======
 
 tANI_U8* limGetIePtr(v_U8_t *pIes, int length, v_U8_t eid)
 {
@@ -8472,4 +8492,3 @@ eHalStatus limTxBdComplete(tpAniSirGlobal pMac, void *pData)
             pTxBdStatus->txBdToken, pTxBdStatus->txCompleteStatus);
     return eHAL_STATUS_SUCCESS;
 }
->>>>>>> a38196d... prima: Update to release LA.BF.1.1.3-00110-8x74.0

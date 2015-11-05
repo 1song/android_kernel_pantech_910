@@ -5657,16 +5657,14 @@ int __hdd_stop (struct net_device *dev)
     * That is intentional to be able to scan if it is a STA/P2P interface
     */
    hdd_stop_adapter(pHddCtx, pAdapter, VOS_FALSE);
-
+#ifdef FEATURE_WLAN_TDLS
+   mutex_lock(&pHddCtx->tdls_lock);
+#endif
    /* DeInit the adapter. This ensures datapath cleanup as well */
-<<<<<<< HEAD
-   hdd_deinit_adapter(pHddCtx, pAdapter);
-=======
    hdd_deinit_adapter(pHddCtx, pAdapter, TRUE);
 #ifdef FEATURE_WLAN_TDLS
    mutex_unlock(&pHddCtx->tdls_lock);
 #endif
->>>>>>> a38196d... prima: Update to release LA.BF.1.1.3-00110-8x74.0
    /* SoftAP ifaces should never go in power save mode
       making sure same here. */
    if ( (WLAN_HDD_SOFTAP == pAdapter->device_mode )
@@ -5749,7 +5747,7 @@ int hdd_stop (struct net_device *dev)
 static void __hdd_uninit (struct net_device *dev)
 {
    hdd_adapter_t *pAdapter = WLAN_HDD_GET_PRIV_PTR(dev);
-
+   hdd_context_t *pHddCtx;
    ENTER();
 
    do
@@ -5767,8 +5765,8 @@ static void __hdd_uninit (struct net_device *dev)
                 "%s: Invalid magic", __func__);
          break;
       }
-
-      if (NULL == pAdapter->pHddCtx)
+      pHddCtx = WLAN_HDD_GET_CTX(pAdapter);
+      if (NULL == pHddCtx)
       {
          hddLog(VOS_TRACE_LEVEL_FATAL,
                 "%s: NULL pHddCtx", __func__);
@@ -5781,10 +5779,6 @@ static void __hdd_uninit (struct net_device *dev)
                 "%s: Invalid device reference", __func__);
          /* we haven't validated all cases so let this go for now */
       }
-<<<<<<< HEAD
-
-      hdd_deinit_adapter(pAdapter->pHddCtx, pAdapter);
-=======
 #ifdef FEATURE_WLAN_TDLS
       mutex_lock(&pHddCtx->tdls_lock);
 #endif
@@ -5792,7 +5786,6 @@ static void __hdd_uninit (struct net_device *dev)
 #ifdef FEATURE_WLAN_TDLS
       mutex_unlock(&pHddCtx->tdls_lock);
 #endif
->>>>>>> a38196d... prima: Update to release LA.BF.1.1.3-00110-8x74.0
 
       /* after uninit our adapter structure will no longer be valid */
       pAdapter->dev = NULL;
@@ -6905,7 +6898,6 @@ hdd_adapter_t* hdd_open_adapter( hdd_context_t *pHddCtx, tANI_U8 session_type,
                                  const char *iface_name, tSirMacAddr macAddr,
                                  tANI_U8 rtnl_held )
 {
-   int ret = 0;
    hdd_adapter_t *pAdapter = NULL;
    hdd_adapter_list_node_t *pHddAdapterNode = NULL;
    VOS_STATUS status = VOS_STATUS_E_FAILURE;
@@ -6971,9 +6963,6 @@ hdd_adapter_t* hdd_open_adapter( hdd_context_t *pHddCtx, tANI_U8 session_type,
          status = hdd_register_interface( pAdapter, rtnl_held );
          if( VOS_STATUS_SUCCESS != status )
          {
-<<<<<<< HEAD
-            hdd_deinit_adapter(pHddCtx, pAdapter);
-=======
 #ifdef FEATURE_WLAN_TDLS
             mutex_lock(&pHddCtx->tdls_lock);
 #endif
@@ -6981,50 +6970,15 @@ hdd_adapter_t* hdd_open_adapter( hdd_context_t *pHddCtx, tANI_U8 session_type,
 #ifdef FEATURE_WLAN_TDLS
             mutex_unlock(&pHddCtx->tdls_lock);
 #endif
->>>>>>> a38196d... prima: Update to release LA.BF.1.1.3-00110-8x74.0
             goto err_free_netdev;
          }
 
          // Workqueue which gets scheduled in IPv4 notification callback.
-<<<<<<< HEAD
-         INIT_WORK(&pAdapter->ipv4NotifierWorkQueue, hdd_ipv4_notifier_work_queue);
-         // Register IPv4 notifier to notify if any change in IP
-         // So that we can reconfigure the offload parameters
-         pAdapter->ipv4_notifier.notifier_call = wlan_hdd_ipv4_changed;
-         ret = register_inetaddr_notifier(&pAdapter->ipv4_notifier);
-         if (ret)
-         {
-             hddLog(LOGE, FL("Failed to register IPv4 notifier"));
-         }
-         else
-         {
-             hddLog(LOG1, FL("Registered IPv4 notifier"));
-             pAdapter->ipv4_notifier_registered = true;
-         }
-
-#ifdef WLAN_NS_OFFLOAD
-         // Workqueue which gets scheduled in IPv6 notification callback.
-         INIT_WORK(&pAdapter->ipv6NotifierWorkQueue, hdd_ipv6_notifier_work_queue);
-         // Register IPv6 notifier to notify if any change in IP
-         // So that we can reconfigure the offload parameters
-         pAdapter->ipv6_notifier.notifier_call = wlan_hdd_ipv6_changed;
-         ret = register_inet6addr_notifier(&pAdapter->ipv6_notifier);
-         if (ret)
-         {
-             hddLog(LOGE, FL("Failed to register IPv6 notifier"));
-         }
-         else
-         {
-             hddLog(LOG1, FL("Registered IPv6 notifier"));
-             pAdapter->ipv6_notifier_registered = true;
-         }
-=======
          vos_init_work(&pAdapter->ipv4NotifierWorkQueue, hdd_ipv4_notifier_work_queue);
 
 #ifdef WLAN_NS_OFFLOAD
          // Workqueue which gets scheduled in IPv6 notification callback.
          vos_init_work(&pAdapter->ipv6NotifierWorkQueue, hdd_ipv6_notifier_work_queue);
->>>>>>> a38196d... prima: Update to release LA.BF.1.1.3-00110-8x74.0
 #endif
          //Stop the Interface TX queue.
          hddLog(VOS_TRACE_LEVEL_INFO, FL("Disabling queues"));
@@ -7353,9 +7307,13 @@ VOS_STATUS hdd_stop_adapter( hdd_context_t *pHddCtx, hdd_adapter_t *pAdapter,
    long ret;
    VOS_STATUS status;
 
+   if (pHddCtx->isLogpInProgress) {
+       VOS_TRACE(VOS_MODULE_ID_HDD, VOS_TRACE_LEVEL_INFO,
+                       "%s:LOGP in Progress. Ignore!!!",__func__);
+       return VOS_STATUS_E_FAILURE;
+   }
+
    ENTER();
-<<<<<<< HEAD
-=======
 
    if ( VOS_TRUE == bCloseSession )
    {
@@ -7365,7 +7323,6 @@ VOS_STATUS hdd_stop_adapter( hdd_context_t *pHddCtx, hdd_adapter_t *pAdapter,
                     FL("sta id hash detach failed"));
    }
 
->>>>>>> a38196d... prima: Update to release LA.BF.1.1.3-00110-8x74.0
    pScanInfo =  &pHddCtx->scan_info;
    switch(pAdapter->device_mode)
    {
@@ -7463,33 +7420,11 @@ VOS_STATUS hdd_stop_adapter( hdd_context_t *pHddCtx, hdd_adapter_t *pAdapter,
           vos_flush_delayed_work(&pAdapter->roc_work);
        }
 #ifdef WLAN_NS_OFFLOAD
-<<<<<<< HEAD
-#ifdef WLAN_OPEN_SOURCE
-         cancel_work_sync(&pAdapter->ipv6NotifierWorkQueue);
-#endif
-         if (pAdapter->ipv6_notifier_registered)
-         {
-            hddLog(LOG1, FL("Unregistered IPv6 notifier"));
-            unregister_inet6addr_notifier(&pAdapter->ipv6_notifier);
-            pAdapter->ipv6_notifier_registered = false;
-         }
-#endif
-         if (pAdapter->ipv4_notifier_registered)
-         {
-            hddLog(LOG1, FL("Unregistered IPv4 notifier"));
-            unregister_inetaddr_notifier(&pAdapter->ipv4_notifier);
-            pAdapter->ipv4_notifier_registered = false;
-         }
-#ifdef WLAN_OPEN_SOURCE
-         cancel_work_sync(&pAdapter->ipv4NotifierWorkQueue);
-#endif
-=======
          vos_flush_work(&pAdapter->ipv6NotifierWorkQueue);
 #endif
 
          vos_flush_work(&pAdapter->ipv4NotifierWorkQueue);
 
->>>>>>> a38196d... prima: Update to release LA.BF.1.1.3-00110-8x74.0
          /* It is possible that the caller of this function does not
           * wish to close the session
           */
@@ -7707,6 +7642,11 @@ VOS_STATUS hdd_reset_all_adapters( hdd_context_t *pHddCtx )
       {
           hdd_wmm_adapter_close( pAdapter );
           clear_bit(WMM_INIT_DONE, &pAdapter->event_flags);
+      }
+
+      if (test_bit(SOFTAP_BSS_STARTED, &pAdapter->event_flags))
+      {
+          clear_bit(SOFTAP_BSS_STARTED, &pAdapter->event_flags);
       }
 
 #ifdef FEATURE_WLAN_BATCH_SCAN
@@ -8617,9 +8557,6 @@ void hdd_wlan_exit(hdd_context_t *pHddCtx)
 
    ENTER();
 
-<<<<<<< HEAD
-   if (VOS_FTM_MODE != hdd_get_conparam())
-=======
 
    if (VOS_MONITOR_MODE == hdd_get_conparam())
    {
@@ -8628,7 +8565,6 @@ void hdd_wlan_exit(hdd_context_t *pHddCtx)
       return;
    }
    else if (VOS_FTM_MODE != hdd_get_conparam())
->>>>>>> a38196d... prima: Update to release LA.BF.1.1.3-00110-8x74.0
    {
       // Unloading, restart logic is no more required.
       wlan_hdd_restart_deinit(pHddCtx);
@@ -8665,9 +8601,6 @@ void hdd_wlan_exit(hdd_context_t *pHddCtx)
             /* DeInit the adapter. This ensures that all data packets
              * are freed.
              */
-<<<<<<< HEAD
-            hdd_deinit_adapter(pHddCtx, pAdapter);
-=======
 #ifdef FEATURE_WLAN_TDLS
             mutex_lock(&pHddCtx->tdls_lock);
 #endif
@@ -8675,7 +8608,6 @@ void hdd_wlan_exit(hdd_context_t *pHddCtx)
 #ifdef FEATURE_WLAN_TDLS
             mutex_unlock(&pHddCtx->tdls_lock);
 #endif
->>>>>>> a38196d... prima: Update to release LA.BF.1.1.3-00110-8x74.0
 
             if (WLAN_HDD_INFRA_STATION ==  pAdapter->device_mode ||
                 WLAN_HDD_P2P_CLIENT == pAdapter->device_mode)
@@ -10402,8 +10334,6 @@ int hdd_wlan_startup(struct device *dev )
             wlan_hdd_cfg80211_extscan_callback,
                            pHddCtx);
 #endif /* WLAN_FEATURE_EXTSCAN */
-<<<<<<< HEAD
-=======
 
 #ifdef WLAN_NS_OFFLOAD
    // Register IPv6 notifier to notify if any change in IP
@@ -10433,7 +10363,6 @@ int hdd_wlan_startup(struct device *dev )
       hddLog(VOS_TRACE_LEVEL_INFO, FL("Registered IPv4 notifier"));
    }
 
->>>>>>> a38196d... prima: Update to release LA.BF.1.1.3-00110-8x74.0
    goto success;
 
 err_nl_srv:
@@ -10537,6 +10466,9 @@ static int hdd_driver_init( void)
 #ifdef HAVE_WCNSS_CAL_DOWNLOAD
    int max_retries = 0;
 #endif
+#ifdef HAVE_CBC_DONE
+   int max_cbc_retries = 0;
+#endif
 
 #ifdef WLAN_LOGGING_SOCK_SVC_ENABLE
    wlan_logging_sock_init_svc();
@@ -10562,6 +10494,7 @@ static int hdd_driver_init( void)
    while (!wcnss_device_ready() && 5 >= ++max_retries) {
        msleep(1000);
    }
+
    if (max_retries >= 5) {
       hddLog(VOS_TRACE_LEVEL_FATAL,"%s: WCNSS driver not ready", __func__);
       vos_wake_lock_destroy(&wlan_wake_lock);
@@ -10570,6 +10503,15 @@ static int hdd_driver_init( void)
 #endif
 
       return -ENODEV;
+   }
+#endif
+
+#ifdef HAVE_CBC_DONE
+   while (!wcnss_cbc_complete() && 10 >= ++max_cbc_retries) {
+       msleep(1000);
+   }
+   if (max_cbc_retries >= 10) {
+      hddLog(VOS_TRACE_LEVEL_FATAL, "%s:CBC not completed", __func__);
    }
 #endif
 
@@ -11144,7 +11086,8 @@ v_BOOL_t hdd_is_apps_power_collapse_allowed(hdd_context_t* pHddCtx)
         {
             if (((pConfig->fIsImpsEnabled || pConfig->fIsBmpsEnabled)
                  && (pmcState != IMPS && pmcState != BMPS && pmcState != UAPSD
-                  &&  pmcState != STOPPED && pmcState != STANDBY)) ||
+                  &&  pmcState != STOPPED && pmcState != STANDBY &&
+                      pmcState != WOWL)) ||
                  (eANI_BOOLEAN_TRUE == scanRspPending) ||
                  (eANI_BOOLEAN_TRUE == inMiddleOfRoaming))
             {
@@ -11479,11 +11422,6 @@ VOS_STATUS wlan_hdd_restart_driver(hdd_context_t *pHddCtx)
 
       return VOS_STATUS_E_ALREADY;
    }
-   /* Send reset FIQ to WCNSS to invoke SSR. */
-#ifdef HAVE_WCNSS_RESET_INTR
-   wcnss_reset_fiq(TRUE);
-#endif
- 
    return status;
 }
 

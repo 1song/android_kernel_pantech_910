@@ -124,6 +124,7 @@ static struct msm_gpiomux_config mdm_configs[] __initdata = {
 	},
 };
 
+#if defined(CONFIG_PANTECH_CONSOLE_UART10)
 static struct gpiomux_setting gpio_uart_config = {
 	.func = GPIOMUX_FUNC_2,
 	.drv = GPIOMUX_DRV_16MA,

@@ -1504,12 +1504,9 @@ int wlan_hdd_tdls_set_peer_caps(hdd_adapter_t *pAdapter,
 
     curr_peer->supported_oper_classes_len =
                StaParams->supported_oper_classes_len;
-<<<<<<< HEAD
-=======
     curr_peer->qos = StaParams->capability & CAPABILITIES_QOS_OFFSET;
 
     mutex_unlock(&pHddCtx->tdls_lock);
->>>>>>> a38196d... prima: Update to release LA.BF.1.1.3-00110-8x74.0
     return 0;
 }
 
@@ -1552,12 +1549,9 @@ int wlan_hdd_tdls_get_link_establish_params(hdd_adapter_t *pAdapter, u8 *mac,
 
     tdlsLinkEstablishParams->supportedOperClassesLen =
                  curr_peer->supported_oper_classes_len;
-<<<<<<< HEAD
-=======
     tdlsLinkEstablishParams->qos = curr_peer->qos;
 
     mutex_unlock(&pHddCtx->tdls_lock);
->>>>>>> a38196d... prima: Update to release LA.BF.1.1.3-00110-8x74.0
     return 0;
 }
 
