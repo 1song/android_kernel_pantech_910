@@ -23,14 +23,7 @@
 #include <linux/sort.h>
 #include <linux/err.h>
 #include <linux/of.h>
-<<<<<<< HEAD
-<<<<<<< HEAD
 #include <linux/sched.h>
-=======
->>>>>>> 9fc7d88... cpufreq_stats: Adds the fucntionality to load current values for each frequency
-=======
-#include <linux/sched.h>
->>>>>>> ec04782... sched: cpufreq: Adds a field cpu_power in the task_struct
 #include <asm/cputime.h>
 
 static spinlock_t cpufreq_stats_lock;
@@ -86,14 +79,24 @@ struct cpufreq_stats_attribute {
 static int cpufreq_stats_update(unsigned int cpu)
 {
 	struct cpufreq_stats *stat;
+	struct all_cpufreq_stats *all_stat;
 	unsigned long long cur_time;
 
 	cur_time = get_jiffies_64();
 	spin_lock(&cpufreq_stats_lock);
 	stat = per_cpu(cpufreq_stats_table, cpu);
-	if (stat->time_in_state)
+	all_stat = per_cpu(all_cpufreq_stats, cpu);
+	if (!stat) {
+		spin_unlock(&cpufreq_stats_lock);
+		return 0;
+	}
+	if (stat->time_in_state) {
 		stat->time_in_state[stat->last_index] +=
 			cur_time - stat->last_time;
+		if (all_stat)
+			all_stat->time_in_state[stat->last_index] +=
+					cur_time - stat->last_time;
+	}
 	stat->last_time = cur_time;
 	spin_unlock(&cpufreq_stats_lock);
 	return 0;
@@ -137,10 +140,6 @@ static int get_index_all_cpufreq_stat(struct all_cpufreq_stats *all_stat,
 	return -1;
 }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> ec04782... sched: cpufreq: Adds a field cpu_power in the task_struct
 void acct_update_power(struct task_struct *task, cputime_t cputime) {
 	struct cpufreq_power_stats *powerstats;
 	struct cpufreq_stats *stats;
@@ -155,25 +154,11 @@ void acct_update_power(struct task_struct *task, cputime_t cputime) {
 		return;
 
 	curr = powerstats->curr[stats->last_index];
-<<<<<<< HEAD
-<<<<<<< HEAD
 	if (task->cpu_power != ULLONG_MAX)
 		task->cpu_power += curr * cputime_to_usecs(cputime);
 }
 EXPORT_SYMBOL_GPL(acct_update_power);
 
-=======
->>>>>>> 9fc7d88... cpufreq_stats: Adds the fucntionality to load current values for each frequency
-=======
-	task->cpu_power += curr * cputime_to_usecs(cputime);
-=======
-	if (task->cpu_power != ULLONG_MAX)
-		task->cpu_power += curr * cputime_to_usecs(cputime);
->>>>>>> 96b9e54... cpu_power: Avoids race condition when the task exits.
-}
-EXPORT_SYMBOL_GPL(acct_update_power);
-
->>>>>>> ec04782... sched: cpufreq: Adds a field cpu_power in the task_struct
 static ssize_t show_current_in_state(struct kobject *kobj,
 		struct kobj_attribute *attr, char *buf)
 {
@@ -611,17 +596,10 @@ static int cpufreq_stat_notifier_policy(struct notifier_block *nb,
 
 	if (!per_cpu(all_cpufreq_stats, cpu))
 		cpufreq_allstats_create(cpu, table, count);
-<<<<<<< HEAD
 
 	if (!per_cpu(cpufreq_power_stats, cpu))
 		cpufreq_powerstats_create(cpu, table, count);
 
-=======
-
-	if (!per_cpu(cpufreq_power_stats, cpu))
-		cpufreq_powerstats_create(cpu, table, count);
-
->>>>>>> 9fc7d88... cpufreq_stats: Adds the fucntionality to load current values for each frequency
 	ret = cpufreq_stats_create_table(policy, table, count);
 	if (ret)
 		return ret;
@@ -688,17 +666,10 @@ static int cpufreq_stats_create_table_cpu(unsigned int cpu)
 
 	if (!per_cpu(all_cpufreq_stats, cpu))
 		cpufreq_allstats_create(cpu, table, count);
-<<<<<<< HEAD
 
 	if (!per_cpu(cpufreq_power_stats, cpu))
 		cpufreq_powerstats_create(cpu, table, count);
 
-=======
-
-	if (!per_cpu(cpufreq_power_stats, cpu))
-		cpufreq_powerstats_create(cpu, table, count);
-
->>>>>>> 9fc7d88... cpufreq_stats: Adds the fucntionality to load current values for each frequency
 	ret = cpufreq_stats_create_table(policy, table, count);
 
 out:
@@ -706,7 +677,7 @@ out:
 	return ret;
 }
 
-static int __cpuinit cpufreq_stat_cpu_callback(struct notifier_block *nfb,
+static int cpufreq_stat_cpu_callback(struct notifier_block *nfb,
 					       unsigned long action,
 					       void *hcpu)
 {
@@ -797,7 +768,6 @@ static void __exit cpufreq_stats_exit(void)
 		cpufreq_stats_free_table(cpu);
 		cpufreq_stats_free_sysfs(cpu);
 	}
-
 	cpufreq_allstats_free();
 	cpufreq_powerstats_free();
 }
