@@ -622,7 +622,24 @@ static int shift_arg_pages(struct vm_area_struct *vma, unsigned long shift)
 
 	lru_add_drain();
 	tlb_gather_mmu(&tlb, mm, 0);
-	
+	if (new_end > old_start) {
+		/*
+		 * when the old and new regions overlap clear from new_end.
+		 */
+		free_pgd_range(&tlb, new_end, old_end, new_end,
+			vma->vm_next ? vma->vm_next->vm_start : USER_PGTABLES_CEILING);
+	} else {
+		/*
+		 * otherwise, clean from old_start; this is done to not touch
+		 * the address space in [new_end, old_start) some architectures
+		 * have constraints on va-space that make this illegal (IA64) -
+		 * for the others its just a little faster.
+		 */
+		free_pgd_range(&tlb, old_start, old_end, new_end,
+			vma->vm_next ? vma->vm_next->vm_start : USER_PGTABLES_CEILING);
+	}
+	tlb_finish_mmu(&tlb, new_end, old_end);
+
 	/*
 	 * Shrink the vma to just the new range.  Always succeeds.
 	 */
