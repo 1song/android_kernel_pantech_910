@@ -3,18 +3,25 @@
  *
  * Copyright 2004-2005  Andrea Arcangeli <andrea@cpushare.com>
  *
- * This defines a simple but solid secure-computing mode.
+ * Copyright (C) 2012 Google, Inc.
+ * Will Drewry <wad@chromium.org>
+ *
+ * This defines a simple but solid secure-computing facility.
+ *
+ * Mode 1 uses a fixed list of allowed system calls.
+ * Mode 2 allows user-defined system call filters in the form
+ *        of Berkeley Packet Filters/Linux Socket Filters.
  */
 
+#include <linux/atomic.h>
 #include <linux/audit.h>
-#include <linux/seccomp.h>
-#include <linux/sched.h>
 #include <linux/compat.h>
+#include <linux/sched.h>
+#include <linux/seccomp.h>
+#include <linux/slab.h>
+#include <linux/syscalls.h>
 
 /* #define SECCOMP_DEBUG 1 */
-<<<<<<< HEAD
-#define NR_SECCOMP_MODES 1
-=======
 
 #ifdef CONFIG_SECCOMP_FILTER
 #include <asm/syscall.h>
@@ -537,7 +544,6 @@ static void seccomp_send_sigsys(int syscall, int reason)
 	force_sig_info(SIGSYS, &info, current);
 }
 #endif	/* CONFIG_SECCOMP_FILTER */
->>>>>>> 2dc8975... seccomp: Replace BUG(!spin_is_locked()) with assert_spin_lock
 
 /*
  * Secure computing mode 1 allows only read/write/exit/sigreturn.
@@ -556,13 +562,20 @@ static int mode1_syscalls_32[] = {
 };
 #endif
 
-void __secure_computing(int this_syscall)
+int __secure_computing(int this_syscall)
 {
-	int mode = current->seccomp.mode;
-	int * syscall;
+	int exit_sig = 0;
+	int *syscall;
+	u32 ret;
 
-	switch (mode) {
-	case 1:
+	/*
+	 * Make sure that any changes to mode from another thread have
+	 * been seen after TIF_SECCOMP was seen.
+	 */
+	rmb();
+
+	switch (current->seccomp.mode) {
+	case SECCOMP_MODE_STRICT:
 		syscall = mode1_syscalls;
 #ifdef CONFIG_COMPAT
 		if (is_compat_task())
@@ -570,9 +583,58 @@ void __secure_computing(int this_syscall)
 #endif
 		do {
 			if (*syscall == this_syscall)
-				return;
+				return 0;
 		} while (*++syscall);
+		exit_sig = SIGKILL;
+		ret = SECCOMP_RET_KILL;
 		break;
+#ifdef CONFIG_SECCOMP_FILTER
+	case SECCOMP_MODE_FILTER: {
+		int data;
+		ret = seccomp_run_filters(this_syscall);
+		data = ret & SECCOMP_RET_DATA;
+		ret &= SECCOMP_RET_ACTION;
+		switch (ret) {
+		case SECCOMP_RET_ERRNO:
+			/* Set the low-order 16-bits as a errno. */
+			syscall_set_return_value(current, task_pt_regs(current),
+						 -data, 0);
+			goto skip;
+		case SECCOMP_RET_TRAP:
+			/* Show the handler the original registers. */
+			syscall_rollback(current, task_pt_regs(current));
+			/* Let the filter pass back 16 bits of data. */
+			seccomp_send_sigsys(this_syscall, data);
+			goto skip;
+		case SECCOMP_RET_TRACE:
+			/* Skip these calls if there is no tracer. */
+			if (!ptrace_event_enabled(current, PTRACE_EVENT_SECCOMP)) {
+				/* Make sure userspace sees an ENOSYS. */
+				syscall_set_return_value(current,
+					task_pt_regs(current), -ENOSYS, 0);
+				goto skip;
+			}
+			/* Allow the BPF to provide the event message */
+			ptrace_event(PTRACE_EVENT_SECCOMP, data);
+			/*
+			 * The delivery of a fatal signal during event
+			 * notification may silently skip tracer notification.
+			 * Terminating the task now avoids executing a system
+			 * call that may not be intended.
+			 */
+			if (fatal_signal_pending(current))
+				break;
+			return 0;
+		case SECCOMP_RET_ALLOW:
+			return 0;
+		case SECCOMP_RET_KILL:
+		default:
+			break;
+		}
+		exit_sig = SIGSYS;
+		break;
+	}
+#endif
 	default:
 		BUG();
 	}
@@ -580,8 +642,13 @@ void __secure_computing(int this_syscall)
 #ifdef SECCOMP_DEBUG
 	dump_stack();
 #endif
-	audit_seccomp(this_syscall);
-	do_exit(SIGKILL);
+	audit_seccomp(this_syscall, exit_sig, ret);
+	do_exit(exit_sig);
+#ifdef CONFIG_SECCOMP_FILTER
+skip:
+	audit_seccomp(this_syscall, exit_sig, ret);
+#endif
+	return -1;
 }
 
 long prctl_get_seccomp(void)
@@ -589,25 +656,153 @@ long prctl_get_seccomp(void)
 	return current->seccomp.mode;
 }
 
-long prctl_set_seccomp(unsigned long seccomp_mode)
+/**
+ * seccomp_set_mode_strict: internal function for setting strict seccomp
+ *
+ * Once current->seccomp.mode is non-zero, it may not be changed.
+ *
+ * Returns 0 on success or -EINVAL on failure.
+ */
+static long seccomp_set_mode_strict(void)
 {
-	long ret;
+	const unsigned long seccomp_mode = SECCOMP_MODE_STRICT;
+	long ret = -EINVAL;
 
-	/* can set it only once to be even more secure */
-	ret = -EPERM;
-	if (unlikely(current->seccomp.mode))
+	spin_lock_irq(&current->sighand->siglock);
+
+	if (!seccomp_may_assign_mode(seccomp_mode))
 		goto out;
 
-	ret = -EINVAL;
-	if (seccomp_mode && seccomp_mode <= NR_SECCOMP_MODES) {
-		current->seccomp.mode = seccomp_mode;
-		set_thread_flag(TIF_SECCOMP);
 #ifdef TIF_NOTSC
-		disable_TSC();
+	disable_TSC();
 #endif
-		ret = 0;
+	seccomp_assign_mode(current, seccomp_mode);
+	ret = 0;
+
+out:
+	spin_unlock_irq(&current->sighand->siglock);
+
+	return ret;
+}
+
+#ifdef CONFIG_SECCOMP_FILTER
+/**
+ * seccomp_set_mode_filter: internal function for setting seccomp filter
+ * @flags:  flags to change filter behavior
+ * @filter: struct sock_fprog containing filter
+ *
+ * This function may be called repeatedly to install additional filters.
+ * Every filter successfully installed will be evaluated (in reverse order)
+ * for each system call the task makes.
+ *
+ * Once current->seccomp.mode is non-zero, it may not be changed.
+ *
+ * Returns 0 on success or -EINVAL on failure.
+ */
+static long seccomp_set_mode_filter(unsigned int flags,
+				    const char __user *filter)
+{
+	const unsigned long seccomp_mode = SECCOMP_MODE_FILTER;
+	struct seccomp_filter *prepared = NULL;
+	long ret = -EINVAL;
+
+	/* Validate flags. */
+	if (flags & ~SECCOMP_FILTER_FLAG_MASK)
+		return -EINVAL;
+
+	/* Prepare the new filter before holding any locks. */
+	prepared = seccomp_prepare_user_filter(filter);
+	if (IS_ERR(prepared))
+		return PTR_ERR(prepared);
+
+	/*
+	 * Make sure we cannot change seccomp or nnp state via TSYNC
+	 * while another thread is in the middle of calling exec.
+	 */
+	if (flags & SECCOMP_FILTER_FLAG_TSYNC &&
+	    mutex_lock_killable(&current->signal->cred_guard_mutex))
+		goto out_free;
+
+	spin_lock_irq(&current->sighand->siglock);
+
+	if (!seccomp_may_assign_mode(seccomp_mode))
+		goto out;
+
+	ret = seccomp_attach_filter(flags, prepared);
+	if (ret)
+		goto out;
+	/* Do not free the successfully attached filter. */
+	prepared = NULL;
+
+	seccomp_assign_mode(current, seccomp_mode);
+out:
+	spin_unlock_irq(&current->sighand->siglock);
+	if (flags & SECCOMP_FILTER_FLAG_TSYNC)
+		mutex_unlock(&current->signal->cred_guard_mutex);
+out_free:
+	seccomp_filter_free(prepared);
+	return ret;
+}
+#else
+static inline long seccomp_set_mode_filter(unsigned int flags,
+					   const char __user *filter)
+{
+	return -EINVAL;
+}
+#endif
+
+/* Common entry point for both prctl and syscall. */
+static long do_seccomp(unsigned int op, unsigned int flags,
+		       const char __user *uargs)
+{
+	switch (op) {
+	case SECCOMP_SET_MODE_STRICT:
+		if (flags != 0 || uargs != NULL)
+			return -EINVAL;
+		return seccomp_set_mode_strict();
+	case SECCOMP_SET_MODE_FILTER:
+		return seccomp_set_mode_filter(flags, uargs);
+	default:
+		return -EINVAL;
+	}
+}
+
+SYSCALL_DEFINE3(seccomp, unsigned int, op, unsigned int, flags,
+			 const char __user *, uargs)
+{
+	return do_seccomp(op, flags, uargs);
+}
+
+/**
+ * prctl_set_seccomp: configures current->seccomp.mode
+ * @seccomp_mode: requested mode to use
+ * @filter: optional struct sock_fprog for use with SECCOMP_MODE_FILTER
+ *
+ * Returns 0 on success or -EINVAL on failure.
+ */
+long prctl_set_seccomp(unsigned long seccomp_mode, char __user *filter)
+{
+	unsigned int op;
+	char __user *uargs;
+
+	switch (seccomp_mode) {
+	case SECCOMP_MODE_STRICT:
+		op = SECCOMP_SET_MODE_STRICT;
+		/*
+		 * Setting strict mode through prctl always ignored filter,
+		 * so make sure it is always NULL here to pass the internal
+		 * check in do_seccomp().
+		 */
+		uargs = NULL;
+		break;
+	case SECCOMP_MODE_FILTER:
+		op = SECCOMP_SET_MODE_FILTER;
+		uargs = filter;
+		break;
+	default:
+		return -EINVAL;
 	}
 
- out:
-	return ret;
+	/* prctl interface doesn't have flags, so they are always zero. */
+	return do_seccomp(op, 0, uargs);
 }
