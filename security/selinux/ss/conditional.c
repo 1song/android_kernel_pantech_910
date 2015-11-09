@@ -619,41 +619,18 @@ int cond_write_list(struct policydb *p, struct cond_node *list, void *fp)
 	return 0;
 }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 03ef60a... selinux: extended permissions for ioctls
 void cond_compute_xperms(struct avtab *ctab, struct avtab_key *key,
 		struct extended_perms_decision *xpermd)
 {
 	struct avtab_node *node;
 
 	if (!ctab || !key || !xpermd)
-<<<<<<< HEAD
-=======
-void cond_compute_operation(struct avtab *ctab, struct avtab_key *key,
-		struct operation_decision *od)
-{
-	struct avtab_node *node;
-
-	if (!ctab || !key || !od)
->>>>>>> 57ce68f... SELinux: per-command whitelisting of ioctls
-=======
->>>>>>> 03ef60a... selinux: extended permissions for ioctls
 		return;
 
 	for (node = avtab_search_node(ctab, key); node;
 			node = avtab_search_node_next(node, key->specified)) {
 		if (node->key.specified & AVTAB_ENABLED)
-<<<<<<< HEAD
-<<<<<<< HEAD
 			services_compute_xperms_decision(xpermd, node);
-=======
-			services_compute_operation_num(od, node);
->>>>>>> 57ce68f... SELinux: per-command whitelisting of ioctls
-=======
-			services_compute_xperms_decision(xpermd, node);
->>>>>>> 03ef60a... selinux: extended permissions for ioctls
 	}
 	return;
 
@@ -662,27 +639,11 @@ void cond_compute_operation(struct avtab *ctab, struct avtab_key *key,
  * av table, and if so, add them to the result
  */
 void cond_compute_av(struct avtab *ctab, struct avtab_key *key,
-<<<<<<< HEAD
-<<<<<<< HEAD
 		struct av_decision *avd, struct extended_perms *xperms)
 {
 	struct avtab_node *node;
 
 	if (!ctab || !key || !avd || !xperms)
-=======
-		struct av_decision *avd, struct operation *ops)
-{
-	struct avtab_node *node;
-
-	if (!ctab || !key || !avd || !ops)
->>>>>>> 57ce68f... SELinux: per-command whitelisting of ioctls
-=======
-		struct av_decision *avd, struct extended_perms *xperms)
-{
-	struct avtab_node *node;
-
-	if (!ctab || !key || !avd || !xperms)
->>>>>>> 03ef60a... selinux: extended permissions for ioctls
 		return;
 
 	for (node = avtab_search_node(ctab, key); node;
@@ -702,18 +663,8 @@ void cond_compute_av(struct avtab *ctab, struct avtab_key *key,
 		    (node->key.specified & (AVTAB_AUDITALLOW|AVTAB_ENABLED)))
 			avd->auditallow |= node->datum.u.data;
 		if ((node->key.specified & AVTAB_ENABLED) &&
-<<<<<<< HEAD
-<<<<<<< HEAD
 				(node->key.specified & AVTAB_XPERMS))
 			services_compute_xperms_drivers(xperms, node);
-=======
-				(node->key.specified & AVTAB_OP))
-			services_compute_operation_type(ops, node);
->>>>>>> 57ce68f... SELinux: per-command whitelisting of ioctls
-=======
-				(node->key.specified & AVTAB_XPERMS))
-			services_compute_xperms_drivers(xperms, node);
->>>>>>> 03ef60a... selinux: extended permissions for ioctls
 	}
 	return;
 }

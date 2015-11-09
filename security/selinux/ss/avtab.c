@@ -24,15 +24,7 @@
 #include "policydb.h"
 
 static struct kmem_cache *avtab_node_cachep;
-<<<<<<< HEAD
-<<<<<<< HEAD
 static struct kmem_cache *avtab_xperms_cachep;
-=======
-static struct kmem_cache *avtab_operation_cachep;
->>>>>>> 57ce68f... SELinux: per-command whitelisting of ioctls
-=======
-static struct kmem_cache *avtab_xperms_cachep;
->>>>>>> 03ef60a... selinux: extended permissions for ioctls
 
 static inline int avtab_hash(struct avtab_key *keyp, u16 mask)
 {
@@ -46,24 +38,12 @@ avtab_insert_node(struct avtab *h, int hvalue,
 		  struct avtab_key *key, struct avtab_datum *datum)
 {
 	struct avtab_node *newnode;
-<<<<<<< HEAD
-<<<<<<< HEAD
 	struct avtab_extended_perms *xperms;
-=======
-	struct avtab_operation *ops;
->>>>>>> 57ce68f... SELinux: per-command whitelisting of ioctls
-=======
-	struct avtab_extended_perms *xperms;
->>>>>>> 03ef60a... selinux: extended permissions for ioctls
 	newnode = kmem_cache_zalloc(avtab_node_cachep, GFP_KERNEL);
 	if (newnode == NULL)
 		return NULL;
 	newnode->key = *key;
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 03ef60a... selinux: extended permissions for ioctls
 	if (key->specified & AVTAB_XPERMS) {
 		xperms = kmem_cache_zalloc(avtab_xperms_cachep, GFP_KERNEL);
 		if (xperms == NULL) {
@@ -72,19 +52,6 @@ avtab_insert_node(struct avtab *h, int hvalue,
 		}
 		*xperms = *(datum->u.xperms);
 		newnode->datum.u.xperms = xperms;
-<<<<<<< HEAD
-=======
-	if (key->specified & AVTAB_OP) {
-		ops = kmem_cache_zalloc(avtab_operation_cachep, GFP_KERNEL);
-		if (ops == NULL) {
-			kmem_cache_free(avtab_node_cachep, newnode);
-			return NULL;
-		}
-		*ops = *(datum->u.ops);
-		newnode->datum.u.ops = ops;
->>>>>>> 57ce68f... SELinux: per-command whitelisting of ioctls
-=======
->>>>>>> 03ef60a... selinux: extended permissions for ioctls
 	} else {
 		newnode->datum.u.data = datum->u.data;
 	}
@@ -118,17 +85,8 @@ static int avtab_insert(struct avtab *h, struct avtab_key *key, struct avtab_dat
 		    key->target_type == cur->key.target_type &&
 		    key->target_class == cur->key.target_class &&
 		    (specified & cur->key.specified)) {
-<<<<<<< HEAD
-<<<<<<< HEAD
 			/* extended perms may not be unique */
 			if (specified & AVTAB_XPERMS)
-=======
-			if (specified & AVTAB_OPNUM)
->>>>>>> 57ce68f... SELinux: per-command whitelisting of ioctls
-=======
-			/* extended perms may not be unique */
-			if (specified & AVTAB_XPERMS)
->>>>>>> 03ef60a... selinux: extended permissions for ioctls
 				break;
 			return -EEXIST;
 		}
@@ -292,21 +250,9 @@ void avtab_destroy(struct avtab *h)
 		while (cur) {
 			temp = cur;
 			cur = cur->next;
-<<<<<<< HEAD
-<<<<<<< HEAD
 			if (temp->key.specified & AVTAB_XPERMS)
 				kmem_cache_free(avtab_xperms_cachep,
 						temp->datum.u.xperms);
-=======
-			if (temp->key.specified & AVTAB_OP)
-				kmem_cache_free(avtab_operation_cachep,
-							temp->datum.u.ops);
->>>>>>> 57ce68f... SELinux: per-command whitelisting of ioctls
-=======
-			if (temp->key.specified & AVTAB_XPERMS)
-				kmem_cache_free(avtab_xperms_cachep,
-						temp->datum.u.xperms);
->>>>>>> 03ef60a... selinux: extended permissions for ioctls
 			kmem_cache_free(avtab_node_cachep, temp);
 		}
 		h->htable[i] = NULL;
@@ -422,24 +368,9 @@ static uint16_t spec_order[] = {
 	AVTAB_TRANSITION,
 	AVTAB_CHANGE,
 	AVTAB_MEMBER,
-<<<<<<< HEAD
-<<<<<<< HEAD
 	AVTAB_XPERMS_ALLOWED,
 	AVTAB_XPERMS_AUDITALLOW,
 	AVTAB_XPERMS_DONTAUDIT
-=======
-	AVTAB_OPNUM_ALLOWED,
-	AVTAB_OPNUM_AUDITALLOW,
-	AVTAB_OPNUM_DONTAUDIT,
-	AVTAB_OPTYPE_ALLOWED,
-	AVTAB_OPTYPE_AUDITALLOW,
-	AVTAB_OPTYPE_DONTAUDIT
->>>>>>> 57ce68f... SELinux: per-command whitelisting of ioctls
-=======
-	AVTAB_XPERMS_ALLOWED,
-	AVTAB_XPERMS_AUDITALLOW,
-	AVTAB_XPERMS_DONTAUDIT
->>>>>>> 03ef60a... selinux: extended permissions for ioctls
 };
 
 int avtab_read_item(struct avtab *a, void *fp, struct policydb *pol,
@@ -452,22 +383,9 @@ int avtab_read_item(struct avtab *a, void *fp, struct policydb *pol,
 	u32 items, items2, val, vers = pol->policyvers;
 	struct avtab_key key;
 	struct avtab_datum datum;
-<<<<<<< HEAD
-<<<<<<< HEAD
 	struct avtab_extended_perms xperms;
 	__le32 buf32[ARRAY_SIZE(xperms.perms.p)];
 	unsigned int android_m_compat_optype = 0;
-<<<<<<< HEAD
-=======
-	struct avtab_operation ops;
-	__le32 buf32[ARRAY_SIZE(ops.op.perms)];
->>>>>>> 57ce68f... SELinux: per-command whitelisting of ioctls
-=======
-	struct avtab_extended_perms xperms;
-	__le32 buf32[ARRAY_SIZE(xperms.perms.p)];
->>>>>>> 03ef60a... selinux: extended permissions for ioctls
-=======
->>>>>>> 5959cc4... selinux: Android kernel compatibility with M userspace
 	int i, rc;
 	unsigned set;
 
@@ -524,18 +442,8 @@ int avtab_read_item(struct avtab *a, void *fp, struct policydb *pol,
 			printk(KERN_ERR "SELinux: avtab: entry has both access vectors and types\n");
 			return -EINVAL;
 		}
-<<<<<<< HEAD
-<<<<<<< HEAD
 		if (val & AVTAB_XPERMS) {
 			printk(KERN_ERR "SELinux: avtab: entry has extended permissions\n");
-=======
-		if (val & AVTAB_OP) {
-			printk(KERN_ERR "SELinux: avtab: entry has operations\n");
->>>>>>> 57ce68f... SELinux: per-command whitelisting of ioctls
-=======
-		if (val & AVTAB_XPERMS) {
-			printk(KERN_ERR "SELinux: avtab: entry has extended permissions\n");
->>>>>>> 03ef60a... selinux: extended permissions for ioctls
 			return -EINVAL;
 		}
 
@@ -561,6 +469,7 @@ int avtab_read_item(struct avtab *a, void *fp, struct policydb *pol,
 		printk(KERN_ERR "SELinux: avtab: truncated entry\n");
 		return rc;
 	}
+
 	items = 0;
 	key.source_type = le16_to_cpu(buf16[items++]);
 	key.target_type = le16_to_cpu(buf16[items++]);
@@ -591,10 +500,6 @@ int avtab_read_item(struct avtab *a, void *fp, struct policydb *pol,
 		return -EINVAL;
 	}
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 03ef60a... selinux: extended permissions for ioctls
 	if ((vers < POLICYDB_VERSION_XPERMS_IOCTL) &&
 			(key.specified & AVTAB_XPERMS)) {
 		printk(KERN_ERR "SELinux:  avtab:  policy version %u does not "
@@ -604,23 +509,10 @@ int avtab_read_item(struct avtab *a, void *fp, struct policydb *pol,
 	} else if (key.specified & AVTAB_XPERMS) {
 		memset(&xperms, 0, sizeof(struct avtab_extended_perms));
 		rc = next_entry(&xperms.specified, fp, sizeof(u8));
-<<<<<<< HEAD
-=======
-	if ((vers < POLICYDB_VERSION_IOCTL_OPERATIONS)
-			|| !(key.specified & AVTAB_OP)) {
-		rc = next_entry(buf32, fp, sizeof(u32));
->>>>>>> 57ce68f... SELinux: per-command whitelisting of ioctls
-=======
->>>>>>> 03ef60a... selinux: extended permissions for ioctls
 		if (rc) {
 			printk(KERN_ERR "SELinux: avtab: truncated entry\n");
 			return rc;
 		}
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 5959cc4... selinux: Android kernel compatibility with M userspace
 		if (avtab_android_m_compat ||
 			    ((xperms.specified != AVTAB_XPERMS_IOCTLFUNCTION) &&
 			    (xperms.specified != AVTAB_XPERMS_IOCTLDRIVER) &&
@@ -637,59 +529,22 @@ int avtab_read_item(struct avtab *a, void *fp, struct policydb *pol,
 				printk(KERN_ERR "SELinux: avtab: truncated entry\n");
 				return rc;
 			}
-<<<<<<< HEAD
 		}
 		rc = next_entry(buf32, fp, sizeof(u32)*ARRAY_SIZE(xperms.perms.p));
-=======
-		datum.u.data = le32_to_cpu(*buf32);
-	} else {
-		memset(&ops, 0, sizeof(struct avtab_operation));
-		rc = next_entry(&ops.type, fp, sizeof(u8));
->>>>>>> 57ce68f... SELinux: per-command whitelisting of ioctls
-=======
-		rc = next_entry(&xperms.driver, fp, sizeof(u8));
-		if (rc) {
-			printk(KERN_ERR "SELinux: avtab: truncated entry\n");
-			return rc;
-=======
->>>>>>> 5959cc4... selinux: Android kernel compatibility with M userspace
-		}
-		rc = next_entry(buf32, fp, sizeof(u32)*ARRAY_SIZE(xperms.perms.p));
->>>>>>> 03ef60a... selinux: extended permissions for ioctls
 		if (rc) {
 			printk(KERN_ERR "SELinux: avtab: truncated entry\n");
 			return rc;
 		}
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 03ef60a... selinux: extended permissions for ioctls
 		for (i = 0; i < ARRAY_SIZE(xperms.perms.p); i++)
 			xperms.perms.p[i] = le32_to_cpu(buf32[i]);
 		datum.u.xperms = &xperms;
 	} else {
 		rc = next_entry(buf32, fp, sizeof(u32));
-<<<<<<< HEAD
-=======
-		rc = next_entry(buf32, fp, sizeof(u32)*ARRAY_SIZE(ops.op.perms));
->>>>>>> 57ce68f... SELinux: per-command whitelisting of ioctls
-=======
->>>>>>> 03ef60a... selinux: extended permissions for ioctls
 		if (rc) {
 			printk(KERN_ERR "SELinux: avtab: truncated entry\n");
 			return rc;
 		}
-<<<<<<< HEAD
-<<<<<<< HEAD
 		datum.u.data = le32_to_cpu(*buf32);
-=======
-		for (i = 0; i < ARRAY_SIZE(ops.op.perms); i++)
-			ops.op.perms[i] = le32_to_cpu(buf32[i]);
-		datum.u.ops = &ops;
->>>>>>> 57ce68f... SELinux: per-command whitelisting of ioctls
-=======
-		datum.u.data = le32_to_cpu(*buf32);
->>>>>>> 03ef60a... selinux: extended permissions for ioctls
 	}
 	if ((key.specified & AVTAB_TYPE) &&
 	    !policydb_type_isvalid(pol, datum.u.data)) {
@@ -752,15 +607,7 @@ bad:
 int avtab_write_item(struct policydb *p, struct avtab_node *cur, void *fp)
 {
 	__le16 buf16[4];
-<<<<<<< HEAD
-<<<<<<< HEAD
 	__le32 buf32[ARRAY_SIZE(cur->datum.u.xperms->perms.p)];
-=======
-	__le32 buf32[ARRAY_SIZE(cur->datum.u.ops->op.perms)];
->>>>>>> 57ce68f... SELinux: per-command whitelisting of ioctls
-=======
-	__le32 buf32[ARRAY_SIZE(cur->datum.u.xperms->perms.p)];
->>>>>>> 03ef60a... selinux: extended permissions for ioctls
 	int rc;
 	unsigned int i;
 
@@ -776,8 +623,6 @@ int avtab_write_item(struct policydb *p, struct avtab_node *cur, void *fp)
 	if (rc)
 		return rc;
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 	if (cur->key.specified & AVTAB_XPERMS) {
 		if (avtab_android_m_compat == 0) {
 			rc = put_entry(&cur->datum.u.xperms->specified,
@@ -785,21 +630,6 @@ int avtab_write_item(struct policydb *p, struct avtab_node *cur, void *fp)
 			if (rc)
 				return rc;
 		}
-=======
-	if (cur->key.specified & AVTAB_XPERMS) {
-<<<<<<< HEAD
-		rc = put_entry(&cur->datum.u.xperms->specified, sizeof(u8), 1, fp);
-		if (rc)
-			return rc;
->>>>>>> 03ef60a... selinux: extended permissions for ioctls
-=======
-		if (avtab_android_m_compat == 0) {
-			rc = put_entry(&cur->datum.u.xperms->specified,
-					sizeof(u8), 1, fp);
-			if (rc)
-				return rc;
-		}
->>>>>>> 5959cc4... selinux: Android kernel compatibility with M userspace
 		rc = put_entry(&cur->datum.u.xperms->driver, sizeof(u8), 1, fp);
 		if (rc)
 			return rc;
@@ -807,19 +637,6 @@ int avtab_write_item(struct policydb *p, struct avtab_node *cur, void *fp)
 			buf32[i] = cpu_to_le32(cur->datum.u.xperms->perms.p[i]);
 		rc = put_entry(buf32, sizeof(u32),
 				ARRAY_SIZE(cur->datum.u.xperms->perms.p), fp);
-<<<<<<< HEAD
-=======
-	if (cur->key.specified & AVTAB_OP) {
-		rc = put_entry(&cur->datum.u.ops->type, sizeof(u8), 1, fp);
-		if (rc)
-			return rc;
-		for (i = 0; i < ARRAY_SIZE(cur->datum.u.ops->op.perms); i++)
-			buf32[i] = cpu_to_le32(cur->datum.u.ops->op.perms[i]);
-		rc = put_entry(buf32, sizeof(u32),
-				ARRAY_SIZE(cur->datum.u.ops->op.perms), fp);
->>>>>>> 57ce68f... SELinux: per-command whitelisting of ioctls
-=======
->>>>>>> 03ef60a... selinux: extended permissions for ioctls
 	} else {
 		buf32[0] = cpu_to_le32(cur->datum.u.data);
 		rc = put_entry(buf32, sizeof(u32), 1, fp);
@@ -856,33 +673,13 @@ void avtab_cache_init(void)
 	avtab_node_cachep = kmem_cache_create("avtab_node",
 					      sizeof(struct avtab_node),
 					      0, SLAB_PANIC, NULL);
-<<<<<<< HEAD
-<<<<<<< HEAD
 	avtab_xperms_cachep = kmem_cache_create("avtab_extended_perms",
 						sizeof(struct avtab_extended_perms),
 						0, SLAB_PANIC, NULL);
-=======
-	avtab_operation_cachep = kmem_cache_create("avtab_operation",
-					      sizeof(struct avtab_operation),
-					      0, SLAB_PANIC, NULL);
->>>>>>> 57ce68f... SELinux: per-command whitelisting of ioctls
-=======
-	avtab_xperms_cachep = kmem_cache_create("avtab_extended_perms",
-						sizeof(struct avtab_extended_perms),
-						0, SLAB_PANIC, NULL);
->>>>>>> 03ef60a... selinux: extended permissions for ioctls
 }
 
 void avtab_cache_destroy(void)
 {
 	kmem_cache_destroy(avtab_node_cachep);
-<<<<<<< HEAD
-<<<<<<< HEAD
 	kmem_cache_destroy(avtab_xperms_cachep);
-=======
-	kmem_cache_destroy(avtab_operation_cachep);
->>>>>>> 57ce68f... SELinux: per-command whitelisting of ioctls
-=======
-	kmem_cache_destroy(avtab_xperms_cachep);
->>>>>>> 03ef60a... selinux: extended permissions for ioctls
 }
