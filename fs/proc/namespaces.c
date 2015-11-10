@@ -24,12 +24,9 @@ static const struct proc_ns_operations *ns_entries[] = {
 #ifdef CONFIG_IPC_NS
 	&ipcns_operations,
 #endif
-<<<<<<< HEAD
-=======
 #ifdef CONFIG_PID_NS
 	&pidns_operations,
 #endif
->>>>>>> 52dba7a... vfs: Add setns support for the mount namespace
 	&mntns_operations,
 };
 
@@ -81,15 +78,7 @@ static struct dentry *proc_ns_get_dentry(struct super_block *sb,
 		return ERR_PTR(-ENOMEM);
 	}
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 	inode = iget_locked(sb, ns_ops->inum(ns));
-=======
-	inode = new_inode(sb);
->>>>>>> aae3860... proc: Fix the namespace inode permission checks.
-=======
-	inode = iget_locked(sb, ns_ops->inum(ns));
->>>>>>> a2b5a5f... proc: Usable inode numbers for the namespace file descriptors.
 	if (!inode) {
 		dput(dentry);
 		ns_ops->put(ns);
@@ -97,10 +86,6 @@ static struct dentry *proc_ns_get_dentry(struct super_block *sb,
 	}
 
 	ei = PROC_I(inode);
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> a2b5a5f... proc: Usable inode numbers for the namespace file descriptors.
 	if (inode->i_state & I_NEW) {
 		inode->i_mtime = inode->i_atime = inode->i_ctime = CURRENT_TIME;
 		inode->i_op = &ns_inode_operations;
@@ -112,18 +97,6 @@ static struct dentry *proc_ns_get_dentry(struct super_block *sb,
 	} else {
 		ns_ops->put(ns);
 	}
-<<<<<<< HEAD
-=======
-	inode->i_ino = get_next_ino();
-	inode->i_mtime = inode->i_atime = inode->i_ctime = CURRENT_TIME;
-	inode->i_op = &ns_inode_operations;
-	inode->i_mode = S_IFREG | S_IRUGO;
-	inode->i_fop = &ns_file_operations;
-	ei->ns_ops = ns_ops;
-	ei->ns = ns;
->>>>>>> aae3860... proc: Fix the namespace inode permission checks.
-=======
->>>>>>> a2b5a5f... proc: Usable inode numbers for the namespace file descriptors.
 
 	d_set_d_op(dentry, &ns_dentry_operations);
 	result = d_instantiate_unique(dentry, inode);
@@ -189,28 +162,12 @@ static int proc_ns_readlink(struct dentry *dentry, char __user *buffer, int bufl
 	if (!ns)
 		goto out_put_task;
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 	snprintf(name, sizeof(name), "%s:[%u]", ns_ops->name, ns_ops->inum(ns));
-=======
-	snprintf(name, sizeof(name), "%s", ns_ops->name);
->>>>>>> aae3860... proc: Fix the namespace inode permission checks.
-=======
-	snprintf(name, sizeof(name), "%s:[%u]", ns_ops->name, ns_ops->inum(ns));
->>>>>>> a2b5a5f... proc: Usable inode numbers for the namespace file descriptors.
 	len = strlen(name);
 
 	if (len > buflen)
 		len = buflen;
-<<<<<<< HEAD
-<<<<<<< HEAD
 	if (copy_to_user(buffer, name, len))
-=======
-	if (copy_to_user(buffer, ns_ops->name, len))
->>>>>>> aae3860... proc: Fix the namespace inode permission checks.
-=======
-	if (copy_to_user(buffer, name, len))
->>>>>>> a2b5a5f... proc: Usable inode numbers for the namespace file descriptors.
 		len = -EFAULT;
 
 	ns_ops->put(ns);
