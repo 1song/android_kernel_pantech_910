@@ -117,17 +117,7 @@ static int update_average_load(unsigned int freq, unsigned int cpu)
 	idle_time = (unsigned int) (cur_idle_time - pcpu->prev_cpu_idle);
 	pcpu->prev_cpu_idle = cur_idle_time;
 
-<<<<<<< HEAD
-	iowait_time = (unsigned int) (cur_iowait_time - pcpu->prev_cpu_iowait);
-	pcpu->prev_cpu_iowait = cur_iowait_time;
-
-	if (idle_time >= iowait_time)
-		idle_time -= iowait_time;
-
-	if (unlikely(!wall_time || wall_time < idle_time))
-=======
 	if (unlikely(wall_time <= 0 || wall_time < idle_time))
->>>>>>> cd0e83b... soc: qcom: rq_stats: Pass correct cpu id to update_average_load function
 		return 0;
 
 	cur_load = 100 * (wall_time - idle_time) / wall_time;
