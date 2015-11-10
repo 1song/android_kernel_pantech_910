@@ -563,34 +563,6 @@ static void venus_hfi_set_registers(struct venus_hfi_device *device)
 	}
 }
 
-static int venus_hfi_halt_axi(struct venus_hfi_device *device)
-{
-	u32 reg;
-	int rc = 0;
-	if (!device) {
-		dprintk(VIDC_ERR, "Invalid input: %p\n", device);
-		return -EINVAL;
-	}
-	if (venus_hfi_clk_gating_off(device)) {
-		dprintk(VIDC_ERR, "Failed to turn off clk gating\n");
-		return -EIO;
-	}
-	/* Halt AXI and AXI OCMEM VBIF Access */
-	reg = venus_hfi_read_register(device, VENUS_VBIF_AXI_HALT_CTRL0);
-	reg |= VENUS_VBIF_AXI_HALT_CTRL0_HALT_REQ;
-	venus_hfi_write_register(device, VENUS_VBIF_AXI_HALT_CTRL0, reg, 0);
-
-	/* Request for AXI bus port halt */
-	rc = readl_poll_timeout((u32)device->hal_data->register_base_addr
-			+ VENUS_VBIF_AXI_HALT_CTRL1,
-			reg, reg & VENUS_VBIF_AXI_HALT_CTRL1_HALT_ACK,
-			POLL_INTERVAL_US,
-			VENUS_VBIF_AXI_HALT_ACK_TIMEOUT_US);
-	if (rc)
-		dprintk(VIDC_WARN, "AXI bus port halt timeout\n");
-	return rc;
-}
-
 static int venus_hfi_core_start_cpu(struct venus_hfi_device *device)
 {
 	u32 ctrl_status = 0, count = 0, rc = 0;
@@ -1248,47 +1220,6 @@ static inline void venus_hfi_clk_disable(struct venus_hfi_device *device)
 	--device->clk_cnt;
 }
 
-<<<<<<< HEAD
-static DECLARE_COMPLETION(pc_prep_done);
-static DECLARE_COMPLETION(release_resources_done);
-
-<<<<<<< HEAD
-=======
-=======
->>>>>>> 5d9249e... msm: vidc: Refactor OCMEM alloc, set, unset and free
-static int venus_hfi_halt_axi(struct venus_hfi_device *device)
-{
-	u32 reg;
-	int rc = 0;
-	if (!device) {
-		dprintk(VIDC_ERR, "Invalid input: %p\n", device);
-		return -EINVAL;
-	}
-	mutex_lock(&device->clk_pwr_lock);
-	if (venus_hfi_clk_gating_off(device)) {
-		dprintk(VIDC_ERR, "Failed to turn off clk gating\n");
-		rc = -EIO;
-		goto err_clk_gating_off;
-	}
-	/* Halt AXI and AXI OCMEM VBIF Access */
-	reg = venus_hfi_read_register(device, VENUS_VBIF_AXI_HALT_CTRL0);
-	reg |= VENUS_VBIF_AXI_HALT_CTRL0_HALT_REQ;
-	venus_hfi_write_register(device, VENUS_VBIF_AXI_HALT_CTRL0, reg, 0);
-
-	/* Request for AXI bus port halt */
-	rc = readl_poll_timeout((u32)device->hal_data->register_base_addr
-			+ VENUS_VBIF_AXI_HALT_CTRL1,
-			reg, reg & VENUS_VBIF_AXI_HALT_CTRL1_HALT_ACK,
-			POLL_INTERVAL_US,
-			VENUS_VBIF_AXI_HALT_ACK_TIMEOUT_US);
-	if (rc)
-		dprintk(VIDC_WARN, "AXI bus port halt timeout\n");
-err_clk_gating_off:
-	mutex_unlock(&device->clk_pwr_lock);
-	return rc;
-}
-
->>>>>>> a72f81d... msm: vidc: unprepare clocks during power collapse
 static inline int venus_hfi_power_off(struct venus_hfi_device *device)
 {
 	int rc = 0;
@@ -3450,121 +3381,6 @@ err_init_bus:
 	return -EINVAL;
 }
 
-<<<<<<< HEAD
-static int venus_hfi_ocmem_notify_handler(struct notifier_block *this,
-		unsigned long event, void *data)
-{
-	struct ocmem_buf *buff = data;
-	struct venus_hfi_device *device;
-	struct venus_resources *resources;
-	struct on_chip_mem *ocmem;
-	int rc = NOTIFY_DONE;
-	if (event == OCMEM_ALLOC_GROW) {
-		ocmem = container_of(this, struct on_chip_mem, vidc_ocmem_nb);
-		if (!ocmem) {
-			dprintk(VIDC_ERR, "Wrong handler passed\n");
-			rc = NOTIFY_BAD;
-			goto err_ocmem_notify;
-		}
-		resources = container_of(ocmem,
-			struct venus_resources, ocmem);
-		device = container_of(resources,
-			struct venus_hfi_device, resources);
-		if (venus_hfi_set_ocmem(device, buff, 1)) {
-			dprintk(VIDC_ERR, "Failed to set ocmem: %d\n", rc);
-			goto err_ocmem_notify;
-		}
-		rc = NOTIFY_OK;
-	}
-
-err_ocmem_notify:
-	return rc;
-}
-
-static void venus_hfi_ocmem_init(struct venus_hfi_device *device)
-{
-	struct on_chip_mem *ocmem;
-
-	ocmem = &device->resources.ocmem;
-	ocmem->vidc_ocmem_nb.notifier_call = venus_hfi_ocmem_notify_handler;
-	ocmem->handle =
-		ocmem_notifier_register(OCMEM_VIDEO, &ocmem->vidc_ocmem_nb);
-	if (IS_ERR_OR_NULL(ocmem->handle)) {
-		dprintk(VIDC_WARN,
-				"Failed to register OCMEM notifier. Performance might be impacted\n");
-		ocmem->handle = NULL;
-	}
-}
-
-<<<<<<< HEAD
-static int venus_hfi_alloc_ocmem(void *dev, unsigned long size)
-{
-	int rc = 0;
-	struct ocmem_buf *ocmem_buffer;
-	struct venus_hfi_device *device = dev;
-
-	if (!device || !size) {
-		dprintk(VIDC_ERR, "%s Invalid param, core: %p, size: %lu\n",
-			__func__, device, size);
-		return -EINVAL;
-	}
-	ocmem_buffer = device->resources.ocmem.buf;
-	if (!ocmem_buffer ||
-		ocmem_buffer->len < size) {
-		ocmem_buffer = ocmem_allocate(OCMEM_VIDEO, size);
-		if (IS_ERR_OR_NULL(ocmem_buffer)) {
-			dprintk(VIDC_ERR,
-				"ocmem_allocate_nb failed: %d\n",
-				(u32) ocmem_buffer);
-			rc = -ENOMEM;
-		}
-		device->resources.ocmem.buf = ocmem_buffer;
-		rc = venus_hfi_set_ocmem(device, ocmem_buffer);
-		if (rc) {
-			dprintk(VIDC_ERR, "Failed to set ocmem: %d\n", rc);
-			goto ocmem_set_failed;
-		}
-	} else
-		dprintk(VIDC_DBG,
-			"OCMEM is enough. reqd: %lu, available: %lu\n",
-			size, ocmem_buffer->len);
-
-ocmem_set_failed:
-	return rc;
-}
-
-static int venus_hfi_free_ocmem(void *dev)
-{
-	struct venus_hfi_device *device = dev;
-	int rc = 0;
-
-	if (!device) {
-		dprintk(VIDC_ERR, "%s invalid device handle %p",
-			__func__, device);
-		return -EINVAL;
-	}
-
-	if (device->resources.ocmem.buf) {
-		rc = ocmem_free(OCMEM_VIDEO, device->resources.ocmem.buf);
-		if (rc)
-			dprintk(VIDC_ERR, "Failed to free ocmem\n");
-		device->resources.ocmem.buf = NULL;
-	}
-	return rc;
-}
-
-=======
->>>>>>> b47cc01... msm: vidc: Free OCMEM during power collapse
-static void venus_hfi_deinit_ocmem(struct venus_hfi_device *device)
-{
-	if (device->resources.ocmem.handle)
-		ocmem_notifier_unregister(device->resources.ocmem.handle,
-				&device->resources.ocmem.vidc_ocmem_nb);
-}
-
-
-=======
->>>>>>> 5d9249e... msm: vidc: Refactor OCMEM alloc, set, unset and free
 static int venus_hfi_init_resources(struct venus_hfi_device *device,
 				struct msm_vidc_platform_resources *res)
 {
@@ -3773,7 +3589,7 @@ static void venus_hfi_unload_fw(void *dev)
 		/* Halt the AXI to make sure there are no pending transactions.
 		 * Clocks should be unprepared after making sure axi is halted.
 		 */
-		if(venus_hfi_halt_axi(device))
+		if((device))
 			dprintk(VIDC_WARN, "Failed to halt AXI\n");
 		mutex_lock(&device->clk_pwr_lock);
 		venus_hfi_disable_unprepare_clks(device);
